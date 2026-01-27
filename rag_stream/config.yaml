@@ -1,47 +1,111 @@
-active_env: development  # development | production
+# ============================================================
+# 岱山意图识别服务配置文件
+# ============================================================
 
-environments:
-  development:
-    request_timeout: 300
-    stream_timeout: 300
-    session_expire_hours: 1
-    max_sessions_per_user: 5
-    dify_api_url: "http://172.16.11.60/v1/chat-messages"
-    dify_api_key: "app-dNlklapL8Mpm5VOTsiIGwSDE"
-    chat_ids:
-      法律法规: "1b0abaca824a11f0bc900242ac140003"
-      标准规范: "f86efa8e824a11f09d290242ac140003"
-      应急知识: "530474c4824b11f09cc60242ac140003"
-      事故案例: "82e5a0e6824b11f08a5b0242ac140003"
-      MSDS: "a7eca95c824b11f081ea0242ac140003"
-      标准政策: "e0c339f8824b11f0863a0242ac140003"
-      通用: "3db04e5efa7311f0bb082ac08b8dde63"
-      重大危险源预警: "3b4461ceafdb11f089700242ac140006"
-      当日安全态势: "29e0c8b4afdb11f0969f0242ac140006"
-      双重预防机制效果: "00b3d2f6afdb11f0b8570242ac140006"
-      园区开停车: "de9e7c48afda11f086900242ac140006"
-      园区特殊作业态势: "ae8d795aafda11f082c20242ac140006"
-      园区企业态势: "9a337ce8afda11f099390242ac140006"
+# ============================================================
+# RAGFlow 配置
+# ============================================================
+ragflow:
+  # api_key: "ragflow-RkNmM3OWNjMWE4ZjExZjBhZWY4Y2FlM2"
+  # base_url: "http://192.168.1.160:8081/api/v1"
+  api_key: "ragflow-I0YmY0NzUwNGZmNzExZjBiZjYzMDI0Mm"
+  base_url: "http://172.16.11.60:8081/api/v1"
+  timeout: 30
+  max_retries: 3
 
-  production:
-    request_timeout: 300
-    stream_timeout: 300
-    session_expire_hours: 1
-    max_sessions_per_user: 5
-    dify_api_url: "http://172.16.11.60/v1/chat-messages"
-    dify_api_key: "app-dNlklapL8Mpm5VOTsiIGwSDE"
-    chat_ids:
-      法律法规: "1b0abaca824a11f0bc900242ac140003"
-      标准规范: "f86efa8e824a11f09d290242ac140003"
-      应急知识: "530474c4824b11f09cc60242ac140003"
-      事故案例: "82e5a0e6824b11f08a5b0242ac140003"
-      MSDS: "a7eca95c824b11f081ea0242ac140003"
-      标准政策: "e0c339f8824b11f0863a0242ac140003"
-      通用: "29b17242824c11f08ae80242ac140003"
-      重大危险源预警: "3b4461ceafdb11f089700242ac140006"
-      当日安全态势: "29e0c8b4afdb11f0969f0242ac140006"
-      双重预防机制效果: "00b3d2f6afdb11f0b8570242ac140006"
-      园区开停车: "de9e7c48afda11f086900242ac140006"
-      园区特殊作业态势: "ae8d795aafda11f082c20242ac140006"
-      园区企业态势: "9a337ce8afda11f099390242ac140006"
+  # Chat IDs
+  chat_ids:
+    法律法规: "1b0abaca824a11f0bc900242ac140003"
+    标准规范: "f86efa8e824a11f09d290242ac140003"
+    应急知识: "530474c4824b11f09cc60242ac140003"
+    事故案例: "82e5a0e6824b11f08a5b0242ac140003"
+    MSDS: "a7eca95c824b11f081ea0242ac140003"
+    标准政策: "e0c339f8824b11f0863a0242ac140003"
+    通用: "29b17242824c11f08ae80242ac140003"
+    重大危险源预警: "3b4461ceafdb11f089700242ac140006"
+    当日安全态势: "29e0c8b4afdb11f0969f0242ac140006"
+    双重预防机制效果: "00b3d2f6afdb11f0b8570242ac140006"
+    园区开停车: "de9e7c48afda11f086900242ac140006"
+    园区特殊作业态势: "ae8d795aafda11f082c20242ac140006"
+    园区企业态势: "9a337ce8afda11f099390242ac140006"
+    园区知识库: "ace15c6afb3511f08a4f0242ac140002"
+    企业知识库: "cea91306fb3511f0a2f80242ac140002"
+    安全信息知识库: "e830c760fb3511f0aff50242ac140002"
 
+  # 知识库映射: 知识库名 → 意图类型（业务配置）
+  database_mapping:
+    岱山-指令集: 1
+    岱山-数据库问题: 2
+
+# ============================================================
+# 意图判断参数（业务配置）
+# ============================================================
+intent:
+  similarity_threshold: 0.4
+  top_k_per_database: 10
+  default_type: 0
+
+# ============================================================
+# 服务器配置
+# ============================================================
+server:
+  host: "0.0.0.0"
+  port: 11028
+
+# ============================================================
+# 日志配置
+# ============================================================
+logging:
+  log_dir: "logs"
+  max_bytes: 10485760       # 10MB
+  backup_count: 5
+  total_size_limit: 524288000  # 500MB
+
+# ============================================================
+# Dify 配置
+# ============================================================
+dify:
+  base_url: "http://192.168.1.160/v1"
+  timeout: 30
+  max_retries: 3
+
+  # Chat 应用
+  chats:
+    sql_result_formatter:
+      api_key: "app-sxd0yqypWhX2pjhchYGLg4xu"
+      description: "SQL 查询结果格式化"
+
+    type0_semantic_chat:
+      api_key: "app-dNlklapL8Mpm5VOTsiIGwSDE"
+      description: "Type 0 语义类问答"
+
+    park_kb_chat:
+      api_key: "app-nj6LdeqHU3TkVsbqLqJPaGsl"
+      description: "园区知识库智能问答"
+
+    enterprise_kb_chat:
+      api_key: "app-dNlklapL8Mpm5VOTsiIGwSDE"
+      description: "企业知识库智能问答"
+
+    safety_kb_chat:
+      api_key: "app-dNlklapL8Mpm5VOTsiIGwSDE"
+      description: "安全信息知识库智能问答"
+
+# ============================================================
+# OpenAI 配置 (用于 DaiShanSQL)
+# ============================================================
+openai:
+  api_key: "sk-a406359bc3814281ba589414203af5be"
+  base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  base_url_embedding: "https://dashscope.aliyuncs.com/compatible-mode/v1/embeddings"
+  model: "qwen3-max"
+
+# ============================================================
+# MySQL 数据库配置 (用于 DaiShanSQL)
+# ============================================================
+mysql:
+  host: "localhost"
+  name: "ipark"
+  user: "root"
+  password: "123456"
+  port: 3306

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import asyncio
+import json
 from datetime import datetime
 from typing import Any, Dict
 
@@ -16,6 +18,14 @@ from src.models.schemas import (
 from src.services.dify_service import should_use_dify, stream_dify_chatflow_response
 from src.services.rag_service import get_or_create_session, stream_chat_response
 from src.utils.session_manager import session_manager
+from src.services.log_manager import LogManager
+from src.services.ragflow_client import RagflowClient
+from src.services.intent_service import IntentService
+
+# 直接初始化意图识别服务所需的组件
+log_manager = LogManager(settings.logging)
+ragflow_client = RagflowClient(settings.ragflow, settings.intent, log_manager)
+intent_service = IntentService(log_manager, ragflow_client)
 
 router = APIRouter()
 
@@ -27,12 +37,14 @@ async def chat_with_category(
 ):
     """通用聊天接口，根据类别选择对应的chat_id"""
     user_id = request.user_id or None
-    if category not in settings.CHAT_IDS:
+    if category not in settings.ragflow.chat_ids:
         raise HTTPException(status_code=400, detail=f"不支持的类别: {category}")
 
-    chat_id = settings.CHAT_IDS[category]
+    chat_id = settings.ragflow.chat_ids[category]
+    print(f"chat_id: {chat_id}")
 
     session_id = await get_or_create_session(chat_id, category, user_id)
+    print(f"session_id: {session_id}")
 
     return StreamingResponse(
         stream_chat_response(chat_id, request.question, session_id, user_id),
@@ -94,11 +106,89 @@ async def chat_policies(request: ChatRequest):
     return await chat_with_category("标准政策", request)
 
 
+async def dict_to_stream_generator(result_dict: dict):
+    """
+    将字典结果转换为 SSE 流式生成器
+
+    Args:
+        result_dict: 包含 type 和 data 的字典
+
+    Yields:
+        SSE 格式的事件字符串
+    """
+    import json
+    import asyncio
+
+    # 发送开始事件
+    yield f"event: start\ndata: {json.dumps({'message': '开始流式输出'}, ensure_ascii=False)}\n\n"
+
+    # 转换为 JSON 字符串并分块输出
+    result_str = json.dumps(result_dict, ensure_ascii=False)
+    chunk_size = 3
+    message_id = 0
+    for i in range(0, len(result_str), chunk_size):
+        chunk = result_str[i : i + chunk_size]
+        message_id += 1
+        yield f"id: {message_id}\nevent: message\ndata: {json.dumps({'content': chunk, 'type': 'chunk'}, ensure_ascii=False)}\n\n"
+        await asyncio.sleep(0.02)
+
+    # 发送完成事件
+    yield f"event: complete\ndata: {json.dumps({'message': '流式输出已完成'}, ensure_ascii=False)}\n\n"
+
+    # 发送结束事件
+    yield f"event: end\ndata: [DONE]\n\n"
+
+
 @router.post("/api/general", response_model=ChatResponse)
 async def chat_general(request: ChatRequest):
-    if should_use_dify(request.question):
-        return await chat_with_dify(request)
-    return await chat_with_category("通用", request)
+    """
+    通用问答接口 - 使用意图识别路由
+    """
+    user_id = request.user_id or "anonymous"
+
+    # process_query 现在直接返回字典
+    result_dict = await intent_service.process_query(request.question, user_id)
+
+    # 提取 type 字段判断如何处理
+    result_type = result_dict.get("type")
+    print(f"result_type:{result_type}")
+
+    if result_type == 1:
+        data = result_dict.get("data", {})
+        sql_result = data.get("sql_result", "")
+        kb_name = data.get("kb_name", "")
+
+        if sql_result:
+            # 将 sql_result 转换为字符串
+            sql_result_str = str(sql_result)
+
+            # 创建新的 request 对象
+            updated_request = ChatRequest(
+                question=f"{request.question}\n\n{sql_result_str}",
+                user_id=request.user_id,
+            )
+
+            print(f"kb_name:{kb_name}")
+            return await chat_with_category(kb_name, updated_request)
+        
+        
+    elif result_type == 2:
+        # type=2: 提取 data.sql_result，转换成字符串，与 request.question 拼接
+        data = result_dict.get("data", {})
+        sql_result = data.get("sql_result", "")
+
+        if sql_result:
+            # 将 sql_result 转换为字符串
+            sql_result_str = str(sql_result)
+
+            # 创建新的 request 对象
+            updated_request = ChatRequest(
+                question=f"{request.question}\n\n{sql_result_str}",
+                user_id=request.user_id,
+            )
+
+            # 调用 chat_with_category("通用", request)
+            return await chat_with_category("通用", updated_request)
 
 
 @router.post("/api/warn", response_model=ChatResponse)
@@ -133,10 +223,10 @@ async def chat_firmsituation(request: ChatRequest):
 
 @router.post("/api/sessions/{category}", response_model=SessionResponse)
 async def create_category_session(category: str, request: SessionRequest):
-    if category not in settings.CHAT_IDS:
+    if category not in settings.ragflow.chat_ids:
         raise HTTPException(status_code=400, detail=f"不支持的类别: {category}")
 
-    chat_id = settings.CHAT_IDS[category]
+    chat_id = settings.ragflow.chat_ids[category]
     session_id = await get_or_create_session(chat_id, category, request.user_id)
 
     return SessionResponse(
@@ -206,5 +296,5 @@ async def get_categories() -> Dict[str, Any]:
     return {
         "code": 0,
         "message": "获取成功",
-        "data": {"categories": list(settings.CHAT_IDS.keys()), "chat_ids": settings.CHAT_IDS},
+        "data": {"categories": list(settings.ragflow.chat_ids.keys()), "chat_ids": settings.ragflow.chat_ids},
     }

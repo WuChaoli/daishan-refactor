@@ -62,3 +62,36 @@ class SessionResponse(BaseModel):
     message: str = Field("", description="响应消息")
     data: Optional[Dict[str, Any]] = Field(None, description="会话数据")
 
+
+# 意图识别相关模型
+class QueryResult(BaseModel):
+    """查询结果模型"""
+
+    question: str = Field(..., description="匹配的问题原文")
+    similarity: float = Field(..., description="相似度分数")
+
+
+class IntentRequest(BaseModel):
+    """意图识别请求模型"""
+
+    text_input: str = Field(..., description="用户输入文本", min_length=1)
+    user_id: Optional[str] = Field(None, description="用户ID")
+
+
+class IntentResponse(BaseModel):
+    """意图识别响应模型"""
+
+    type: int = Field(..., description="意图类型 (0/1/2)")
+    query: str = Field(..., description="用户原始查询")
+    results: list[QueryResult] = Field(default_factory=list, description="Top 5 查询结果")
+    similarity: float = Field(..., description="最高相似度")
+    database: str = Field(..., description="匹配的知识库名称")
+
+
+class ErrorResponse(BaseModel):
+    """错误响应模型"""
+
+    error: str = Field(..., description="错误代码")
+    message: str = Field(..., description="错误消息")
+    suggestion: Optional[str] = Field(None, description="建议")
+

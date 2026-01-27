@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 async def get_rag_client():
     """获取RAG客户端会话"""
-    timeout = aiohttp.ClientTimeout(total=settings.REQUEST_TIMEOUT)
+    timeout = aiohttp.ClientTimeout(total=settings.ragflow.timeout)
     return aiohttp.ClientSession(timeout=timeout)
 
 
@@ -26,10 +26,10 @@ async def create_rag_session(
 ) -> str:
     """在RAG服务中创建会话"""
     async with aiohttp.ClientSession() as session:
-        url = f"{settings.RAG_BASE_URL}/api/v1/chats/{chat_id}/sessions"
+        url = f"{settings.ragflow.base_url}/chats/{chat_id}/sessions"
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {settings.RAG_API_KEY}",
+            "Authorization": f"Bearer {settings.ragflow.api_key}",
         }
         data = {"name": session_name}
         if user_id:
@@ -85,19 +85,21 @@ async def stream_chat_response(
     """流式聊天响应"""
     rag_session_id = session_manager.sessions.get(session_id, {}).get("rag_session_id", session_id)
 
-    url = f"{settings.RAG_BASE_URL}/api/v1/chats/{chat_id}/completions"
+    url = f"{settings.ragflow.base_url}/chats/{chat_id}/completions"
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {settings.RAG_API_KEY}",
+        "Authorization": f"Bearer {settings.ragflow.api_key}",
     }
     data = {"question": question, "stream": True, "session_id": rag_session_id}
     if user_id:
         data["user_id"] = user_id
     start_time = time.time()
     first_output_sent = False
+    logger.info(f"发送给 RAGFlow 的请求: url={url}, data={data}")
     try:
         async with aiohttp.ClientSession() as session:
             async with session.post(url, headers=headers, json=data) as response:
+                logger.info(f"RAGFlow 响应状态: status={response.status}")
                 if response.status != 200:
                     error_text = await response.text()
                     yield f"data: {json.dumps({'code': 1, 'message': f'RAG服务错误: {error_text}', 'data': None})}\n\n"
@@ -148,6 +150,7 @@ async def stream_chat_response(
 
                             try:
                                 json_data = json.loads(data_content)
+                                logger.info(f"RAGFlow 返回数据: {json_data}")
                                 if json_data.get("code") == 0:
                                     data_field = json_data.get("data")
                                     if data_field and isinstance(data_field, dict):

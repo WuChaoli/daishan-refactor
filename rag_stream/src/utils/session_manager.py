@@ -20,7 +20,7 @@ class SessionManager:
         self, chat_id: str, session_name: str, user_id: Optional[str] = None, category: str = ""
     ) -> str:
         session_id = str(uuid.uuid4())
-        expire_time = datetime.now() + timedelta(hours=settings.SESSION_EXPIRE_HOURS)
+        expire_time = datetime.now() + timedelta(hours=24)  # 默认24小时过期
 
         session_info = {
             "id": session_id,
@@ -56,7 +56,7 @@ class SessionManager:
         if session_id in self.sessions:
             self.sessions[session_id]["last_activity"] = datetime.now().isoformat()
             self.sessions[session_id]["message_count"] += 1
-            self.session_expires[session_id] = datetime.now() + timedelta(hours=settings.SESSION_EXPIRE_HOURS)
+            self.session_expires[session_id] = datetime.now() + timedelta(hours=24)  # 默认24小时过期
 
     def cleanup_expired_session(self, session_id: str):
         if session_id in self.sessions:

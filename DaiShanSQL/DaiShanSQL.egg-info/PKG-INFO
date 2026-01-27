@@ -1,0 +1,5 @@
+Metadata-Version: 2.4
+Name: DaiShanSQL
+Version: 0.2.0
+Requires-Python: >=3.8
+Dynamic: requires-python
