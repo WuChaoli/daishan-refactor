@@ -1022,3 +1022,86 @@
 2026-01-28 11:15:52 - func_ragflow_client - INFO - 知识库 '岱山-指令集' 查询成功,返回 10 条结果
 2026-01-28 11:15:52 - func_ragflow_client - INFO - 知识库 '岱山-数据库问题' 查询成功,返回 10 条结果
 2026-01-28 11:15:52 - func_ragflow_client - INFO - 查询完成,共获得 20 条结果
+2026-01-28 12:36:26 - func_ragflow_client - INFO - 找到知识库 '岱山-数据库问题',ID: 144f46a4f1c311f0ac650242ac140002
+2026-01-28 12:36:26 - func_ragflow_client - INFO - 找到知识库 '岱山-指令集',ID: fa338636f1c211f09ed00242ac140002
+2026-01-28 12:36:26 - func_ragflow_client - INFO - RAGFlow 客户端初始化成功,已加载 2 个知识库
+2026-01-28 12:36:26 - func_ragflow_client - INFO - 找到知识库 '岱山-数据库问题',ID: 144f46a4f1c311f0ac650242ac140002
+2026-01-28 12:36:26 - func_ragflow_client - INFO - 找到知识库 '岱山-指令集',ID: fa338636f1c211f09ed00242ac140002
+2026-01-28 12:36:26 - func_ragflow_client - INFO - RAGFlow 客户端初始化成功,已加载 2 个知识库
+2026-01-28 12:36:26 - func_ragflow_client - INFO - 连接测试成功
+2026-01-28 12:36:40 - func_ragflow_client - INFO - 找到知识库 '岱山-数据库问题',ID: 144f46a4f1c311f0ac650242ac140002
+2026-01-28 12:36:40 - func_ragflow_client - INFO - 找到知识库 '岱山-指令集',ID: fa338636f1c211f09ed00242ac140002
+2026-01-28 12:36:40 - func_ragflow_client - INFO - RAGFlow 客户端初始化成功,已加载 2 个知识库
+2026-01-28 12:36:41 - func_ragflow_client - INFO - 找到知识库 '岱山-数据库问题',ID: 144f46a4f1c311f0ac650242ac140002
+2026-01-28 12:36:41 - func_ragflow_client - INFO - 找到知识库 '岱山-指令集',ID: fa338636f1c211f09ed00242ac140002
+2026-01-28 12:36:41 - func_ragflow_client - INFO - RAGFlow 客户端初始化成功,已加载 2 个知识库
+2026-01-28 12:36:41 - func_ragflow_client - INFO - 连接测试成功
+2026-01-28 12:36:59 - func_ragflow_client - INFO - 找到知识库 '岱山-数据库问题',ID: 144f46a4f1c311f0ac650242ac140002
+2026-01-28 12:36:59 - func_ragflow_client - INFO - 找到知识库 '岱山-指令集',ID: fa338636f1c211f09ed00242ac140002
+2026-01-28 12:36:59 - func_ragflow_client - INFO - RAGFlow 客户端初始化成功,已加载 2 个知识库
+2026-01-28 12:37:00 - func_ragflow_client - INFO - 找到知识库 '岱山-数据库问题',ID: 144f46a4f1c311f0ac650242ac140002
+2026-01-28 12:37:00 - func_ragflow_client - INFO - 找到知识库 '岱山-指令集',ID: fa338636f1c211f09ed00242ac140002
+2026-01-28 12:37:00 - func_ragflow_client - INFO - RAGFlow 客户端初始化成功,已加载 2 个知识库
+2026-01-28 12:37:00 - func_ragflow_client - INFO - 连接测试成功
+2026-01-28 12:37:11 - func_ragflow_client - INFO - 开始查询所有知识库,query='介绍总体企业...'
+2026-01-28 12:37:11 - func_ragflow_client - INFO - 查询知识库: 岱山-指令集
+2026-01-28 12:37:11 - func_ragflow_client - INFO - 查询知识库: 岱山-数据库问题
+2026-01-28 12:37:11 - func_ragflow_client - INFO - 知识库 '岱山-指令集' 查询成功,返回 10 条结果
+2026-01-28 12:37:12 - func_ragflow_client - INFO - 知识库 '岱山-数据库问题' 查询成功,返回 10 条结果
+2026-01-28 12:37:12 - func_ragflow_client - INFO - 查询完成,共获得 20 条结果
+2026-01-28 13:27:26 - func_ragflow_client - INFO - 开始查询所有知识库,query='你好...'
+2026-01-28 13:27:26 - func_ragflow_client - INFO - 查询知识库: 岱山-指令集
+2026-01-28 13:27:26 - func_ragflow_client - INFO - 查询知识库: 岱山-数据库问题
+2026-01-28 13:27:27 - func_ragflow_client - INFO - 知识库 '岱山-数据库问题' 查询成功,返回 0 条结果
+2026-01-28 13:27:27 - func_ragflow_client - INFO - 知识库 '岱山-指令集' 查询成功,返回 0 条结果
+2026-01-28 13:27:27 - func_ragflow_client - INFO - 查询完成,共获得 0 条结果
+2026-01-28 13:28:42 - func_ragflow_client - INFO - 开始查询所有知识库,query='危险化工工艺名称为加氢工艺的危化品有多少...'
+2026-01-28 13:28:42 - func_ragflow_client - INFO - 查询知识库: 岱山-指令集
+2026-01-28 13:28:42 - func_ragflow_client - INFO - 查询知识库: 岱山-数据库问题
+2026-01-28 13:28:43 - func_ragflow_client - INFO - 知识库 '岱山-指令集' 查询成功,返回 0 条结果
+2026-01-28 13:28:43 - func_ragflow_client - INFO - 知识库 '岱山-数据库问题' 查询成功,返回 10 条结果
+2026-01-28 13:28:43 - func_ragflow_client - INFO - 查询完成,共获得 10 条结果
+2026-01-28 13:29:26 - func_ragflow_client - INFO - 开始查询所有知识库,query='设备名称为供电的设备有多少个...'
+2026-01-28 13:29:26 - func_ragflow_client - INFO - 查询知识库: 岱山-指令集
+2026-01-28 13:29:26 - func_ragflow_client - INFO - 查询知识库: 岱山-数据库问题
+2026-01-28 13:29:26 - func_ragflow_client - INFO - 知识库 '岱山-指令集' 查询成功,返回 0 条结果
+2026-01-28 13:29:27 - func_ragflow_client - INFO - 知识库 '岱山-数据库问题' 查询成功,返回 10 条结果
+2026-01-28 13:29:27 - func_ragflow_client - INFO - 查询完成,共获得 10 条结果
+2026-01-28 13:29:56 - func_ragflow_client - INFO - 开始查询所有知识库,query='反应类型为固态的危化品工艺有哪些...'
+2026-01-28 13:29:56 - func_ragflow_client - INFO - 查询知识库: 岱山-指令集
+2026-01-28 13:29:56 - func_ragflow_client - INFO - 查询知识库: 岱山-数据库问题
+2026-01-28 13:29:57 - func_ragflow_client - INFO - 知识库 '岱山-数据库问题' 查询成功,返回 10 条结果
+2026-01-28 13:29:57 - func_ragflow_client - INFO - 知识库 '岱山-指令集' 查询成功,返回 0 条结果
+2026-01-28 13:29:57 - func_ragflow_client - INFO - 查询完成,共获得 10 条结果
+2026-01-28 13:31:44 - func_ragflow_client - INFO - 找到知识库 '岱山-数据库问题',ID: 144f46a4f1c311f0ac650242ac140002
+2026-01-28 13:31:44 - func_ragflow_client - INFO - 找到知识库 '岱山-指令集',ID: fa338636f1c211f09ed00242ac140002
+2026-01-28 13:31:44 - func_ragflow_client - INFO - RAGFlow 客户端初始化成功,已加载 2 个知识库
+2026-01-28 13:31:44 - func_ragflow_client - INFO - 找到知识库 '岱山-数据库问题',ID: 144f46a4f1c311f0ac650242ac140002
+2026-01-28 13:31:44 - func_ragflow_client - INFO - 找到知识库 '岱山-指令集',ID: fa338636f1c211f09ed00242ac140002
+2026-01-28 13:31:44 - func_ragflow_client - INFO - RAGFlow 客户端初始化成功,已加载 2 个知识库
+2026-01-28 13:31:44 - func_ragflow_client - INFO - 连接测试成功
+2026-01-28 13:32:05 - func_ragflow_client - INFO - 开始查询所有知识库,query='反应类型为固态的危化品工艺有哪些...'
+2026-01-28 13:32:05 - func_ragflow_client - INFO - 查询知识库: 岱山-指令集
+2026-01-28 13:32:05 - func_ragflow_client - INFO - 查询知识库: 岱山-数据库问题
+2026-01-28 13:32:06 - func_ragflow_client - INFO - 知识库 '岱山-指令集' 查询成功,返回 0 条结果
+2026-01-28 13:32:06 - func_ragflow_client - INFO - 知识库 '岱山-数据库问题' 查询成功,返回 10 条结果
+2026-01-28 13:32:06 - func_ragflow_client - INFO - 查询完成,共获得 10 条结果
+2026-01-28 15:04:35 - func_ragflow_client - INFO - 找到知识库 '岱山-数据库问题',ID: 144f46a4f1c311f0ac650242ac140002
+2026-01-28 15:04:35 - func_ragflow_client - INFO - 找到知识库 '岱山-指令集',ID: fa338636f1c211f09ed00242ac140002
+2026-01-28 15:04:35 - func_ragflow_client - INFO - RAGFlow 客户端初始化成功,已加载 2 个知识库
+2026-01-28 15:04:36 - func_ragflow_client - INFO - 找到知识库 '岱山-数据库问题',ID: 144f46a4f1c311f0ac650242ac140002
+2026-01-28 15:04:36 - func_ragflow_client - INFO - 找到知识库 '岱山-指令集',ID: fa338636f1c211f09ed00242ac140002
+2026-01-28 15:04:36 - func_ragflow_client - INFO - RAGFlow 客户端初始化成功,已加载 2 个知识库
+2026-01-28 15:04:36 - func_ragflow_client - INFO - 连接测试成功
+2026-01-28 15:04:41 - func_ragflow_client - INFO - 开始查询所有知识库,query='介绍总体企业...'
+2026-01-28 15:04:41 - func_ragflow_client - INFO - 查询知识库: 岱山-指令集
+2026-01-28 15:04:41 - func_ragflow_client - INFO - 查询知识库: 岱山-数据库问题
+2026-01-28 15:04:42 - func_ragflow_client - INFO - 知识库 '岱山-指令集' 查询成功,返回 10 条结果
+2026-01-28 15:04:42 - func_ragflow_client - INFO - 知识库 '岱山-数据库问题' 查询成功,返回 10 条结果
+2026-01-28 15:04:42 - func_ragflow_client - INFO - 查询完成,共获得 20 条结果
+2026-01-28 15:05:06 - func_ragflow_client - INFO - 开始查询所有知识库,query='介绍润和催化材料有限公司...'
+2026-01-28 15:05:06 - func_ragflow_client - INFO - 查询知识库: 岱山-指令集
+2026-01-28 15:05:06 - func_ragflow_client - INFO - 查询知识库: 岱山-数据库问题
+2026-01-28 15:05:07 - func_ragflow_client - INFO - 知识库 '岱山-指令集' 查询成功,返回 10 条结果
+2026-01-28 15:05:07 - func_ragflow_client - INFO - 知识库 '岱山-数据库问题' 查询成功,返回 10 条结果
+2026-01-28 15:05:07 - func_ragflow_client - INFO - 查询完成,共获得 20 条结果

@@ -30,12 +30,49 @@ class Prompt_Templete:
                 [仅返回修改检查后最终可以用于查询的sql语句]      
                 """
         return prompt
+    def generat_error_prompt(self,sql,error_msg,table_info,query):
+        prompt=f"""
+        你是一位达梦数据库（DM Database）SQL 语法专家。请根据用户提供的 SQL 语句及其对应的语法错误信息，精准定位并修正该 SQL 语句中的语法问题。
+        
+        输入格式：  
+        - 用户的提问：{query}  
+        - 根据提问可提供的表单信息：{table_info}  
+        - 查询的SQL语句：{sql}  
+        - 查询的SQL语法错误信息：{error_msg}  
+        
+        你的任务：  
+        仅输出修正后的、符合达梦数据库语法规范的完整 SQL 语句，不要包含任何解释、注释、前缀或后缀。
+        
+        输出格式要求：  
+        【仅输出修正后的 SQL 语句】
+    """
+        return prompt
+    def fixQuerys(self,query,table_info):
+        prompt = f"""
+            你需要将用户的简洁简短的问题，进行完整化修复。使其能够和当前表的字段对应.
+
+            用户问题:’{query}‘
+
+            表信息:’{table_info}‘
+
+            样例：
+                输入1: 我想查询峰景公司的企业信息,
+                输出1： 我想查询‘公司名’为峰景公司的企业信息
+                
+                输入2： 我想查询经开区的供电设备的状态
+                输出2： 我想查询‘园区简称’是经开区的且‘设备名称’是供电的’设备状态‘信息
+                
+            输出（不额外输出思考内容）：
+                这里输出结合提供的表信息丰富后的用户查询输入信息，若无匹配内容则输出{query}
+            """
+        return prompt
 
     def gengerate_sql(self,query,table_info):
             today = datetime.now().date()
             prompt = f"""
             你是一名Dameng DB专家，现在需要阅读并理解下面的【数据库schema】描述，以及可能用到的【参考信息】，并运用Dameng DB知识生成sql语句回答【用户问题】。
-            注意：每个问题只根据单表进行查询，不涉及多表，生成的SQL需严格符合达梦数据库语法规范。
+            注意：
+                1、用户问题可能涉及简称，因此在查询时多使用LIKE语法，生成的SQL需严格符合达梦数据库语法规范。
 
             【用户问题】
             {query}

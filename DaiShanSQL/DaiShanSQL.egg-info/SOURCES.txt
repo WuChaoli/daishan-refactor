@@ -1,7 +1,6 @@
 setup.py
 DaiShanSQL/__init__.py
 DaiShanSQL/api_server.py
-DaiShanSQL/test.py
 DaiShanSQL.egg-info/PKG-INFO
 DaiShanSQL.egg-info/SOURCES.txt
 DaiShanSQL.egg-info/dependency_links.txt

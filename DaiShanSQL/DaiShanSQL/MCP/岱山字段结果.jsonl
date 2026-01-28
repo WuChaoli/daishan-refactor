@@ -34,7 +34,7 @@
 {"table": "v_ai_ipark_safety_park_honor", "field_name": "TO_CHAR(content)", "file_Note": "内容", "field_values": ["2024年12月岱山县绿色石化服务业创新发展区入选第三批浙江省现代服务业创新发展区", "2023年7月舟山岱山县海洋产业提质增效倍增平台入选第一批浙江省海洋产业提质增效倍增平台培育名单", "2024年3月浙江岱山经济开发区入选第三批省级先进制造业和现代服务业融合发展试点"]}
 {"table": "v_ai_ipark_pue_equipment", "field_name": "TO_CHAR(park_name)", "file_Note": "园区名称", "field_values": ["岱山经济开发区"]}
 {"table": "v_ai_ipark_pue_equipment", "field_name": "TO_CHAR(park_short_name)", "file_Note": "园区简称", "field_values": ["岱山经开区"]}
-{"table": "v_ai_ipark_pue_equipment", "field_name": "TO_CHAR(equipment_type)", "file_Note": "设备设施类型（中文）", "field_values": ["应急池", "供电设备设施", "供水设备设施", "15", "12"]}
+{"table": "v_ai_ipark_pue_equipment", "field_name": "TO_CHAR(equipment_type)", "file_Note": "设备设施类型（中文）", "field_values": ["15", "12"]}
 {"table": "v_ai_ipark_pue_equipment", "field_name": "TO_CHAR(equipment_name)", "file_Note": "设备名称", "field_values": ["事故应急池", "岱西变电站", "岱山变电站", "岱北水厂", "危化品停车场"]}
 {"table": "v_ai_ipark_pue_equipment", "field_name": "TO_CHAR(equipment_status)", "file_Note": "设备状态", "field_values": ["正常", "在用", "待建"]}
 {"table": "v_ai_ipark_pue_equipment", "field_name": "TO_CHAR(equipment_location)", "file_Note": "设备位置", "field_values": ["靠近岱山经济开发区新材料产业园污水处理厂", "岱西变电站", "岱山变电站", "岱北", "-"]}

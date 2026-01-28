@@ -36,7 +36,7 @@ class MySQLManager:
         self.password = os.getenv('DB_PASSWORD')
         self.port = int(os.getenv('DB_PORT', 3306))
         self.connection = None
-        self.api_url_ds = "http://192.168.1.231/hzfj-ai-dm/api/dataQuery/query001"
+        self.api_url_ds = os.getenv('SQL_DataBase')
 
     def request_api_sql(self,sql):
         try:

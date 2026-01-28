@@ -14,12 +14,13 @@ class Server:
         sql_result=self.agent.chat(prompt=query,conversation=history,questions=questions)
         return sql_result
 
-server = Server()
-
 if __name__=="__main__":
-    # server=Server()
-    print(server.sqlFixed.sql_ChemicalCompanyInfo())
+    server=Server()
+    #介绍企业基本信息
     print(server.sqlFixed.sql_companyInfo())
+    #介绍化工企业
+    print(server.sqlFixed.sql_ChemicalCompanyInfo())
+    #介绍安全态势
     print(server.sqlFixed.sql_SecuritySituation())
     # while True:
     #     conversations = []

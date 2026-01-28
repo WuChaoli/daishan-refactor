@@ -137,9 +137,15 @@ class RagflowClient:
 
         # 按相似度降序排序
         all_results.sort(key=lambda x: x.total_similarity, reverse=True)
-        results[0].sort(key=lambda x: x.total_similarity, reverse=True)
+        instruct_results = result[0]
+        if isinstance(instruct_results, list):
+            if len(instruct_results) > 0:
+                instruct_results[0].sort(key=lambda x: x.total_similarity, reverse=True)
+        else:
+            instruct_results = []
 
-        return all_results, results[0][0]
+        return all_results, instruct_results
+        # return all_results
 
     async def query_single_database(
         self, query: str, database: str

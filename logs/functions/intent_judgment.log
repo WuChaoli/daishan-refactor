@@ -633,3 +633,79 @@ IndexError: list index out of range
 2026-01-28 11:15:52 - func_intent_judgment - INFO - 知识库映射成功: 岱山-指令集 -> type=1
 2026-01-28 11:15:52 - func_intent_judgment - INFO - 意图判断完成: type=1, 知识库=岱山-指令集, 相似度=0.5725, 返回结果数=5
 2026-01-28 11:15:52 - func_intent_judgment - INFO - 意图判断完成 | type=1 | database=岱山-指令集 | similarity=0.5725151950201193 | results_count=5
+2026-01-28 12:37:11 - func_intent_judgment - INFO - 开始意图判断,query='介绍总体企业...'
+2026-01-28 12:37:11 - func_intent_judgment - INFO - 开始意图判断 | query=介绍总体企业
+2026-01-28 12:37:12 - func_intent_judgment - INFO - 指令集最高相似度：0.5725151950201193
+2026-01-28 12:37:12 - func_intent_judgment - INFO - 最高相似度=0.5725, 知识库=岱山-指令集
+2026-01-28 12:37:12 - func_intent_judgment - INFO - 知识库映射成功: 岱山-指令集 -> type=1
+2026-01-28 12:37:12 - func_intent_judgment - INFO - 意图判断完成: type=1, 知识库=岱山-指令集, 相似度=0.5725, 返回结果数=5
+2026-01-28 12:37:12 - func_intent_judgment - INFO - 意图判断完成 | type=1 | database=岱山-指令集 | similarity=0.5725151950201193 | results_count=5
+2026-01-28 13:27:26 - func_intent_judgment - INFO - 开始意图判断,query='你好...'
+2026-01-28 13:27:26 - func_intent_judgment - INFO - 开始意图判断 | query=你好
+2026-01-28 13:27:27 - func_intent_judgment - ERROR - 意图判断异常: list index out of range
+Traceback (most recent call last):
+  File "/home/wuchaoli/codespace/daishan-refactor/rag_stream/src/services/intent_judgment.py", line 67, in intent_judgment
+    all_results, instent_result = await client.query_all_databases(query)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wuchaoli/codespace/daishan-refactor/rag_stream/src/services/ragflow_client.py", line 142, in query_all_databases
+    return all_results, results[0][0]
+                        ~~~~~~~~~~^^^
+IndexError: list index out of range
+2026-01-28 13:27:27 - func_intent_judgment - ERROR - 意图判断异常 | error=list index out of range
+2026-01-28 13:28:42 - func_intent_judgment - INFO - 开始意图判断,query='危险化工工艺名称为加氢工艺的危化品有多少...'
+2026-01-28 13:28:42 - func_intent_judgment - INFO - 开始意图判断 | query=危险化工工艺名称为加氢工艺的危化品有多少
+2026-01-28 13:28:43 - func_intent_judgment - ERROR - 意图判断异常: list index out of range
+Traceback (most recent call last):
+  File "/home/wuchaoli/codespace/daishan-refactor/rag_stream/src/services/intent_judgment.py", line 67, in intent_judgment
+    all_results, instent_result = await client.query_all_databases(query)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wuchaoli/codespace/daishan-refactor/rag_stream/src/services/ragflow_client.py", line 142, in query_all_databases
+    return all_results, results[0][0]
+                        ~~~~~~~~~~^^^
+IndexError: list index out of range
+2026-01-28 13:28:43 - func_intent_judgment - ERROR - 意图判断异常 | error=list index out of range
+2026-01-28 13:29:26 - func_intent_judgment - INFO - 开始意图判断,query='设备名称为供电的设备有多少个...'
+2026-01-28 13:29:26 - func_intent_judgment - INFO - 开始意图判断 | query=设备名称为供电的设备有多少个
+2026-01-28 13:29:27 - func_intent_judgment - ERROR - 意图判断异常: list index out of range
+Traceback (most recent call last):
+  File "/home/wuchaoli/codespace/daishan-refactor/rag_stream/src/services/intent_judgment.py", line 67, in intent_judgment
+    all_results, instent_result = await client.query_all_databases(query)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wuchaoli/codespace/daishan-refactor/rag_stream/src/services/ragflow_client.py", line 142, in query_all_databases
+    return all_results, results[0][0]
+                        ~~~~~~~~~~^^^
+IndexError: list index out of range
+2026-01-28 13:29:27 - func_intent_judgment - ERROR - 意图判断异常 | error=list index out of range
+2026-01-28 13:29:56 - func_intent_judgment - INFO - 开始意图判断,query='反应类型为固态的危化品工艺有哪些...'
+2026-01-28 13:29:56 - func_intent_judgment - INFO - 开始意图判断 | query=反应类型为固态的危化品工艺有哪些
+2026-01-28 13:29:57 - func_intent_judgment - ERROR - 意图判断异常: list index out of range
+Traceback (most recent call last):
+  File "/home/wuchaoli/codespace/daishan-refactor/rag_stream/src/services/intent_judgment.py", line 67, in intent_judgment
+    all_results, instent_result = await client.query_all_databases(query)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wuchaoli/codespace/daishan-refactor/rag_stream/src/services/ragflow_client.py", line 142, in query_all_databases
+    return all_results, results[0][0]
+                        ~~~~~~~~~~^^^
+IndexError: list index out of range
+2026-01-28 13:29:57 - func_intent_judgment - ERROR - 意图判断异常 | error=list index out of range
+2026-01-28 13:32:05 - func_intent_judgment - INFO - 开始意图判断,query='反应类型为固态的危化品工艺有哪些...'
+2026-01-28 13:32:05 - func_intent_judgment - INFO - 开始意图判断 | query=反应类型为固态的危化品工艺有哪些
+2026-01-28 13:32:06 - func_intent_judgment - ERROR - 意图判断异常: name 'instent_result' is not defined
+Traceback (most recent call last):
+  File "/home/wuchaoli/codespace/daishan-refactor/rag_stream/src/services/intent_judgment.py", line 87, in intent_judgment
+    logger.info(f"指令集最高相似度：{instent_result.total_similarity}")
+                                     ^^^^^^^^^^^^^^
+NameError: name 'instent_result' is not defined. Did you mean: 'IntentResult'?
+2026-01-28 13:32:06 - func_intent_judgment - ERROR - 意图判断异常 | error=name 'instent_result' is not defined
+2026-01-28 15:04:41 - func_intent_judgment - INFO - 开始意图判断,query='介绍总体企业...'
+2026-01-28 15:04:41 - func_intent_judgment - INFO - 开始意图判断 | query=介绍总体企业
+2026-01-28 15:04:42 - func_intent_judgment - INFO - 最高相似度=0.5725, 知识库=岱山-指令集
+2026-01-28 15:04:42 - func_intent_judgment - INFO - 知识库映射成功: 岱山-指令集 -> type=1
+2026-01-28 15:04:42 - func_intent_judgment - INFO - 意图判断完成: type=1, 知识库=岱山-指令集, 相似度=0.5725, 返回结果数=5
+2026-01-28 15:04:42 - func_intent_judgment - INFO - 意图判断完成 | type=1 | database=岱山-指令集 | similarity=0.5725151950201193 | results_count=5
+2026-01-28 15:05:06 - func_intent_judgment - INFO - 开始意图判断,query='介绍润和催化材料有限公司...'
+2026-01-28 15:05:06 - func_intent_judgment - INFO - 开始意图判断 | query=介绍润和催化材料有限公司
+2026-01-28 15:05:07 - func_intent_judgment - INFO - 最高相似度=0.6275, 知识库=岱山-指令集
+2026-01-28 15:05:07 - func_intent_judgment - INFO - 知识库映射成功: 岱山-指令集 -> type=1
+2026-01-28 15:05:07 - func_intent_judgment - INFO - 意图判断完成: type=1, 知识库=岱山-指令集, 相似度=0.6275, 返回结果数=5
+2026-01-28 15:05:07 - func_intent_judgment - INFO - 意图判断完成 | type=1 | database=岱山-指令集 | similarity=0.6275088968408605 | results_count=5

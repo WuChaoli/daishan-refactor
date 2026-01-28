@@ -68,3 +68,50 @@ Traceback (most recent call last):
                         ~~~~~~~~~~^^^
 IndexError: list index out of range
 2026-01-28 10:34:58 - [func_intent_judgment] - ERROR - 意图判断异常 | error=list index out of range
+2026-01-28 13:27:27 - [func_intent_judgment] - ERROR - 意图判断异常: list index out of range
+Traceback (most recent call last):
+  File "/home/wuchaoli/codespace/daishan-refactor/rag_stream/src/services/intent_judgment.py", line 67, in intent_judgment
+    all_results, instent_result = await client.query_all_databases(query)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wuchaoli/codespace/daishan-refactor/rag_stream/src/services/ragflow_client.py", line 142, in query_all_databases
+    return all_results, results[0][0]
+                        ~~~~~~~~~~^^^
+IndexError: list index out of range
+2026-01-28 13:27:27 - [func_intent_judgment] - ERROR - 意图判断异常 | error=list index out of range
+2026-01-28 13:28:43 - [func_intent_judgment] - ERROR - 意图判断异常: list index out of range
+Traceback (most recent call last):
+  File "/home/wuchaoli/codespace/daishan-refactor/rag_stream/src/services/intent_judgment.py", line 67, in intent_judgment
+    all_results, instent_result = await client.query_all_databases(query)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wuchaoli/codespace/daishan-refactor/rag_stream/src/services/ragflow_client.py", line 142, in query_all_databases
+    return all_results, results[0][0]
+                        ~~~~~~~~~~^^^
+IndexError: list index out of range
+2026-01-28 13:28:43 - [func_intent_judgment] - ERROR - 意图判断异常 | error=list index out of range
+2026-01-28 13:29:27 - [func_intent_judgment] - ERROR - 意图判断异常: list index out of range
+Traceback (most recent call last):
+  File "/home/wuchaoli/codespace/daishan-refactor/rag_stream/src/services/intent_judgment.py", line 67, in intent_judgment
+    all_results, instent_result = await client.query_all_databases(query)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wuchaoli/codespace/daishan-refactor/rag_stream/src/services/ragflow_client.py", line 142, in query_all_databases
+    return all_results, results[0][0]
+                        ~~~~~~~~~~^^^
+IndexError: list index out of range
+2026-01-28 13:29:27 - [func_intent_judgment] - ERROR - 意图判断异常 | error=list index out of range
+2026-01-28 13:29:57 - [func_intent_judgment] - ERROR - 意图判断异常: list index out of range
+Traceback (most recent call last):
+  File "/home/wuchaoli/codespace/daishan-refactor/rag_stream/src/services/intent_judgment.py", line 67, in intent_judgment
+    all_results, instent_result = await client.query_all_databases(query)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wuchaoli/codespace/daishan-refactor/rag_stream/src/services/ragflow_client.py", line 142, in query_all_databases
+    return all_results, results[0][0]
+                        ~~~~~~~~~~^^^
+IndexError: list index out of range
+2026-01-28 13:29:57 - [func_intent_judgment] - ERROR - 意图判断异常 | error=list index out of range
+2026-01-28 13:32:06 - [func_intent_judgment] - ERROR - 意图判断异常: name 'instent_result' is not defined
+Traceback (most recent call last):
+  File "/home/wuchaoli/codespace/daishan-refactor/rag_stream/src/services/intent_judgment.py", line 87, in intent_judgment
+    logger.info(f"指令集最高相似度：{instent_result.total_similarity}")
+                                     ^^^^^^^^^^^^^^
+NameError: name 'instent_result' is not defined. Did you mean: 'IntentResult'?
+2026-01-28 13:32:06 - [func_intent_judgment] - ERROR - 意图判断异常 | error=name 'instent_result' is not defined

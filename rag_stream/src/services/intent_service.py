@@ -9,8 +9,10 @@ import re
 from rag_stream.src.services.intent_judgment import IntentResult, intent_judgment
 from rag_stream.src.services.log_manager import LogManager
 from rag_stream.src.services.ragflow_client import RagflowClient
-from DaiShanSQL.DaiShanSQL.api_server import server, Server
+# import DaiShanSQL.DaiShanSQL.api_server
+from DaiShanSQL.DaiShanSQL.api_server import Server
 
+# server = Server()
 
 class IntentService:
     """意图识别服务"""

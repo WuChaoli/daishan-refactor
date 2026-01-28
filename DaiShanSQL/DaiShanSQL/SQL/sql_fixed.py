@@ -1,4 +1,4 @@
-from .sql_utils import MySQLManager
+from ..SQL.sql_utils import MySQLManager
 class SQLFixed:
     def __init__(self):
         self.sql_manager = MySQLManager()
@@ -11,7 +11,6 @@ class SQLFixed:
         5. 行业分布‌：【】行业【】家，【】行业【】家。
         Returns:
         """
-        # 构建字典，以方便告诉llm当前查询语句的结果是什么查询的，是哪个类型的count数目计算
         try:
             search_dict_sql={
                 "基础企业总数信息":"""SELECT COUNT(*) AS 企业总数 FROM v_ai_ipark_safety_enterprise_info;""",

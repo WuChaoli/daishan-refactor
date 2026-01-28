@@ -18,10 +18,10 @@ class OpenAIUtils:
         self.Alimodel = os.getenv("OPENAI_MODEL")
 
         self.client = OpenAI(
-            base_url="http://192.168.1.117:2314/v1",
-            api_key="xiyunmu"
+            base_url=os.getenv("TextToSQL_base_url"),
+            api_key=os.getenv("TextToSQL_api_key")
         )
-        self.sqlmodel = "TextToSQL_7B"
+        self.sqlmodel =os.getenv("TextToSQL_model")
 
     def request(self, conversation=None, tools=[], tool_choice="auto",thinking=False,model=""):
         if conversation is None:
