@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import time
 from datetime import datetime
 from typing import Optional
@@ -13,6 +14,16 @@ from src.config.settings import settings
 from src.utils.session_manager import session_manager
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+_LOG_RAGFLOW_RAW = os.getenv("RAGFLOW_LOG_RAW", "").lower() in {"1", "true", "yes", "on"}
+_SUPPRESS_INTERNAL_LOGS = (
+    os.getenv("RAGFLOW_SUPPRESS_INTERNAL_LOGS", "").lower() in {"1", "true", "yes", "on"}
+    or _LOG_RAGFLOW_RAW
+)
+if _SUPPRESS_INTERNAL_LOGS:
+    # 避免在终端刷我们自己的解析日志；raw 开启时只保留 [RAGFLOW_RAW] 输出
+    logger.setLevel(logging.ERROR)
 
 
 async def get_rag_client():
@@ -95,11 +106,14 @@ async def stream_chat_response(
         data["user_id"] = user_id
     start_time = time.time()
     first_output_sent = False
-    logger.info(f"发送给 RAGFlow 的请求: url={url}, data={data}")
+    end_sent = False
+    if not _SUPPRESS_INTERNAL_LOGS:
+        logger.info(f"发送给 RAGFlow 的请求: url={url}, data={data}")
     try:
         async with aiohttp.ClientSession() as session:
             async with session.post(url, headers=headers, json=data) as response:
-                logger.info(f"RAGFlow 响应状态: status={response.status}")
+                if not _SUPPRESS_INTERNAL_LOGS:
+                    logger.info(f"RAGFlow 响应状态: status={response.status}")
                 if response.status != 200:
                     error_text = await response.text()
                     yield f"data: {json.dumps({'code': 1, 'message': f'RAG服务错误: {error_text}', 'data': None})}\n\n"
@@ -114,6 +128,10 @@ async def stream_chat_response(
                     buffer += chunk
                     while b"\n" in buffer:
                         raw_line, buffer = buffer.split(b"\n", 1)
+                        if _LOG_RAGFLOW_RAW:
+                            decoded_raw = raw_line.decode("utf-8", errors="replace")
+                            print(f"[RAGFLOW_RAW] {decoded_raw}")
+
                         line_text = raw_line.decode("utf-8", errors="ignore").strip()
 
                         if not first_output_sent and (time.time() - start_time > 15):
@@ -150,18 +168,27 @@ async def stream_chat_response(
 
                             try:
                                 json_data = json.loads(data_content)
-                                logger.info(f"RAGFlow 返回数据: {json_data}")
+                                if not _SUPPRESS_INTERNAL_LOGS:
+                                    logger.info(f"RAGFlow 返回数据: {json_data}")
                                 if json_data.get("code") == 0:
                                     data_field = json_data.get("data")
                                     if data_field and isinstance(data_field, dict):
                                         answer = data_field.get("answer", "")
                                         if answer:
-                                            if old_answer and answer.startswith(old_answer):
-                                                incremental_answer = answer[len(old_answer) :]
-                                            else:
-                                                incremental_answer = answer
+                                            # 仅接受“前缀追加”的增量。
+                                            # RAGFlow 有时会在最后一条把历史文本做“中间插入/改写”（如插入引用标记 ##x$$ 和 reference），
+                                            # 这会导致把整段答案再输出一遍（前端看起来像复制了一遍）。这种非前缀更新直接忽略。
+                                            if answer == old_answer:
+                                                continue
 
-                                            old_answer = answer
+                                            if not old_answer:
+                                                incremental_answer = answer
+                                                old_answer = answer
+                                            elif answer.startswith(old_answer):
+                                                incremental_answer = answer[len(old_answer) :]
+                                                old_answer = answer
+                                            else:
+                                                continue
 
                                             if not first_output_sent:
                                                 first_output_sent = True
@@ -218,7 +245,8 @@ async def stream_chat_response(
                                                 },
                                             }
                                             yield f"data: {json.dumps(end_data, ensure_ascii=False)}\n\n"
-                                            break
+                                            end_sent = True
+                                            return
 
                                         elif data_field == "true" or data_field == "True":
                                             end_data = {
@@ -232,22 +260,24 @@ async def stream_chat_response(
                                                 },
                                             }
                                             yield f"data: {json.dumps(end_data, ensure_ascii=False)}\n\n"
-                                            break
+                                            end_sent = True
+                                            return
 
                             except json.JSONDecodeError:
                                 continue
 
-                end_data = {
-                    "code": 0,
-                    "data": {
-                        "sessionId": session_id,
-                        "answer": "",
-                        "flag": 0,
-                        "wordId": word_id,
-                        "end": 1,
-                    },
-                }
-                yield f"data: {json.dumps(end_data, ensure_ascii=False)}\n\n"
+                if not end_sent:
+                    end_data = {
+                        "code": 0,
+                        "data": {
+                            "sessionId": session_id,
+                            "answer": "",
+                            "flag": 0,
+                            "wordId": word_id,
+                            "end": 1,
+                        },
+                    }
+                    yield f"data: {json.dumps(end_data, ensure_ascii=False)}\n\n"
 
     except Exception as e:
         logger.error(f"流式响应处理失败: {str(e)}")

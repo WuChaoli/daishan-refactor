@@ -101,6 +101,21 @@ class SessionManager:
 
         return user_sessions_info
 
+    def cleanup_user_sessions(self, user_id: str) -> int:
+        """删除指定用户的所有会话，返回删除的会话数量"""
+        if user_id not in self.user_sessions:
+            return 0
+
+        session_ids = list(self.user_sessions[user_id].values())
+        count = 0
+        for session_id in session_ids:
+            if session_id in self.sessions:
+                self.cleanup_expired_session(session_id)
+                count += 1
+
+        logger.info(f"删除用户 {user_id} 的 {count} 个会话")
+        return count
+
 
 session_manager = SessionManager()
 

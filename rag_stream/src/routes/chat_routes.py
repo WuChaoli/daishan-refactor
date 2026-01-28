@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 from datetime import datetime
 from typing import Any, Dict
 
@@ -12,6 +13,7 @@ from src.config.settings import settings
 from src.models.schemas import (
     ChatRequest,
     ChatResponse,
+    ChatDeleteRequest,
     SessionRequest,
     SessionResponse,
 )
@@ -26,6 +28,7 @@ from src.services.intent_service import IntentService
 log_manager = LogManager(settings.logging)
 ragflow_client = RagflowClient(settings.ragflow, settings.intent, log_manager)
 intent_service = IntentService(log_manager, ragflow_client)
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -41,10 +44,10 @@ async def chat_with_category(
         raise HTTPException(status_code=400, detail=f"不支持的类别: {category}")
 
     chat_id = settings.ragflow.chat_ids[category]
-    print(f"chat_id: {chat_id}")
+    logger.debug("chat_id: %s", chat_id)
 
     session_id = await get_or_create_session(chat_id, category, user_id)
-    print(f"session_id: {session_id}")
+    logger.debug("session_id: %s", session_id)
 
     return StreamingResponse(
         stream_chat_response(chat_id, request.question, session_id, user_id),
@@ -151,7 +154,7 @@ async def chat_general(request: ChatRequest):
 
     # 提取 type 字段判断如何处理
     result_type = result_dict.get("type")
-    print(f"result_type:{result_type}")
+    logger.debug("result_type: %s", result_type)
 
     if result_type == 1:
         data = result_dict.get("data", {})
@@ -168,9 +171,8 @@ async def chat_general(request: ChatRequest):
                 user_id=request.user_id,
             )
 
-            print(f"kb_name:{kb_name}")
+            logger.debug("kb_name: %s", kb_name)
             return await chat_with_category(kb_name, updated_request)
-        
         
     elif result_type == 2:
         # type=2: 提取 data.sql_result，转换成字符串，与 request.question 拼接
@@ -219,6 +221,22 @@ async def chat_special(request: ChatRequest):
 @router.post("/api/firmsituation", response_model=ChatResponse)
 async def chat_firmsituation(request: ChatRequest):
     return await chat_with_category("园区企业态势", request)
+
+@router.post("/api/stop", status_code=200)
+async def stop_session(request: ChatDeleteRequest):
+    """暂停/删除会话"""
+    if request.session_id:
+        # 按 session_id 删除
+        if request.session_id not in session_manager.sessions:
+            raise HTTPException(status_code=404, detail="会话不存在")
+        session_manager.cleanup_expired_session(request.session_id)
+    elif request.user_id:
+        # 按 user_id 删除用户所有会话
+        session_manager.cleanup_user_sessions(request.user_id)
+    else:
+        raise HTTPException(status_code=400, detail="session_id 或 user_id 不能为空")
+
+    return "暂停成功"
 
 
 @router.post("/api/sessions/{category}", response_model=SessionResponse)

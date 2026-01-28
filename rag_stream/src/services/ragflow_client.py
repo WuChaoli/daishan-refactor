@@ -137,8 +137,9 @@ class RagflowClient:
 
         # 按相似度降序排序
         all_results.sort(key=lambda x: x.total_similarity, reverse=True)
+        results[0].sort(key=lambda x: x.total_similarity, reverse=True)
 
-        return all_results
+        return all_results, results[0][0]
 
     async def query_single_database(
         self, query: str, database: str

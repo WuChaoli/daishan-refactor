@@ -4,6 +4,7 @@ import json
 import logging
 import re
 import time
+import os
 from typing import Optional
 
 import aiohttp
@@ -11,6 +12,9 @@ import aiohttp
 from src.config.settings import settings
 
 logger = logging.getLogger(__name__)
+_SUPPRESS_INTERNAL_LOGS = os.getenv("DIFY_SUPPRESS_INTERNAL_LOGS", "").lower() in {"1", "true", "yes", "on"}
+if _SUPPRESS_INTERNAL_LOGS:
+    logger.setLevel(logging.ERROR)
 
 
 def should_use_dify(request_question: str) -> bool:
@@ -115,12 +119,18 @@ async def stream_dify_chatflow_response(
                                 answer = json_data.get("message", {}).get("content", "")
 
                             if answer:
-                                if old_answer and answer.startswith(old_answer):
-                                    incremental_answer = answer[len(old_answer) :]
-                                else:
+                                if not old_answer:
                                     incremental_answer = answer
-
-                                old_answer = answer
+                                    old_answer = answer
+                                elif answer.startswith(old_answer):
+                                    incremental_answer = answer[len(old_answer) :]
+                                    old_answer = answer
+                                elif answer in old_answer or old_answer.startswith(answer) or len(answer) <= len(old_answer):
+                                    # 子串/回退/变短：忽略，避免 end=0 重复 chunk
+                                    continue
+                                else:
+                                    # 非追加更新（可能是插入/改写）：忽略以避免重复输出
+                                    continue
 
                                 if not first_output_sent:
                                     first_output_sent = True

@@ -64,7 +64,7 @@ async def intent_judgment(
 
     try:
         # 调用 RAGFlow 客户端查询所有知识库
-        all_results = await client.query_all_databases(query)
+        all_results, instent_result = await client.query_all_databases(query)
 
         if not all_results:
             # RAGFlow 返回空结果,触发降级策略
@@ -82,9 +82,12 @@ async def intent_judgment(
                 similarity=0.0,
                 database="",
             )
-
-        # 获取最高相似度结果
-        best_result = all_results[0]
+        
+        logger.info(f"指令集最高相似度：{instent_result.total_similarity}")
+        if instent_result.total_similarity >= settings.intent.similarity_threshold:
+            best_result = instent_result
+        else:
+            best_result = all_results[0]
         logger.info(
             f"最高相似度={best_result.total_similarity:.4f}, "
             f"知识库={best_result.database}"

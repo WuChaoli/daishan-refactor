@@ -112,7 +112,7 @@ class IntentService:
                 elif kb_name == "安全信息知识库":
                     result = server.sqlFixed.sql_SecuritySituation()
                 
-                print(f"sql_result: {result}")
+                self.logger.debug("sql_result: %s", result)
                 
                 return {"type": 1, "data": {"kb_name": kb_name, "sql_result": str(result)}}
             else:

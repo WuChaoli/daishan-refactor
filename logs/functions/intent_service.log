@@ -344,3 +344,434 @@ ModuleNotFoundError: No module named 'DaiShanSQL.api_server'
 2026-01-27 12:34:57 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.8100
 2026-01-27 12:34:57 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
 2026-01-27 12:34:57 - func_intent_service - INFO - 检测到知识库标记: 企业知识库
+2026-01-27 14:16:17 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769494564167, query='介绍园区...'
+2026-01-27 14:16:18 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.7611
+2026-01-27 14:16:18 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-27 14:16:18 - func_intent_service - INFO - 检测到知识库标记: 园区知识库
+2026-01-27 14:18:38 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769494709926, query='介绍企业...'
+2026-01-27 14:18:42 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.7439
+2026-01-27 14:18:42 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-27 14:18:42 - func_intent_service - INFO - 检测到知识库标记: 企业知识库
+2026-01-27 14:19:17 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769494709926, query='氟化氢的用法...'
+2026-01-27 14:19:17 - func_intent_service - INFO - 意图判断完成: type=0, database=岱山-数据库问题, similarity=0.3258
+2026-01-27 14:19:17 - func_intent_service - INFO - Type 2 处理器: 数据库查询, query='氟化氢的用法...', user_id=test_user_1769494709926
+2026-01-27 14:19:17 - func_intent_service - INFO - 调用 DaiShanSQL, questions: ['工艺类型是氟化的企业，其典型工艺装置名称是什么？', '园区“滨海新材料园”内有没有使用氟化工艺的企业？']... (共2个)
+2026-01-27 14:19:20 - func_intent_service - INFO - DaiShanSQL 查询完成
+2026-01-27 14:19:20 - func_intent_service - INFO - ========== SQL Result Debug ==========
+2026-01-27 14:19:20 - func_intent_service - INFO - SQL Result 类型: <class 'dict'>
+2026-01-27 14:19:20 - func_intent_service - INFO - SQL Result 内容: {'数据库查询': "SELECT TO_CHAR(park_name) AS 所属园区, TO_CHAR(enterprise_name) AS 企业名称, TO_CHAR(crafts_type) AS 危险化工工艺名称, TO_CHAR(reaction_type) AS 反应类型, TO_CHAR(crafts_code) AS 典型工艺装置编码, TO_CHAR(crafts_process) AS 典型工艺装置名称, TO_CHAR(crafts_parameters) AS 重点监管工艺参数 FROM v_ai_ipark_hm_craft_detail WHERE TO_CHAR(crafts_type) = '氟化氢';", '数据库查询结果': [], '筛选出的表': ['v_ai_ipark_hm_craft_detail']}
+2026-01-27 14:19:20 - func_intent_service - INFO - SQL Result 键: ['数据库查询', '数据库查询结果', '筛选出的表']
+2026-01-27 14:19:20 - func_intent_service - INFO - ======================================
+2026-01-27 14:35:41 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769494709926, query='反应类型为固态的危化品工艺有哪些...'
+2026-01-27 14:35:43 - func_intent_service - INFO - 意图判断完成: type=2, database=岱山-数据库问题, similarity=0.6014
+2026-01-27 14:35:43 - func_intent_service - INFO - Type 2 处理器: 数据库查询, query='反应类型为固态的危化品工艺有哪些...', user_id=test_user_1769494709926
+2026-01-27 14:35:43 - func_intent_service - INFO - 调用 DaiShanSQL, questions: ['这些危险化工工艺的反应类型是固态、液态还是气态？', '固态反应类型的危险化工工艺在哪些企业中存在？', '反应类型为固态的危险化工工艺主要集中在哪些园区？']... (共5个)
+2026-01-27 14:35:44 - func_intent_service - INFO - DaiShanSQL 查询完成
+2026-01-27 14:35:44 - func_intent_service - INFO - ========== SQL Result Debug ==========
+2026-01-27 14:35:44 - func_intent_service - INFO - SQL Result 类型: <class 'dict'>
+2026-01-27 14:35:44 - func_intent_service - INFO - SQL Result 内容: {'数据库查询': "SELECT TO_CHAR(crafts_type) FROM v_ai_ipark_hm_craft_detail WHERE TO_CHAR(reaction_type) = '固态'", '数据库查询结果': [{'TO_CHAR(CRAFTS_TYPE)': '光气及光气化工艺'}, {'TO_CHAR(CRAFTS_TYPE)': '光气及光气化工艺'}, {'TO_CHAR(CRAFTS_TYPE)': '光气及光气化工艺'}, {'TO_CHAR(CRAFTS_TYPE)': '光气及光气化工艺'}, {'TO_CHAR(CRAFTS_TYPE)': '硝化工艺'}, {'TO_CHAR(CRAFTS_TYPE)': '加氢工艺'}, {'TO_CHAR(CRAFTS_TYPE)': '加氢工艺'}, {'TO_CHAR(CRAFTS_TYPE)': '加氢工艺'}, {'TO_CHAR(CRAFTS_TYPE)': '氧化工艺'}, {'TO_CHAR(CRAFTS_TYPE)': '聚合工艺'}], '筛选出的表': ['v_ai_ipark_hm_craft_detail']}
+2026-01-27 14:35:44 - func_intent_service - INFO - SQL Result 键: ['数据库查询', '数据库查询结果', '筛选出的表']
+2026-01-27 14:35:44 - func_intent_service - INFO - ======================================
+2026-01-27 14:45:41 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769496330762, query='你好...'
+2026-01-27 14:45:41 - func_intent_service - INFO - 意图判断完成: type=0, database=, similarity=0.0000
+2026-01-27 14:45:41 - func_intent_service - INFO - Type 2 处理器: 数据库查询, query='你好...', user_id=test_user_1769496330762
+2026-01-27 14:45:41 - func_intent_service - INFO - 调用 DaiShanSQL, questions: ['你好']... (共1个)
+2026-01-27 14:45:59 - func_intent_service - INFO - DaiShanSQL 查询完成
+2026-01-27 14:45:59 - func_intent_service - INFO - ========== SQL Result Debug ==========
+2026-01-27 14:45:59 - func_intent_service - INFO - SQL Result 类型: <class 'dict'>
+2026-01-27 14:45:59 - func_intent_service - INFO - SQL Result 内容: {'数据库查询': "SELECT '你好，请问有什么具体的问题或需要查询的数据库表信息？' AS content;", '数据库查询结果': [{'CONTENT': '你好，请问有什么具体的问题或需要查询的数据库表信息？'}], '筛选出的表': []}
+2026-01-27 14:45:59 - func_intent_service - INFO - SQL Result 键: ['数据库查询', '数据库查询结果', '筛选出的表']
+2026-01-27 14:45:59 - func_intent_service - INFO - ======================================
+2026-01-27 14:46:11 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769496330762, query='园区介绍...'
+2026-01-27 14:46:12 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.7510
+2026-01-27 14:46:12 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-27 14:46:12 - func_intent_service - INFO - 检测到知识库标记: 园区知识库
+2026-01-27 14:46:27 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769496330762, query='反应类型为固态的危化品工艺有哪些...'
+2026-01-27 14:46:27 - func_intent_service - INFO - 意图判断完成: type=2, database=岱山-数据库问题, similarity=0.6014
+2026-01-27 14:46:27 - func_intent_service - INFO - Type 2 处理器: 数据库查询, query='反应类型为固态的危化品工艺有哪些...', user_id=test_user_1769496330762
+2026-01-27 14:46:27 - func_intent_service - INFO - 调用 DaiShanSQL, questions: ['这些危险化工工艺的反应类型是固态、液态还是气态？', '固态反应类型的危险化工工艺在哪些企业中存在？', '反应类型为固态的危险化工工艺主要集中在哪些园区？']... (共5个)
+2026-01-27 14:46:28 - func_intent_service - INFO - DaiShanSQL 查询完成
+2026-01-27 14:46:28 - func_intent_service - INFO - ========== SQL Result Debug ==========
+2026-01-27 14:46:28 - func_intent_service - INFO - SQL Result 类型: <class 'dict'>
+2026-01-27 14:46:28 - func_intent_service - INFO - SQL Result 内容: {'数据库查询': "SELECT TO_CHAR(crafts_type) FROM v_ai_ipark_hm_craft_detail WHERE TO_CHAR(reaction_type) = '固态'", '数据库查询结果': [{'TO_CHAR(CRAFTS_TYPE)': '光气及光气化工艺'}, {'TO_CHAR(CRAFTS_TYPE)': '光气及光气化工艺'}, {'TO_CHAR(CRAFTS_TYPE)': '光气及光气化工艺'}, {'TO_CHAR(CRAFTS_TYPE)': '光气及光气化工艺'}, {'TO_CHAR(CRAFTS_TYPE)': '硝化工艺'}, {'TO_CHAR(CRAFTS_TYPE)': '加氢工艺'}, {'TO_CHAR(CRAFTS_TYPE)': '加氢工艺'}, {'TO_CHAR(CRAFTS_TYPE)': '加氢工艺'}, {'TO_CHAR(CRAFTS_TYPE)': '氧化工艺'}, {'TO_CHAR(CRAFTS_TYPE)': '聚合工艺'}], '筛选出的表': ['v_ai_ipark_hm_craft_detail']}
+2026-01-27 14:46:28 - func_intent_service - INFO - SQL Result 键: ['数据库查询', '数据库查询结果', '筛选出的表']
+2026-01-27 14:46:28 - func_intent_service - INFO - ======================================
+2026-01-27 14:46:41 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769496330762, query='典型工艺装置名称为甲烷硝化制取硝基甲烷工艺的反应类型是什么...'
+2026-01-27 14:46:42 - func_intent_service - INFO - 意图判断完成: type=2, database=岱山-数据库问题, similarity=0.5836
+2026-01-27 14:46:42 - func_intent_service - INFO - Type 2 处理器: 数据库查询, query='典型工艺装置名称为甲烷硝化制取硝基甲烷工艺的反应类型是什么...', user_id=test_user_1769496330762
+2026-01-27 14:46:42 - func_intent_service - INFO - 调用 DaiShanSQL, questions: ['典型工艺装置名称是“连续硝化反应器”的企业叫什么？', '典型工艺装置名称为‘连续硝化反应器’的企业叫什么？', '典型工艺装置名称为‘连续硝化反应器’的企业有哪些？']... (共5个)
+2026-01-27 14:46:46 - func_intent_service - INFO - DaiShanSQL 查询完成
+2026-01-27 14:46:46 - func_intent_service - INFO - ========== SQL Result Debug ==========
+2026-01-27 14:46:46 - func_intent_service - INFO - SQL Result 类型: <class 'dict'>
+2026-01-27 14:46:46 - func_intent_service - INFO - SQL Result 内容: {'数据库查询': "SELECT TO_CHAR(reaction_type) FROM v_ai_ipark_hm_craft_detail WHERE TO_CHAR(crafts_process) = '甲烷硝化制取硝基甲烷工艺'", '数据库查询结果': [{'TO_CHAR(REACTION_TYPE)': '固态'}], '筛选出的表': ['v_ai_ipark_hm_craft_detail']}
+2026-01-27 14:46:46 - func_intent_service - INFO - SQL Result 键: ['数据库查询', '数据库查询结果', '筛选出的表']
+2026-01-27 14:46:46 - func_intent_service - INFO - ======================================
+2026-01-27 14:47:01 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769496330762, query='叫做正丁醛的危化品的化学品类是什么...'
+2026-01-27 14:47:02 - func_intent_service - INFO - 意图判断完成: type=2, database=岱山-数据库问题, similarity=0.4263
+2026-01-27 14:47:02 - func_intent_service - INFO - Type 2 处理器: 数据库查询, query='叫做正丁醛的危化品的化学品类是什么...', user_id=test_user_1769496330762
+2026-01-27 14:47:02 - func_intent_service - INFO - 调用 DaiShanSQL, questions: ['危化品中文名叫什么的化学品在哪些企业里有登记？', '有没有企业的危化品中文名和化学品类型不匹配的情况？', '列出所有园区中化学品状态为“在用”的危化品信息。']... (共5个)
+2026-01-27 14:47:03 - func_intent_service - INFO - DaiShanSQL 查询完成
+2026-01-27 14:47:03 - func_intent_service - INFO - ========== SQL Result Debug ==========
+2026-01-27 14:47:03 - func_intent_service - INFO - SQL Result 类型: <class 'dict'>
+2026-01-27 14:47:03 - func_intent_service - INFO - SQL Result 内容: {'数据库查询': "SELECT TO_CHAR(chemical_type) FROM v_ai_ipark_hm_chemical_detail WHERE TO_CHAR(chemical_name) = '正丁醛'", '数据库查询结果': [{'TO_CHAR(CHEMICAL_TYPE)': '原料'}], '筛选出的表': ['v_ai_ipark_hm_chemical_detail']}
+2026-01-27 14:47:03 - func_intent_service - INFO - SQL Result 键: ['数据库查询', '数据库查询结果', '筛选出的表']
+2026-01-27 14:47:03 - func_intent_service - INFO - ======================================
+2026-01-27 14:47:14 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769496330762, query='设备名称为污水处理中心且设备位置在岱山变电站的设备有多少...'
+2026-01-27 14:47:15 - func_intent_service - INFO - 意图判断完成: type=2, database=岱山-数据库问题, similarity=0.5138
+2026-01-27 14:47:15 - func_intent_service - INFO - Type 2 处理器: 数据库查询, query='设备名称为污水处理中心且设备位置在岱山变电站的设备有多少...', user_id=test_user_1769496330762
+2026-01-27 14:47:15 - func_intent_service - INFO - 调用 DaiShanSQL, questions: ['岱山经济开发区的污水处理设备具体在什么位置？', '岱山经济开发区的污水处理设备安装在哪个位置？', '园区污水处理设备的详细位置信息能提供一下吗？']... (共5个)
+2026-01-27 14:47:16 - func_intent_service - INFO - DaiShanSQL 查询完成
+2026-01-27 14:47:16 - func_intent_service - INFO - ========== SQL Result Debug ==========
+2026-01-27 14:47:16 - func_intent_service - INFO - SQL Result 类型: <class 'dict'>
+2026-01-27 14:47:16 - func_intent_service - INFO - SQL Result 内容: {'数据库查询': "SELECT COUNT(*) FROM v_ai_ipark_pue_equipment WHERE TO_CHAR(equipment_name) = '污水处理中心' AND TO_CHAR(equipment_location) = '岱山变电站';", '数据库查询结果': [{'COUNT(*)': 0}], '筛选出的表': ['v_ai_ipark_pue_equipment']}
+2026-01-27 14:47:16 - func_intent_service - INFO - SQL Result 键: ['数据库查询', '数据库查询结果', '筛选出的表']
+2026-01-27 14:47:16 - func_intent_service - INFO - ======================================
+2026-01-27 14:47:32 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769496330762, query='设备名称为供电的设备有多少个...'
+2026-01-27 14:47:33 - func_intent_service - INFO - 意图判断完成: type=2, database=岱山-数据库问题, similarity=0.6758
+2026-01-27 14:47:33 - func_intent_service - INFO - Type 2 处理器: 数据库查询, query='设备名称为供电的设备有多少个...', user_id=test_user_1769496330762
+2026-01-27 14:47:33 - func_intent_service - INFO - 调用 DaiShanSQL, questions: ['岱山经开区供电设备的名称是什么？', '能列出所有园区名称及其对应的设备数量吗？', '设备设施名称包括什么？']... (共5个)
+2026-01-27 14:47:34 - func_intent_service - INFO - DaiShanSQL 查询完成
+2026-01-27 14:47:34 - func_intent_service - INFO - ========== SQL Result Debug ==========
+2026-01-27 14:47:34 - func_intent_service - INFO - SQL Result 类型: <class 'dict'>
+2026-01-27 14:47:34 - func_intent_service - INFO - SQL Result 内容: {'数据库查询': "SELECT COUNT(*) FROM v_ai_ipark_pue_equipment WHERE TO_CHAR(equipment_name) = '供电'", '数据库查询结果': [{'COUNT(*)': 1}], '筛选出的表': ['v_ai_ipark_pue_equipment', 'v_ai_ipark_hm_monitor_metric']}
+2026-01-27 14:47:34 - func_intent_service - INFO - SQL Result 键: ['数据库查询', '数据库查询结果', '筛选出的表']
+2026-01-27 14:47:34 - func_intent_service - INFO - ======================================
+2026-01-27 14:47:50 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769496330762, query='CAS号为115-07-1的危化品叫什么...'
+2026-01-27 14:47:51 - func_intent_service - INFO - 意图判断完成: type=0, database=岱山-数据库问题, similarity=0.2869
+2026-01-27 14:47:51 - func_intent_service - INFO - Type 2 处理器: 数据库查询, query='CAS号为115-07-1的危化品叫什么...', user_id=test_user_1769496330762
+2026-01-27 14:47:51 - func_intent_service - INFO - 调用 DaiShanSQL, questions: ['CAS号对应的具体危化品名称是什么？', '我想查一下未来科技城在2023-10-07这天是不是高风险。', '这个危化品的CAS号是多少？']... (共5个)
+2026-01-27 14:47:52 - func_intent_service - INFO - DaiShanSQL 查询完成
+2026-01-27 14:47:52 - func_intent_service - INFO - ========== SQL Result Debug ==========
+2026-01-27 14:47:52 - func_intent_service - INFO - SQL Result 类型: <class 'dict'>
+2026-01-27 14:47:52 - func_intent_service - INFO - SQL Result 内容: {'数据库查询': "SELECT TO_CHAR(chemical_name) FROM v_ai_ipark_hm_chemical_detail WHERE TO_CHAR(cas) = '115-07-1'", '数据库查询结果': [{'TO_CHAR(CHEMICAL_NAME)': '丙烯'}], '筛选出的表': ['v_ai_ipark_hm_chemical_detail', 'v_ai_ipark_ra_park_daily_risk_summary_park']}
+2026-01-27 14:47:52 - func_intent_service - INFO - SQL Result 键: ['数据库查询', '数据库查询结果', '筛选出的表']
+2026-01-27 14:47:52 - func_intent_service - INFO - ======================================
+2026-01-27 15:29:58 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769498933571, query='舟山市智德工业气体有限公司有哪些危化品...'
+2026-01-27 15:30:00 - func_intent_service - INFO - 意图判断完成: type=0, database=岱山-数据库问题, similarity=0.3763
+2026-01-27 15:30:00 - func_intent_service - INFO - Type 2 处理器: 数据库查询, query='舟山市智德工业气体有限公司有哪些危化品...', user_id=test_user_1769498933571
+2026-01-27 15:30:00 - func_intent_service - INFO - 调用 DaiShanSQL, questions: ['公司名称为“舟山海洋化工有限公司”的企业在第18周的运行效果得分是多少？', '查一下‘舟山海洋科技有限公司’的销警及时处置率。', '哪些企业的危化品类型属于“易燃液体”？']... (共5个)
+2026-01-27 15:30:01 - func_intent_service - INFO - DaiShanSQL 查询完成
+2026-01-27 15:30:01 - func_intent_service - INFO - ========== SQL Result Debug ==========
+2026-01-27 15:30:01 - func_intent_service - INFO - SQL Result 类型: <class 'dict'>
+2026-01-27 15:30:01 - func_intent_service - INFO - SQL Result 内容: {'数据库查询': "SELECT TO_CHAR(chemical_name) FROM v_ai_ipark_hm_chemical_detail WHERE TO_CHAR(enterprise_name) = '浙江舟山市智德工业气体有限公司'", '数据库查询结果': [{'TO_CHAR(CHEMICAL_NAME)': '氢气'}, {'TO_CHAR(CHEMICAL_NAME)': '天然气[富含甲烷的]'}, {'TO_CHAR(CHEMICAL_NAME)': '氢气'}, {'TO_CHAR(CHEMICAL_NAME)': '硫化氢'}, {'TO_CHAR(CHEMICAL_NAME)': '正丁烷'}, {'TO_CHAR(CHEMICAL_NAME)': '3-丁二烯'}, {'TO_CHAR(CHEMICAL_NAME)': '标准气中的甲烷'}, {'TO_CHAR(CHEMICAL_NAME)': '乙烯'}, {'TO_CHAR(CHEMICAL_NAME)': '乙烷'}, {'TO_CHAR(CHEMICAL_NAME)': '甲烷'}, {'TO_CHAR(CHEMICAL_NAME)': '异丁烯'}, {'TO_CHAR(CHEMICAL_NAME)': '乙炔'}, {'TO_CHAR(CHEMICAL_NAME)': '1-丁烯'}, {'TO_CHAR(CHEMICAL_NAME)': '甲基叔丁基醚'}, {'TO_CHAR(CHEMICAL_NAME)': '混合气中的氢气。'}, {'TO_CHAR(CHEMICAL_NAME)': '顺-2-丁烯'}, {'TO_CHAR(CHEMICAL_NAME)': '丙烷'}, {'TO_CHAR(CHEMICAL_NAME)': '丙烯'}, {'TO_CHAR(CHEMICAL_NAME)': '一氧化碳'}, {'TO_CHAR(CHEMICAL_NAME)': '异丁烷'}, {'TO_CHAR(CHEMICAL_NAME)': '二氧化硫'}, {'TO_CHAR(CHEMICAL_NAME)': '1，3丁二烯'}], '筛选出的表': ['v_ai_ipark_hm_chemical_detail', 'v_ai_ipark_close_alarm_handle_rate', 'v_ai_ipark_dp_evaluation']}
+2026-01-27 15:30:01 - func_intent_service - INFO - SQL Result 键: ['数据库查询', '数据库查询结果', '筛选出的表']
+2026-01-27 15:30:01 - func_intent_service - INFO - ======================================
+2026-01-27 15:32:09 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769498933571, query='有氢气的是哪些公司？...'
+2026-01-27 15:32:09 - func_intent_service - INFO - 意图判断完成: type=2, database=岱山-数据库问题, similarity=0.4479
+2026-01-27 15:32:09 - func_intent_service - INFO - Type 2 处理器: 数据库查询, query='有氢气的是哪些公司？...', user_id=test_user_1769498933571
+2026-01-27 15:32:09 - func_intent_service - INFO - 调用 DaiShanSQL, questions: ['企业名称包含‘化工’字样的公司，其工艺连续性是怎样的？', '企业名称包含“化工”的公司，其工艺装置编码是什么？', '企业名称包含“能源”的公司，他们的员工持证情况如何？']... (共5个)
+2026-01-27 15:32:11 - func_intent_service - INFO - DaiShanSQL 查询完成
+2026-01-27 15:32:11 - func_intent_service - INFO - ========== SQL Result Debug ==========
+2026-01-27 15:32:11 - func_intent_service - INFO - SQL Result 类型: <class 'dict'>
+2026-01-27 15:32:11 - func_intent_service - INFO - SQL Result 内容: {'数据库查询': "SELECT TO_CHAR(enterprise_name) FROM v_ai_ipark_safety_people_qlf WHERE TO_CHAR(qualification_type) = '加氢工艺作业';", '数据库查询结果': [{'TO_CHAR(ENTERPRISE_NAME)': '浙江岱山经开新材料科技发展有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江岱山经开新材料科技发展有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}], '筛选出的表': ['v_ai_ipark_safety_people_qlf', 'v_ai_ipark_hm_defend_statistics_company', 'v_ai_ipark_hm_craft']}
+2026-01-27 15:32:11 - func_intent_service - INFO - SQL Result 键: ['数据库查询', '数据库查询结果', '筛选出的表']
+2026-01-27 15:32:11 - func_intent_service - INFO - ======================================
+2026-01-27 15:33:52 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769498933571, query='存储有氢气这种危化品的企业有哪些？...'
+2026-01-27 15:33:53 - func_intent_service - INFO - 意图判断完成: type=2, database=岱山-数据库问题, similarity=0.6423
+2026-01-27 15:33:53 - func_intent_service - INFO - Type 2 处理器: 数据库查询, query='存储有氢气这种危化品的企业有哪些？...', user_id=test_user_1769498933571
+2026-01-27 15:33:53 - func_intent_service - INFO - 调用 DaiShanSQL, questions: ['哪些企业的隐患描述里提到了危化品存储不规范？', '危化品中文名为氢氧化钠的，它在哪些企业有登记？', '哪家企业在使用“苯”这种危化品？']... (共5个)
+2026-01-27 15:33:54 - func_intent_service - INFO - DaiShanSQL 查询完成
+2026-01-27 15:33:54 - func_intent_service - INFO - ========== SQL Result Debug ==========
+2026-01-27 15:33:54 - func_intent_service - INFO - SQL Result 类型: <class 'dict'>
+2026-01-27 15:33:54 - func_intent_service - INFO - SQL Result 内容: {'数据库查询': "SELECT DISTINCT TO_CHAR(enterprise_name) FROM v_ai_ipark_hm_chemical_detail WHERE TO_CHAR(chemical_name) = '氢气'", '数据库查询结果': [{'TO_CHAR(ENTERPRISE_NAME)': '润和催化材料（浙江）有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '岱山糖能新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江舟山市智德工业气体有限公司'}], '筛选出的表': ['v_ai_ipark_hm_chemical_detail', 'v_ai_ipark_hm_hidden_danger']}
+2026-01-27 15:33:54 - func_intent_service - INFO - SQL Result 键: ['数据库查询', '数据库查询结果', '筛选出的表']
+2026-01-27 15:33:54 - func_intent_service - INFO - ======================================
+2026-01-27 15:34:44 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769498933571, query='存储有氢气的企业有哪些？...'
+2026-01-27 15:34:45 - func_intent_service - INFO - 意图判断完成: type=2, database=岱山-数据库问题, similarity=0.5533
+2026-01-27 15:34:45 - func_intent_service - INFO - Type 2 处理器: 数据库查询, query='存储有氢气的企业有哪些？...', user_id=test_user_1769498933571
+2026-01-27 15:34:45 - func_intent_service - INFO - 调用 DaiShanSQL, questions: ['某园区内有哪些企业存储了有毒类化学品？', '哪些企业的隐患描述里提到了危化品存储不规范？', '哪些企业储存了固态状态的危险化学品？']... (共5个)
+2026-01-27 15:34:46 - func_intent_service - INFO - DaiShanSQL 查询完成
+2026-01-27 15:34:46 - func_intent_service - INFO - ========== SQL Result Debug ==========
+2026-01-27 15:34:46 - func_intent_service - INFO - SQL Result 类型: <class 'dict'>
+2026-01-27 15:34:46 - func_intent_service - INFO - SQL Result 内容: {'数据库查询': "SELECT DISTINCT TO_CHAR(enterprise_name) FROM v_ai_ipark_hm_chemical_detail WHERE TO_CHAR(chemical_name) = '氢气'", '数据库查询结果': [{'TO_CHAR(ENTERPRISE_NAME)': '润和催化材料（浙江）有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '岱山糖能新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江舟山市智德工业气体有限公司'}], '筛选出的表': ['v_ai_ipark_hm_chemical_detail', 'v_ai_ipark_hm_hidden_danger', 'v_ai_ipark_hm_chemical', 'v_ai_ipark_hm_craft']}
+2026-01-27 15:34:46 - func_intent_service - INFO - SQL Result 键: ['数据库查询', '数据库查询结果', '筛选出的表']
+2026-01-27 15:34:46 - func_intent_service - INFO - ======================================
+2026-01-27 15:35:05 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769498933571, query='有限空间作业有哪些要求？...'
+2026-01-27 15:35:06 - func_intent_service - INFO - 意图判断完成: type=2, database=岱山-数据库问题, similarity=0.7111
+2026-01-27 15:35:06 - func_intent_service - INFO - Type 2 处理器: 数据库查询, query='有限空间作业有哪些要求？...', user_id=test_user_1769498933571
+2026-01-27 15:35:06 - func_intent_service - INFO - 调用 DaiShanSQL, questions: ['作业类型名称是“有限空间作业”的详细安排能看一下吗？', '隐患名称为‘有限空间作业违规’的治理期限是什么时候？', '今天有没有安排受限空间作业？具体数量是多少？']... (共5个)
+2026-01-27 15:35:07 - func_intent_service - INFO - DaiShanSQL 查询完成
+2026-01-27 15:35:07 - func_intent_service - INFO - ========== SQL Result Debug ==========
+2026-01-27 15:35:07 - func_intent_service - INFO - SQL Result 类型: <class 'dict'>
+2026-01-27 15:35:07 - func_intent_service - INFO - SQL Result 内容: {'数据库查询': "SELECT TO_CHAR(confined_space_work_count) AS 受限空间作业数量 FROM v_ai_ipark_job_special_job_key_today WHERE TO_CHAR(query_date) = '2026-01-27';", '数据库查询结果': [], '筛选出的表': ['v_ai_ipark_hm_company_promise_today', 'v_ai_ipark_dp_supervision_count', 'v_ai_ipark_job_risk_analysis', 'v_ai_ipark_job_special_job_key_today', 'v_ai_ipark_job_today_detail']}
+2026-01-27 15:35:07 - func_intent_service - INFO - SQL Result 键: ['数据库查询', '数据库查询结果', '筛选出的表']
+2026-01-27 15:35:07 - func_intent_service - INFO - ======================================
+2026-01-27 15:35:50 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769498933571, query='介绍园区...'
+2026-01-27 15:35:51 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.7611
+2026-01-27 15:35:51 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-27 15:35:51 - func_intent_service - INFO - 检测到知识库标记: 园区知识库
+2026-01-27 15:36:23 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769498933571, query='介绍一下润和催化材料（浙江）有限公司...'
+2026-01-27 15:36:23 - func_intent_service - INFO - 意图判断完成: type=2, database=岱山-数据库问题, similarity=0.5095
+2026-01-27 15:36:23 - func_intent_service - INFO - Type 2 处理器: 数据库查询, query='介绍一下润和催化材料（浙江）有限公司...', user_id=test_user_1769498933571
+2026-01-27 15:36:23 - func_intent_service - INFO - 调用 DaiShanSQL, questions: ['查一下浙江华泰化工有限公司的重大危险源名称是什么？', '我想查一下浙江某科技有限公司的AI报警情况。', '能查一下浙江华泰化工有限公司的化学品产能吗？']... (共5个)
+2026-01-27 15:36:47 - func_intent_service - INFO - DaiShanSQL 查询完成
+2026-01-27 15:36:47 - func_intent_service - INFO - ========== SQL Result Debug ==========
+2026-01-27 15:36:47 - func_intent_service - INFO - SQL Result 类型: <class 'dict'>
+2026-01-27 15:36:47 - func_intent_service - INFO - SQL Result 内容: {'数据库查询': "SELECT TO_CHAR(enterprise_name) AS 企业名称 FROM v_ai_ipark_hm_hazard_info_detail WHERE TO_CHAR(enterprise_name) = '润和催化材料（浙江）有限公司';", '数据库查询结果': [], '筛选出的表': ['v_ai_ipark_hm_chemical', 'v_ai_ipark_alarm_ai_ledger', 'v_ai_ipark_hm_hazard_info_detail']}
+2026-01-27 15:36:47 - func_intent_service - INFO - SQL Result 键: ['数据库查询', '数据库查询结果', '筛选出的表']
+2026-01-27 15:36:47 - func_intent_service - INFO - ======================================
+2026-01-27 15:49:05 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769498933571, query='介绍园区整体企业信息...'
+2026-01-27 15:49:06 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.8048
+2026-01-27 15:49:06 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-27 15:49:06 - func_intent_service - INFO - 检测到知识库标记: 企业知识库
+2026-01-27 15:51:56 - func_intent_service - INFO - 处理用户查询, user_id=anonymous, query='介绍园区整体企业信息...'
+2026-01-27 15:51:57 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.8048
+2026-01-27 15:51:57 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-27 15:51:57 - func_intent_service - INFO - 检测到知识库标记: 企业知识库
+2026-01-27 15:52:27 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769498933571, query='介绍园区整体企业信息...'
+2026-01-27 15:52:28 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.8048
+2026-01-27 15:52:28 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-27 15:52:28 - func_intent_service - INFO - 检测到知识库标记: 企业知识库
+2026-01-27 15:53:50 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769498933571, query='2025年8月园区增加值和出口总额是多少？...'
+2026-01-27 15:53:51 - func_intent_service - INFO - 意图判断完成: type=2, database=岱山-数据库问题, similarity=0.6312
+2026-01-27 15:53:51 - func_intent_service - INFO - Type 2 处理器: 数据库查询, query='2025年8月园区增加值和出口总额是多少？...', user_id=test_user_1769498933571
+2026-01-27 15:53:51 - func_intent_service - INFO - 调用 DaiShanSQL, questions: ['园区现在的总产值、增加值和出口总额分别是多少？', '上个月园区出口总额是多少？', '园区出口总额在最近一个报告月达到了多少万元？']... (共5个)
+2026-01-27 15:53:52 - func_intent_service - INFO - DaiShanSQL 查询完成
+2026-01-27 15:53:52 - func_intent_service - INFO - ========== SQL Result Debug ==========
+2026-01-27 15:53:52 - func_intent_service - INFO - SQL Result 类型: <class 'dict'>
+2026-01-27 15:53:52 - func_intent_service - INFO - SQL Result 内容: {'数据库查询': "SELECT TO_CHAR(park_added_value) AS 园区增加值, TO_CHAR(park_export_value) AS 园区出口总额 FROM v_ai_ipark_economic_operation WHERE TO_CHAR(report_month) = '2025-08';", '数据库查询结果': [{'园区增加值': '555', '园区出口总额': '555'}, {'园区增加值': '0', '园区出口总额': '0'}], '筛选出的表': ['v_ai_ipark_economic_operation']}
+2026-01-27 15:53:52 - func_intent_service - INFO - SQL Result 键: ['数据库查询', '数据库查询结果', '筛选出的表']
+2026-01-27 15:53:52 - func_intent_service - INFO - ======================================
+2026-01-27 15:54:24 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769498933571, query='那9月份呢？...'
+2026-01-27 15:54:25 - func_intent_service - INFO - 意图判断完成: type=2, database=岱山-数据库问题, similarity=0.4980
+2026-01-27 15:54:25 - func_intent_service - INFO - Type 2 处理器: 数据库查询, query='那9月份呢？...', user_id=test_user_1769498933571
+2026-01-27 15:54:25 - func_intent_service - INFO - 调用 DaiShanSQL, questions: ['园区每亩地产值最高的月份是哪个月？', '有没有哪个月份某个企业的利润是负的？', '各月份中，哪个月的总利润最高？']... (共5个)
+2026-01-27 15:54:27 - func_intent_service - INFO - DaiShanSQL 查询完成
+2026-01-27 15:54:27 - func_intent_service - INFO - ========== SQL Result Debug ==========
+2026-01-27 15:54:27 - func_intent_service - INFO - SQL Result 类型: <class 'dict'>
+2026-01-27 15:54:27 - func_intent_service - INFO - SQL Result 内容: {'数据库查询': "SELECT TO_CHAR(park_output_value) AS park_output_value, TO_CHAR(report_month) AS report_month, TO_CHAR(park_added_value) AS park_added_value, TO_CHAR(park_export_value) AS park_export_value, TO_CHAR(output_per_mu) AS output_per_mu, TO_CHAR(tax_per_mu) AS tax_per_mu, TO_CHAR(scale_ind_output) AS scale_ind_output, TO_CHAR(employment_count) AS employment_count, TO_CHAR(enterprise_count) AS enterprise_count FROM v_ai_ipark_economic_operation WHERE TO_CHAR(report_month) LIKE '2025-09%';", '数据库查询结果': [{'REPORT_MONTH': '2025-09', 'OUTPUT_PER_MU': '666666', 'EMPLOYMENT_COUNT': '123', 'PARK_ADDED_VALUE': '888888', 'PARK_EXPORT_VALUE': '777777', 'TAX_PER_MU': '555555', 'SCALE_IND_OUTPUT': '444444', 'PARK_OUTPUT_VALUE': '999999', 'ENTERPRISE_COUNT': '10'}, {'REPORT_MONTH': '2025-09', 'OUTPUT_PER_MU': '0', 'EMPLOYMENT_COUNT': '300', 'PARK_ADDED_VALUE': '0', 'PARK_EXPORT_VALUE': '0', 'TAX_PER_MU': '0', 'SCALE_IND_OUTPUT': '184776', 'PARK_OUTPUT_VALUE': '184776', 'ENTERPRISE_COUNT': '59'}], '筛选出的表': ['v_ai_ipark_economic_operation', 'v_ai_ipark_ia_enterprise_output_value']}
+2026-01-27 15:54:27 - func_intent_service - INFO - SQL Result 键: ['数据库查询', '数据库查询结果', '筛选出的表']
+2026-01-27 15:54:27 - func_intent_service - INFO - ======================================
+2026-01-27 15:55:43 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769498933571, query='经开区污水处理中心在哪里？...'
+2026-01-27 15:55:44 - func_intent_service - INFO - 意图判断完成: type=2, database=岱山-数据库问题, similarity=0.4578
+2026-01-27 15:55:44 - func_intent_service - INFO - Type 2 处理器: 数据库查询, query='经开区污水处理中心在哪里？...', user_id=test_user_1769498933571
+2026-01-27 15:55:44 - func_intent_service - INFO - 调用 DaiShanSQL, questions: ['岱山经开区污水处理设备当前运行状态如何？', '岱山经开区里销警处理最及时的企业是哪家？', '岱山经开区近7天的隐患临期提醒有没有处理完？']... (共5个)
+2026-01-27 15:55:45 - func_intent_service - INFO - DaiShanSQL 查询完成
+2026-01-27 15:55:45 - func_intent_service - INFO - ========== SQL Result Debug ==========
+2026-01-27 15:55:45 - func_intent_service - INFO - SQL Result 类型: <class 'dict'>
+2026-01-27 15:55:45 - func_intent_service - INFO - SQL Result 内容: {'数据库查询': "SELECT TO_CHAR(equipment_location) FROM v_ai_ipark_pue_equipment WHERE TO_CHAR(equipment_name) = '经开区内污水处理中心';", '数据库查询结果': [], '筛选出的表': ['v_ai_ipark_pue_equipment', 'v_ai_ipark_ipark_dp_supervision', 'v_ai_ipark_close_alarm_handle_rate']}
+2026-01-27 15:55:45 - func_intent_service - INFO - SQL Result 键: ['数据库查询', '数据库查询结果', '筛选出的表']
+2026-01-27 15:55:45 - func_intent_service - INFO - ======================================
+2026-01-27 15:57:05 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769498933571, query='经开区的污水处理中心在哪里？...'
+2026-01-27 15:57:06 - func_intent_service - INFO - 意图判断完成: type=2, database=岱山-数据库问题, similarity=0.4568
+2026-01-27 15:57:06 - func_intent_service - INFO - Type 2 处理器: 数据库查询, query='经开区的污水处理中心在哪里？...', user_id=test_user_1769498933571
+2026-01-27 15:57:06 - func_intent_service - INFO - 调用 DaiShanSQL, questions: ['岱山经开区污水处理设备当前运行状态如何？', '岱山经开区里销警处理最及时的企业是哪家？', '岱山经开区近7天的隐患临期提醒有没有处理完？']... (共5个)
+2026-01-27 15:57:07 - func_intent_service - INFO - DaiShanSQL 查询完成
+2026-01-27 15:57:07 - func_intent_service - INFO - ========== SQL Result Debug ==========
+2026-01-27 15:57:07 - func_intent_service - INFO - SQL Result 类型: <class 'dict'>
+2026-01-27 15:57:07 - func_intent_service - INFO - SQL Result 内容: {'数据库查询': "SELECT TO_CHAR(equipment_location) FROM v_ai_ipark_pue_equipment WHERE TO_CHAR(park_name) = '岱山经济开发区' AND TO_CHAR(equipment_name) = '污水处理厂';", '数据库查询结果': [], '筛选出的表': ['v_ai_ipark_pue_equipment', 'v_ai_ipark_ipark_dp_supervision', 'v_ai_ipark_close_alarm_handle_rate']}
+2026-01-27 15:57:07 - func_intent_service - INFO - SQL Result 键: ['数据库查询', '数据库查询结果', '筛选出的表']
+2026-01-27 15:57:07 - func_intent_service - INFO - ======================================
+2026-01-27 16:00:12 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769498933571, query='消防取水码头在哪里？...'
+2026-01-27 16:00:13 - func_intent_service - INFO - 意图判断完成: type=0, database=岱山-数据库问题, similarity=0.3998
+2026-01-27 16:00:13 - func_intent_service - INFO - Type 2 处理器: 数据库查询, query='消防取水码头在哪里？...', user_id=test_user_1769498933571
+2026-01-27 16:00:13 - func_intent_service - INFO - 调用 DaiShanSQL, questions: ['任务名称包含“消防”的整改任务详情能查一下吗？', 'org_name 包含“消防”的单位类型有哪些？', '检查内容里提到消防问题的隐患描述有哪些？']... (共5个)
+2026-01-27 16:00:14 - func_intent_service - INFO - DaiShanSQL 查询完成
+2026-01-27 16:00:14 - func_intent_service - INFO - ========== SQL Result Debug ==========
+2026-01-27 16:00:14 - func_intent_service - INFO - SQL Result 类型: <class 'dict'>
+2026-01-27 16:00:14 - func_intent_service - INFO - SQL Result 内容: {'数据库查询': "SELECT TO_CHAR(unit_address) FROM v_ai_ipark_safety_unit_base_info WHERE TO_CHAR(org_name) = '消防取水码头'", '数据库查询结果': [], '筛选出的表': ['v_ai_ipark_ra_risk_deduction_records_mon', 'v_ai_ipark_hm_hidden_danger', 'v_ai_ipark_safety_unit_base_info', 'v_ai_ipark_dp_supervision_count']}
+2026-01-27 16:00:14 - func_intent_service - INFO - SQL Result 键: ['数据库查询', '数据库查询结果', '筛选出的表']
+2026-01-27 16:00:14 - func_intent_service - INFO - ======================================
+2026-01-27 16:04:19 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769498933571, query='润和催化材料（浙江）有限公司有哪些工艺？...'
+2026-01-27 16:04:22 - func_intent_service - INFO - 意图判断完成: type=2, database=岱山-数据库问题, similarity=0.4251
+2026-01-27 16:04:22 - func_intent_service - INFO - Type 2 处理器: 数据库查询, query='润和催化材料（浙江）有限公司有哪些工艺？...', user_id=test_user_1769498933571
+2026-01-27 16:04:22 - func_intent_service - INFO - 调用 DaiShanSQL, questions: ['浙江海港化工有限公司的温度监测指标最近有离线记录吗？', '查一下浙江华泰化工有限公司的重大危险源名称是什么？', '能查一下浙江华泰化工有限公司的化学品产能吗？']... (共5个)
+2026-01-27 16:04:29 - func_intent_service - INFO - DaiShanSQL 查询完成
+2026-01-27 16:04:29 - func_intent_service - INFO - ========== SQL Result Debug ==========
+2026-01-27 16:04:29 - func_intent_service - INFO - SQL Result 类型: <class 'dict'>
+2026-01-27 16:04:29 - func_intent_service - INFO - SQL Result 内容: {'数据库查询': 'SELECT "chemical_name" FROM "v_ai_ipark_hm_chemical" WHERE "enterprise_name" = \'润和催化材料（浙江）有限公司\'', '数据库查询结果': None, '筛选出的表': ['v_ai_ipark_hm_chemical', 'v_ai_ipark_dp_evaluation', 'v_ai_ipark_hm_hazard_info_detail', 'v_ai_ipark_alarm_ai_ledger', 'v_ai_ipark_hm_monitor_metric']}
+2026-01-27 16:04:29 - func_intent_service - INFO - SQL Result 键: ['数据库查询', '数据库查询结果', '筛选出的表']
+2026-01-27 16:04:29 - func_intent_service - INFO - ======================================
+2026-01-27 16:05:19 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769498933571, query='润和催化材料（浙江）有限公司有哪些危化品工艺？...'
+2026-01-27 16:05:20 - func_intent_service - INFO - 意图判断完成: type=2, database=岱山-数据库问题, similarity=0.4388
+2026-01-27 16:05:20 - func_intent_service - INFO - Type 2 处理器: 数据库查询, query='润和催化材料（浙江）有限公司有哪些危化品工艺？...', user_id=test_user_1769498933571
+2026-01-27 16:05:20 - func_intent_service - INFO - 调用 DaiShanSQL, questions: ['查一下浙江华泰化工有限公司的重大危险源名称是什么？', '给我看看浙江华峰化工有限公司的重大危险源包保排查任务详情。', '能查一下浙江华泰化工有限公司的化学品产能吗？']... (共5个)
+2026-01-27 16:05:21 - func_intent_service - INFO - DaiShanSQL 查询完成
+2026-01-27 16:05:21 - func_intent_service - INFO - ========== SQL Result Debug ==========
+2026-01-27 16:05:21 - func_intent_service - INFO - SQL Result 类型: <class 'dict'>
+2026-01-27 16:05:21 - func_intent_service - INFO - SQL Result 内容: {'数据库查询': "SELECT TO_CHAR(hazard_name) FROM v_ai_ipark_hm_hazard_info_detail WHERE TO_CHAR(enterprise_name) = '润和催化材料（浙江）有限公司'", '数据库查询结果': [], '筛选出的表': ['v_ai_ipark_hm_chemical', 'v_ai_ipark_dp_evaluation', 'v_ai_ipark_hm_hazard_info_detail', 'v_ai_ipark_hm_defend_statistics_company', 'v_ai_ipark_hm_monitor_metric']}
+2026-01-27 16:05:21 - func_intent_service - INFO - SQL Result 键: ['数据库查询', '数据库查询结果', '筛选出的表']
+2026-01-27 16:05:21 - func_intent_service - INFO - ======================================
+2026-01-27 16:06:05 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769498933571, query='润和催化有哪些危化品工艺...'
+2026-01-27 16:06:06 - func_intent_service - INFO - 意图判断完成: type=2, database=岱山-数据库问题, similarity=0.5819
+2026-01-27 16:06:06 - func_intent_service - INFO - Type 2 处理器: 数据库查询, query='润和催化有哪些危化品工艺...', user_id=test_user_1769498933571
+2026-01-27 16:06:06 - func_intent_service - INFO - 调用 DaiShanSQL, questions: ['重点监管危化工艺和重点监管危化品都涉及的企业有哪些？', '哪些企业采用了重点监管的危化工艺？', '园区里有哪些企业的典型工艺属于重点监管的危化工艺？']... (共5个)
+2026-01-27 16:06:07 - func_intent_service - INFO - DaiShanSQL 查询完成
+2026-01-27 16:06:07 - func_intent_service - INFO - ========== SQL Result Debug ==========
+2026-01-27 16:06:07 - func_intent_service - INFO - SQL Result 类型: <class 'dict'>
+2026-01-27 16:06:07 - func_intent_service - INFO - SQL Result 内容: {'数据库查询': "SELECT TO_CHAR(crafts_type) FROM v_ai_ipark_hm_craft WHERE TO_CHAR(enterprise_name) = '润和催化材料（浙江）有限公司'", '数据库查询结果': [], '筛选出的表': ['v_ai_ipark_safety_enterprise_info', 'v_ai_ipark_hm_craft']}
+2026-01-27 16:06:07 - func_intent_service - INFO - SQL Result 键: ['数据库查询', '数据库查询结果', '筛选出的表']
+2026-01-27 16:06:07 - func_intent_service - INFO - ======================================
+2026-01-27 16:09:10 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769498933571, query='润合催化有哪些危化品工艺...'
+2026-01-27 16:09:11 - func_intent_service - INFO - 意图判断完成: type=2, database=岱山-数据库问题, similarity=0.5745
+2026-01-27 16:09:11 - func_intent_service - INFO - Type 2 处理器: 数据库查询, query='润合催化有哪些危化品工艺...', user_id=test_user_1769498933571
+2026-01-27 16:09:11 - func_intent_service - INFO - 调用 DaiShanSQL, questions: ['重点监管危化工艺和重点监管危化品都涉及的企业有哪些？', '哪些企业采用了重点监管的危化工艺？', '园区里有哪些企业的典型工艺属于重点监管的危化工艺？']... (共5个)
+2026-01-27 16:09:31 - func_intent_service - INFO - DaiShanSQL 查询完成
+2026-01-27 16:09:31 - func_intent_service - INFO - ========== SQL Result Debug ==========
+2026-01-27 16:09:31 - func_intent_service - INFO - SQL Result 类型: <class 'dict'>
+2026-01-27 16:09:31 - func_intent_service - INFO - SQL Result 内容: {'数据库查询': 'SELECT TO_CHAR(enterprise_name) FROM v_ai_ipark_hm_craft WHERE TO_CHAR(crafts_type) IS NOT NULL;', '数据库查询结果': [{'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}], '筛选出的表': ['v_ai_ipark_safety_enterprise_info', 'v_ai_ipark_hm_craft']}
+2026-01-27 16:09:31 - func_intent_service - INFO - SQL Result 键: ['数据库查询', '数据库查询结果', '筛选出的表']
+2026-01-27 16:09:31 - func_intent_service - INFO - ======================================
+2026-01-27 17:36:35 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769498933571, query='介绍润和催化有限公司...'
+2026-01-27 17:36:36 - func_intent_service - INFO - 意图判断完成: type=2, database=岱山-数据库问题, similarity=0.4325
+2026-01-27 17:36:36 - func_intent_service - INFO - Type 2 处理器: 数据库查询, query='介绍润和催化有限公司...', user_id=test_user_1769498933571
+2026-01-27 17:36:36 - func_intent_service - INFO - 调用 DaiShanSQL, questions: ['公司名称为“舟山海洋化工有限公司”的企业在第18周的运行效果得分是多少？', '按公司名称查询，XX化工有限公司最近一周的隐患整改完成率是多少？', '公司名称是“XX科技有限公司”的企业在2023年各周的隐患整改完成率变化趋势如何？']... (共5个)
+2026-01-27 17:36:37 - func_intent_service - INFO - DaiShanSQL 查询完成
+2026-01-27 17:36:37 - func_intent_service - INFO - ========== SQL Result Debug ==========
+2026-01-27 17:36:37 - func_intent_service - INFO - SQL Result 类型: <class 'dict'>
+2026-01-27 17:36:37 - func_intent_service - INFO - SQL Result 内容: {'数据库查询': "SELECT TO_CHAR(companyName) AS 企业名称 FROM v_ai_ipark_ra_risk_records_company WHERE TO_CHAR(companyName) = '润和催化材料（浙江）有限公司';", '数据库查询结果': [{'企业名称': '润和催化材料（浙江）有限公司'}, {'企业名称': '润和催化材料（浙江）有限公司'}, {'企业名称': '润和催化材料（浙江）有限公司'}, {'企业名称': '润和催化材料（浙江）有限公司'}, {'企业名称': '润和催化材料（浙江）有限公司'}], '筛选出的表': ['v_ai_ipark_alarm_monitor', 'v_ai_ipark_dp_evaluation', 'v_ai_ipark_ra_risk_records_company']}
+2026-01-27 17:36:37 - func_intent_service - INFO - SQL Result 键: ['数据库查询', '数据库查询结果', '筛选出的表']
+2026-01-27 17:36:37 - func_intent_service - INFO - ======================================
+2026-01-27 17:47:09 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769498933571, query='介绍润和催化有限公司...'
+2026-01-27 17:47:10 - func_intent_service - INFO - 意图判断完成: type=2, database=岱山-数据库问题, similarity=0.4325
+2026-01-27 17:47:10 - func_intent_service - INFO - Type 2 处理器: 数据库查询, query='介绍润和催化有限公司...', user_id=test_user_1769498933571
+2026-01-27 17:47:10 - func_intent_service - INFO - 调用 DaiShanSQL, questions: ['公司名称为“舟山海洋化工有限公司”的企业在第18周的运行效果得分是多少？', '按公司名称查询，XX化工有限公司最近一周的隐患整改完成率是多少？', '公司名称是“XX科技有限公司”的企业在2023年各周的隐患整改完成率变化趋势如何？']... (共5个)
+2026-01-27 17:47:11 - func_intent_service - INFO - DaiShanSQL 查询完成
+2026-01-27 17:47:11 - func_intent_service - INFO - ========== SQL Result Debug ==========
+2026-01-27 17:47:11 - func_intent_service - INFO - SQL Result 类型: <class 'dict'>
+2026-01-27 17:47:11 - func_intent_service - INFO - SQL Result 内容: {'数据库查询': "SELECT TO_CHAR(companyName) FROM v_ai_ipark_ra_risk_records_company WHERE TO_CHAR(companyName) = '润和催化材料（浙江）有限公司';", '数据库查询结果': [{'TO_CHAR(COMPANYNAME)': '润和催化材料（浙江）有限公司'}, {'TO_CHAR(COMPANYNAME)': '润和催化材料（浙江）有限公司'}, {'TO_CHAR(COMPANYNAME)': '润和催化材料（浙江）有限公司'}, {'TO_CHAR(COMPANYNAME)': '润和催化材料（浙江）有限公司'}, {'TO_CHAR(COMPANYNAME)': '润和催化材料（浙江）有限公司'}], '筛选出的表': ['v_ai_ipark_ra_risk_records_company', 'v_ai_ipark_dp_evaluation', 'v_ai_ipark_alarm_monitor']}
+2026-01-27 17:47:11 - func_intent_service - INFO - SQL Result 键: ['数据库查询', '数据库查询结果', '筛选出的表']
+2026-01-27 17:47:11 - func_intent_service - INFO - ======================================
+2026-01-27 17:49:14 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769498933571, query='介绍润和催化有限公司...'
+2026-01-27 17:49:14 - func_intent_service - INFO - 意图判断完成: type=2, database=岱山-数据库问题, similarity=0.4325
+2026-01-27 17:49:14 - func_intent_service - INFO - Type 2 处理器: 数据库查询, query='介绍润和催化有限公司...', user_id=test_user_1769498933571
+2026-01-27 17:49:14 - func_intent_service - INFO - 调用 DaiShanSQL, questions: ['公司名称为“舟山海洋化工有限公司”的企业在第18周的运行效果得分是多少？', '按公司名称查询，XX化工有限公司最近一周的隐患整改完成率是多少？', '公司名称是“XX科技有限公司”的企业在2023年各周的隐患整改完成率变化趋势如何？']... (共5个)
+2026-01-27 17:49:15 - func_intent_service - INFO - DaiShanSQL 查询完成
+2026-01-27 17:49:15 - func_intent_service - INFO - ========== SQL Result Debug ==========
+2026-01-27 17:49:15 - func_intent_service - INFO - SQL Result 类型: <class 'dict'>
+2026-01-27 17:49:15 - func_intent_service - INFO - SQL Result 内容: {'数据库查询': "SELECT TO_CHAR(companyName) AS 企业名称 FROM v_ai_ipark_ra_risk_records_company WHERE TO_CHAR(companyName) = '润和催化材料（浙江）有限公司';", '数据库查询结果': [{'企业名称': '润和催化材料（浙江）有限公司'}, {'企业名称': '润和催化材料（浙江）有限公司'}, {'企业名称': '润和催化材料（浙江）有限公司'}, {'企业名称': '润和催化材料（浙江）有限公司'}, {'企业名称': '润和催化材料（浙江）有限公司'}], '筛选出的表': ['v_ai_ipark_alarm_monitor', 'v_ai_ipark_dp_evaluation', 'v_ai_ipark_ra_risk_records_company']}
+2026-01-27 17:49:15 - func_intent_service - INFO - SQL Result 键: ['数据库查询', '数据库查询结果', '筛选出的表']
+2026-01-27 17:49:15 - func_intent_service - INFO - ======================================
+2026-01-27 17:55:15 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769498933571, query='介绍润和催化有限公司...'
+2026-01-27 17:55:15 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.5575
+2026-01-27 17:55:15 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-27 17:55:15 - func_intent_service - INFO - 检测到知识库标记: 企业知识库
+2026-01-27 17:56:28 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769498933571, query='介绍润和催化有限公司...'
+2026-01-27 17:56:29 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.5575
+2026-01-27 17:56:29 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-27 17:56:29 - func_intent_service - INFO - 检测到知识库标记: 企业知识库
+2026-01-27 17:56:53 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769498933571, query='润合催化有哪些危化品工艺...'
+2026-01-27 17:56:54 - func_intent_service - INFO - 意图判断完成: type=2, database=岱山-数据库问题, similarity=0.5745
+2026-01-27 17:56:54 - func_intent_service - INFO - Type 2 处理器: 数据库查询, query='润合催化有哪些危化品工艺...', user_id=test_user_1769498933571
+2026-01-27 17:56:54 - func_intent_service - INFO - 调用 DaiShanSQL, questions: ['重点监管危化工艺和重点监管危化品都涉及的企业有哪些？', '哪些企业采用了重点监管的危化工艺？', '园区里有哪些企业的典型工艺属于重点监管的危化工艺？']... (共5个)
+2026-01-27 17:56:56 - func_intent_service - INFO - DaiShanSQL 查询完成
+2026-01-27 17:56:56 - func_intent_service - INFO - ========== SQL Result Debug ==========
+2026-01-27 17:56:56 - func_intent_service - INFO - SQL Result 类型: <class 'dict'>
+2026-01-27 17:56:56 - func_intent_service - INFO - SQL Result 内容: {'数据库查询': 'SELECT TO_CHAR(enterprise_name) FROM v_ai_ipark_hm_craft WHERE TO_CHAR(crafts_type) IS NOT NULL;', '数据库查询结果': [{'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}], '筛选出的表': ['v_ai_ipark_safety_enterprise_info', 'v_ai_ipark_hm_craft']}
+2026-01-27 17:56:56 - func_intent_service - INFO - SQL Result 键: ['数据库查询', '数据库查询结果', '筛选出的表']
+2026-01-27 17:56:56 - func_intent_service - INFO - ======================================
+2026-01-27 17:57:43 - func_intent_service - INFO - 处理用户查询, user_id=anonymous, query='介绍润和催化有限公司...'
+2026-01-27 17:57:44 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.5575
+2026-01-27 17:57:44 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-27 17:57:44 - func_intent_service - INFO - 检测到知识库标记: 企业知识库
+2026-01-27 17:58:42 - func_intent_service - INFO - 处理用户查询, user_id=anonymous, query='介绍园区整体企业信息...'
+2026-01-27 17:58:43 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.8047
+2026-01-27 17:58:43 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-27 17:58:43 - func_intent_service - INFO - 检测到知识库标记: 企业知识库
+2026-01-27 17:59:40 - func_intent_service - INFO - 处理用户查询, user_id=anonymous, query='润合催化有哪些危化品工艺...'
+2026-01-27 17:59:41 - func_intent_service - INFO - 意图判断完成: type=2, database=岱山-数据库问题, similarity=0.5745
+2026-01-27 17:59:41 - func_intent_service - INFO - Type 2 处理器: 数据库查询, query='润合催化有哪些危化品工艺...', user_id=anonymous
+2026-01-27 17:59:41 - func_intent_service - INFO - 调用 DaiShanSQL, questions: ['重点监管危化工艺和重点监管危化品都涉及的企业有哪些？', '哪些企业采用了重点监管的危化工艺？', '园区里有哪些企业的典型工艺属于重点监管的危化工艺？']... (共5个)
+2026-01-27 17:59:43 - func_intent_service - INFO - DaiShanSQL 查询完成
+2026-01-27 17:59:43 - func_intent_service - INFO - ========== SQL Result Debug ==========
+2026-01-27 17:59:43 - func_intent_service - INFO - SQL Result 类型: <class 'dict'>
+2026-01-27 17:59:43 - func_intent_service - INFO - SQL Result 内容: {'数据库查询': 'SELECT TO_CHAR(enterprise_name) FROM v_ai_ipark_hm_craft WHERE TO_CHAR(crafts_type) IS NOT NULL;', '数据库查询结果': [{'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}, {'TO_CHAR(ENTERPRISE_NAME)': '浙江世倍尔新材料有限公司'}], '筛选出的表': ['v_ai_ipark_safety_enterprise_info', 'v_ai_ipark_hm_craft']}
+2026-01-27 17:59:43 - func_intent_service - INFO - SQL Result 键: ['数据库查询', '数据库查询结果', '筛选出的表']
+2026-01-27 17:59:43 - func_intent_service - INFO - ======================================
+2026-01-27 18:03:49 - func_intent_service - INFO - 处理用户查询, user_id=anonymous, query='介绍一下润合催化有限公司...'
+2026-01-27 18:03:53 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.4400
+2026-01-27 18:03:53 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-27 18:03:53 - func_intent_service - INFO - 检测到知识库标记: 企业知识库
+2026-01-27 18:15:19 - func_intent_service - INFO - 处理用户查询, user_id=anonymous, query='介绍一下润合催化有限公司...'
+2026-01-27 18:15:20 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.4400
+2026-01-27 18:15:20 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-27 18:15:20 - func_intent_service - INFO - 检测到知识库标记: 企业知识库
+2026-01-27 18:15:41 - func_intent_service - INFO - 处理用户查询, user_id=anonymous, query='介绍一下润合催化有限公司...'
+2026-01-27 18:15:41 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.4400
+2026-01-27 18:15:41 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-27 18:15:41 - func_intent_service - INFO - 检测到知识库标记: 企业知识库
+2026-01-27 18:19:40 - func_intent_service - INFO - 处理用户查询, user_id=anonymous, query='介绍一下润合催化有限公司...'
+2026-01-27 18:19:41 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.4400
+2026-01-27 18:19:41 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-27 18:19:41 - func_intent_service - INFO - 检测到知识库标记: 企业知识库
+2026-01-27 18:45:33 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769498933571, query='介绍一下润合催化有限公司...'
+2026-01-27 18:45:34 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.4400
+2026-01-27 18:45:34 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-27 18:45:34 - func_intent_service - INFO - 检测到知识库标记: 企业知识库
+2026-01-27 18:49:33 - func_intent_service - INFO - 处理用户查询, user_id=anonymous, query='介绍一下润合催化有限公司...'
+2026-01-27 18:49:34 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.4400
+2026-01-27 18:49:34 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-27 18:49:34 - func_intent_service - INFO - 检测到知识库标记: 企业知识库
+2026-01-27 19:11:14 - func_intent_service - INFO - 处理用户查询, user_id=anonymous, query='介绍安全态势...'
+2026-01-27 19:11:15 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.4861
+2026-01-27 19:11:15 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-27 19:11:15 - func_intent_service - INFO - 检测到知识库标记: 安全信息知识库
+2026-01-27 19:12:26 - func_intent_service - INFO - 处理用户查询, user_id=anonymous, query='介绍企业整体信息...'
+2026-01-27 19:12:26 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.7472
+2026-01-27 19:12:26 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-27 19:12:26 - func_intent_service - INFO - 检测到知识库标记: 企业知识库
+2026-01-27 19:12:59 - func_intent_service - INFO - 处理用户查询, user_id=anonymous, query='介绍园区...'
+2026-01-27 19:13:00 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.7611
+2026-01-27 19:13:00 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-27 19:13:00 - func_intent_service - INFO - 检测到知识库标记: 园区知识库
+2026-01-27 19:13:31 - func_intent_service - INFO - 处理用户查询, user_id=anonymous, query='介绍润和催化有限公司...'
+2026-01-27 19:13:32 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.5575
+2026-01-27 19:13:32 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-27 19:13:32 - func_intent_service - INFO - 检测到知识库标记: 企业知识库
+2026-01-27 19:22:54 - func_intent_service - INFO - 处理用户查询, user_id=anonymous, query='介绍润和催化有限公司...'
+2026-01-27 19:22:55 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.5575
+2026-01-27 19:22:55 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-27 19:22:55 - func_intent_service - INFO - 检测到知识库标记: 企业知识库
+2026-01-27 19:25:38 - func_intent_service - INFO - 处理用户查询, user_id=anonymous, query='介绍润和催化有限公司...'
+2026-01-27 19:25:39 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.5575
+2026-01-27 19:25:39 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-27 19:25:39 - func_intent_service - INFO - 检测到知识库标记: 企业知识库
+2026-01-27 19:33:46 - func_intent_service - INFO - 处理用户查询, user_id=anonymous, query='介绍润和催化有限公司...'
+2026-01-27 19:33:47 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.5575
+2026-01-27 19:33:47 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-27 19:33:47 - func_intent_service - INFO - 检测到知识库标记: 企业知识库
+2026-01-27 19:35:20 - func_intent_service - INFO - 处理用户查询, user_id=anonymous, query='介绍润和催化有限公司...'
+2026-01-27 19:35:21 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.5575
+2026-01-27 19:35:21 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-27 19:35:21 - func_intent_service - INFO - 检测到知识库标记: 企业知识库
+2026-01-27 19:40:07 - func_intent_service - INFO - 处理用户查询, user_id=test_user_1769498933571, query='介绍一下润合催化有限公司...'
+2026-01-27 19:40:08 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.4400
+2026-01-27 19:40:08 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-27 19:40:08 - func_intent_service - INFO - 检测到知识库标记: 企业知识库
+2026-01-28 10:34:53 - func_intent_service - INFO - 处理用户查询, user_id=anonymous, query='介绍润和催化有限公司...'
+2026-01-28 10:34:58 - func_intent_service - INFO - 意图判断完成: type=0, database=, similarity=0.0000
+2026-01-28 10:34:58 - func_intent_service - INFO - Type 2 处理器: 数据库查询, query='介绍润和催化有限公司...', user_id=anonymous
+2026-01-28 10:34:58 - func_intent_service - INFO - 调用 DaiShanSQL, questions: ['介绍润和催化有限公司']... (共1个)
+2026-01-28 10:35:02 - func_intent_service - INFO - DaiShanSQL 查询完成
+2026-01-28 10:35:02 - func_intent_service - INFO - ========== SQL Result Debug ==========
+2026-01-28 10:35:02 - func_intent_service - INFO - SQL Result 类型: <class 'dict'>
+2026-01-28 10:35:02 - func_intent_service - INFO - SQL Result 内容: {'数据库查询': 'SELECT * FROM "COMPANY"."COMPANY" WHERE company_name = \'润和催化有限公司\';', '数据库查询结果': None, '筛选出的表': []}
+2026-01-28 10:35:02 - func_intent_service - INFO - SQL Result 键: ['数据库查询', '数据库查询结果', '筛选出的表']
+2026-01-28 10:35:02 - func_intent_service - INFO - ======================================
+2026-01-28 10:35:56 - func_intent_service - INFO - 处理用户查询, user_id=anonymous, query='介绍润和催化有限公司...'
+2026-01-28 10:35:57 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.5575
+2026-01-28 10:35:57 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-28 10:35:57 - func_intent_service - INFO - 检测到知识库标记: 企业知识库
+2026-01-28 10:53:43 - func_intent_service - INFO - 处理用户查询, user_id=anonymous, query='介绍润和催化有限公司...'
+2026-01-28 10:53:44 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.5575
+2026-01-28 10:53:44 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-28 10:53:44 - func_intent_service - INFO - 检测到知识库标记: 企业知识库
+2026-01-28 10:54:34 - func_intent_service - INFO - 处理用户查询, user_id=anonymous, query='介绍总体企业...'
+2026-01-28 10:54:35 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.5725
+2026-01-28 10:54:35 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-28 10:54:35 - func_intent_service - INFO - 检测到知识库标记: 企业知识库
+2026-01-28 11:02:15 - func_intent_service - INFO - 处理用户查询, user_id=anonymous, query='介绍总体企业...'
+2026-01-28 11:02:16 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.5725
+2026-01-28 11:02:16 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-28 11:02:16 - func_intent_service - INFO - 检测到知识库标记: 企业知识库
+2026-01-28 11:02:16 - func_intent_service - DEBUG - sql_result: {'数据库查询状态': 'success', '数据库查询结果': [{'园区化工企业数目': [{'COUNT': 0}]}, {'园区东区和西区化工企业数目': [{'RESULT': '东区【5】家，西区【2】家'}]}, {'东区化工企业': [{'企业列表': '东区化工企业列表: [佳瑶新材料科技（浙江）有限公司，浙江世倍尔新材料有限公司，浙江岱山经开新材料科技发展有限公司，浙江鑫月新材料科技有限公司，润和催化材料（浙江）有限公司]'}, {'企业列表': '西区化工企业列表: [岱山糖能新材料有限公司，浙江舟山市智德工业气体有限公司]'}]}, {'生产状态': [{'RESULT': '生产状态：正常生产3家，试生产2家，未投产2家。'}]}, {'企业规模': [{'企业规模分布': '企业规模：\n                                            大型企业【0】家，中型企业【0】家，小型企业【7】家，微型企业【0】家'}]}, {'企业标签': [{'RESULT': '专精特新小巨人：0家。\n高新技术企业：1家。'}]}, {'重点企业': [{'RESULT': '浙江世倍尔新材料有限公司：浙江世倍尔新材料有限公司位于[浙江省舟山市岱山县岱西镇徐福大道888号]，厂区面积：0.080000平方公里，统一社会信用代码[91330921MAC6X51L6E]，成立日期[2022-12-27 00:00:00]，注册资金暂无万元，从业人员数量76人。企业负责人是陈略，联系方式为[13968296575]。安全负责人是陈略，联系方式为[13968296575]。\n润和催化材料（浙江）有限公司：润和催化材料（浙江）有限公司位于[浙江省舟山市岱山县高亭镇徐福大道666号]，厂区面积：0.153000平方公里，统一社会信用代码[91330921MA2DMAWQ66]，成立日期[2020-08-03 00:00:00]，注册资金暂无万元，从业人员数量180人。企业负责人是张明远，联系方式为[13419414959]。安全负责人是张明远，联系方式为[13419414959]。'}]}]}
+2026-01-28 11:10:49 - func_intent_service - INFO - 处理用户查询, user_id=anonymous, query='介绍总体企业...'
+2026-01-28 11:10:50 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.5725
+2026-01-28 11:10:50 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-28 11:10:50 - func_intent_service - INFO - 检测到知识库标记: 企业知识库
+2026-01-28 11:10:50 - func_intent_service - DEBUG - sql_result: {'数据库查询状态': 'success', '数据库查询结果': [{'园区化工企业数目': [{'COUNT': 0}]}, {'园区东区和西区化工企业数目': [{'RESULT': '东区【5】家，西区【2】家'}]}, {'东区化工企业': [{'企业列表': '东区化工企业列表: [佳瑶新材料科技（浙江）有限公司，浙江世倍尔新材料有限公司，浙江岱山经开新材料科技发展有限公司，浙江鑫月新材料科技有限公司，润和催化材料（浙江）有限公司]'}, {'企业列表': '西区化工企业列表: [岱山糖能新材料有限公司，浙江舟山市智德工业气体有限公司]'}]}, {'生产状态': [{'RESULT': '生产状态：正常生产3家，试生产2家，未投产2家。'}]}, {'企业规模': [{'企业规模分布': '企业规模：\n                                            大型企业【0】家，中型企业【0】家，小型企业【7】家，微型企业【0】家'}]}, {'企业标签': [{'RESULT': '专精特新小巨人：0家。\n高新技术企业：1家。'}]}, {'重点企业': [{'RESULT': '浙江世倍尔新材料有限公司：浙江世倍尔新材料有限公司位于[浙江省舟山市岱山县岱西镇徐福大道888号]，厂区面积：0.080000平方公里，统一社会信用代码[91330921MAC6X51L6E]，成立日期[2022-12-27 00:00:00]，注册资金暂无万元，从业人员数量76人。企业负责人是陈略，联系方式为[13968296575]。安全负责人是陈略，联系方式为[13968296575]。\n润和催化材料（浙江）有限公司：润和催化材料（浙江）有限公司位于[浙江省舟山市岱山县高亭镇徐福大道666号]，厂区面积：0.153000平方公里，统一社会信用代码[91330921MA2DMAWQ66]，成立日期[2020-08-03 00:00:00]，注册资金暂无万元，从业人员数量180人。企业负责人是张明远，联系方式为[13419414959]。安全负责人是张明远，联系方式为[13419414959]。'}]}]}
+2026-01-28 11:15:51 - func_intent_service - INFO - 处理用户查询, user_id=anonymous, query='介绍总体企业...'
+2026-01-28 11:15:52 - func_intent_service - INFO - 意图判断完成: type=1, database=岱山-指令集, similarity=0.5725
+2026-01-28 11:15:52 - func_intent_service - INFO - Type 1 处理器: 明确指令类查询
+2026-01-28 11:15:52 - func_intent_service - INFO - 检测到知识库标记: 企业知识库
+2026-01-28 11:15:52 - func_intent_service - DEBUG - sql_result: {'数据库查询状态': 'success', '数据库查询结果': [{'园区化工企业数目': [{'COUNT': 0}]}, {'园区东区和西区化工企业数目': [{'RESULT': '东区【5】家，西区【2】家'}]}, {'东区化工企业': [{'企业列表': '东区化工企业列表: [佳瑶新材料科技（浙江）有限公司，浙江世倍尔新材料有限公司，浙江岱山经开新材料科技发展有限公司，浙江鑫月新材料科技有限公司，润和催化材料（浙江）有限公司]'}, {'企业列表': '西区化工企业列表: [岱山糖能新材料有限公司，浙江舟山市智德工业气体有限公司]'}]}, {'生产状态': [{'RESULT': '生产状态：正常生产3家，试生产2家，未投产2家。'}]}, {'企业规模': [{'企业规模分布': '企业规模：\n                                            大型企业【0】家，中型企业【0】家，小型企业【7】家，微型企业【0】家'}]}, {'企业标签': [{'RESULT': '专精特新小巨人：0家。\n高新技术企业：1家。'}]}, {'重点企业': [{'RESULT': '浙江世倍尔新材料有限公司：浙江世倍尔新材料有限公司位于[浙江省舟山市岱山县岱西镇徐福大道888号]，厂区面积：0.080000平方公里，统一社会信用代码[91330921MAC6X51L6E]，成立日期[2022-12-27 00:00:00]，注册资金暂无万元，从业人员数量76人。企业负责人是陈略，联系方式为[13968296575]。安全负责人是陈略，联系方式为[13968296575]。\n润和催化材料（浙江）有限公司：润和催化材料（浙江）有限公司位于[浙江省舟山市岱山县高亭镇徐福大道666号]，厂区面积：0.153000平方公里，统一社会信用代码[91330921MA2DMAWQ66]，成立日期[2020-08-03 00:00:00]，注册资金暂无万元，从业人员数量180人。企业负责人是张明远，联系方式为[13419414959]。安全负责人是张明远，联系方式为[13419414959]。'}]}]}

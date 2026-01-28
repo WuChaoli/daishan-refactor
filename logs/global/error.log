@@ -58,3 +58,13 @@ Traceback (most recent call last):
   File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
   File "<frozen importlib._bootstrap>", line 1324, in _find_and_load_unlocked
 ModuleNotFoundError: No module named 'DaiShanSQL.api_server'
+2026-01-28 10:34:58 - [func_intent_judgment] - ERROR - 意图判断异常: list index out of range
+Traceback (most recent call last):
+  File "/home/wuchaoli/codespace/daishan-master/rag_stream/src/services/intent_judgment.py", line 67, in intent_judgment
+    all_results, instent_result = await client.query_all_databases(query)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wuchaoli/codespace/daishan-master/rag_stream/src/services/ragflow_client.py", line 142, in query_all_databases
+    return all_results, results[0][0]
+                        ~~~~~~~~~~^^^
+IndexError: list index out of range
+2026-01-28 10:34:58 - [func_intent_judgment] - ERROR - 意图判断异常 | error=list index out of range

@@ -5,6 +5,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import RedirectResponse
 
 # 加载 DaiShanSQL 的 .env 文件（包含 OPENAI_API_KEY 等配置）
 daishan_env_path = Path(__file__).parent.parent / "DaiShanSQL" / "DaiShanSQL" / ".env"
@@ -83,6 +85,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 挂载静态文件目录（使用绝对路径）
+static_dir = Path(__file__).parent / "static"
+app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+
+# 添加根路径重定向
+@app.get("/")
+async def root():
+    return RedirectResponse(url="/static/chat-test.html")
 
 app.include_router(router)
 

@@ -30,6 +30,10 @@ class ChatRequest(BaseModel):
     user_id: Optional[str] = Field(None, description="用户ID")
     stream: bool = Field(True, description="是否启用流式响应")
 
+class ChatDeleteRequest(BaseModel):
+    session_id: Optional[str] = Field(None, description="会话ID")
+    user_id: Optional[str] = Field(None, description="用户ID")
+
 
 class SessionRequest(BaseModel):
     """创建会话请求模型（main.py 迁移）"""
