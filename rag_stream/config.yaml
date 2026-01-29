@@ -41,7 +41,7 @@ ragflow:
 # 意图判断参数（业务配置）
 # ============================================================
 intent:
-  similarity_threshold: 0.4
+  similarity_threshold: 0.5
   top_k_per_database: 10
   default_type: 0
 
