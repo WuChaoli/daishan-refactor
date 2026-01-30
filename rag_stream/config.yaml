@@ -90,6 +90,10 @@ dify:
     safety_kb_chat:
       api_key: "app-dNlklapL8Mpm5VOTsiIGwSDE"
       description: "安全信息知识库智能问答"
+    
+    personnel_dispatching:
+      api_key: "app-3CDscxO2oybkMxKAoH3iH8HL"
+      description: "人员调度工作流"
 
 # ============================================================
 # OpenAI 配置 (用于 DaiShanSQL)
