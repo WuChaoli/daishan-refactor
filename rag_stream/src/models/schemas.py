@@ -1,7 +1,8 @@
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Literal, Optional
 
 from pydantic import BaseModel, Field
+from src.models.emergency_entities import parse_location
 
 
 class ChatType(str, Enum):
@@ -99,3 +100,58 @@ class ErrorResponse(BaseModel):
     message: str = Field(..., description="错误消息")
     suggestion: Optional[str] = Field(None, description="建议")
 
+
+class PeopleDispatchRequest(BaseModel):
+    """人员调度请求模型"""
+
+    accidentId: str = Field(..., description="事故ID")
+    voiceText: Optional[str] = Field(None, description="语音文本内容")
+
+
+class SourceDispatchRequest(BaseModel):
+    """资源调度请求模型"""
+
+    accidentId: str = Field(..., description="事故ID", min_length=1)
+    sourceType: Literal[
+        "emergencySupplies",
+        "rescueTeam",
+        "emergencyExpert",
+        "fireFightingFacilities",
+        "shelter",
+        "medicalInstitution",
+        "rescueOrganization",
+        "protectionTarget"
+    ] = Field(..., description="资源类型")
+    voiceText: Optional[str] = Field(None, description="语音文本内容")
+
+
+class AccidentEventData(BaseModel):
+    """事故事件数据模型"""
+
+    accident_name: Optional[str] = Field(None, description="事故名称")
+    longitude: Optional[float] = Field(None, description="经度")
+    latitude: Optional[float] = Field(None, description="纬度")
+    hazardous_chemicals: Optional[str] = Field(None, description="危险化学品")
+    accident_overview: Optional[str] = Field(None, description="事故概述")
+
+    @classmethod
+    def from_db_row(
+        cls,
+        accident_name: Optional[str],
+        coordinate: Optional[str],
+        hazardous_chemicals: Optional[str],
+        accident_overview: Optional[str]
+    ):
+        """从数据库行创建实例"""
+        longitude, latitude = parse_location(coordinate)
+        return cls(
+            accident_name=accident_name,
+            longitude=longitude,
+            latitude=latitude,
+            hazardous_chemicals=hazardous_chemicals,
+            accident_overview=accident_overview
+        )
+
+    def to_json_str(self) -> str:
+        """转换为 JSON 字符串"""
+        return self.model_dump_json(indent=2, exclude_none=True)

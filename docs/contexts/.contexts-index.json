@@ -1,0 +1,20 @@
+{
+  "activeContexts": [
+    {
+      "contextId": "2026-02-02_dify-sdk-architecture-analysis",
+      "title": "Dify Sdk Architecture Analysis",
+      "status": "in_progress",
+      "assignee": "architect",
+      "updatedAt": "2026-02-02T12:49:19.937860Z"
+    }
+  ],
+  "archivedContexts": [
+    {
+      "contextId": "2026-02-02_test-example",
+      "title": "测试示例功能",
+      "status": "in_progress",
+      "assignee": "developer",
+      "updatedAt": "2026-02-02T11:45:57.480500Z"
+    }
+  ]
+}

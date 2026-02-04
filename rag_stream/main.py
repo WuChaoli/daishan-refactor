@@ -8,6 +8,14 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 
+# 加载 rag_stream 的 .env 文件（包含 DIFY 配置）
+rag_stream_env_path = Path(__file__).parent / ".env"
+if rag_stream_env_path.exists():
+    load_dotenv(rag_stream_env_path)
+    logging.info(f"✓ 已加载 rag_stream 环境变量: {rag_stream_env_path}")
+else:
+    logging.warning(f"⚠ rag_stream .env 文件不存在: {rag_stream_env_path}")
+
 # 加载 DaiShanSQL 的 .env 文件（包含 OPENAI_API_KEY 等配置）
 daishan_env_path = Path(__file__).parent.parent / "DaiShanSQL" / "DaiShanSQL" / ".env"
 if daishan_env_path.exists():

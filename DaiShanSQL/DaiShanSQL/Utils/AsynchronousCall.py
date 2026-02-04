@@ -33,7 +33,6 @@ class AsynchronousCall:
             base_url=os.getenv("Qwen2.5_7B_base_url"),
             api_key=os.getenv("Qwen2.5_7B_api_key"),
         )
-
         self.sql_client = AsyncOpenAI(
             base_url=os.getenv("TextToSQL_base_url"),
             api_key=os.getenv("TextToSQL_api_key"),
@@ -200,8 +199,8 @@ class AsynchronousCall:
         new_sql_prompt = []
         for new_prompt in prompts:
             new_user_query = new_prompt["result"]
-            if new_user_query == query:
-                continue
+            # if new_user_query == query:
+            #     continue
             table = new_prompt["table"]
             sql_query = self.prompt_utils.gengerate_sql(new_user_query, table)
             new_sql_prompt.append({

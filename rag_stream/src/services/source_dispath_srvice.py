@@ -5,7 +5,7 @@ SourceDispatchService - 资源调度服务
 
 import json
 import asyncio
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Callable, Type
 from pathlib import Path
 
 from src.models.schemas import SourceDispatchRequest, AccidentEventData
@@ -418,15 +418,41 @@ async def _dispatch_by_intent(
             entities
         )
     else:
-        logger.info(f"意图分类为 '{intent}'，调用 _query_resource_by_type")
-        return await _query_resource_by_type(
-            request,
-            log_manager,
-            f"source_dispatch_{request.sourceType}",
-            accident_data=accident_data,
-            business_area=business_area,
-            general_client=general_client
-        )
+        logger.info(f"意图分类为 '{intent}'，根据资源类型调用对应的 handle 函数")
+
+        # 资源类型到处理函数的映射
+        handler_mapping = {
+            "emergencySupplies": handle_emergency_supplies,
+            "rescueTeam": handle_rescue_team,
+            "emergencyExpert": handle_emergency_expert,
+            "fireFightingFacilities": handle_fire_fighting_facilities,
+            "shelter": handle_shelter,
+            "medicalInstitution": handle_medical_institution,
+            "rescueOrganization": handle_rescue_organization,
+            "protectionTarget": handle_protection_target
+        }
+
+        handler = handler_mapping.get(request.sourceType)
+        if not handler:
+            raise ValueError(f"未找到资源类型 {request.sourceType} 的处理函数")
+
+        # 根据资源类型调用相应的处理函数
+        # 救援队伍和应急专家需要 business_area 参数
+        if request.sourceType in ["rescueTeam", "emergencyExpert"]:
+            return await handler(
+                request=request,
+                log_manager=log_manager,
+                accident_data=accident_data,
+                business_area=business_area,
+                general_client=general_client
+            )
+        else:
+            return await handler(
+                request=request,
+                log_manager=log_manager,
+                accident_data=accident_data,
+                general_client=general_client
+            )
 
 
 @trace_function
@@ -489,104 +515,125 @@ async def _get_solid_resource_instruction(
     return result_ids
 
 
-@trace_function
-async def _query_resource_by_type(
-    request: SourceDispatchRequest,
-    log_manager: LogManager,
-    function_name: str,
-    accident_data: AccidentEventData,
-    business_area: Optional[str] = None,
-    number: int = 5,
-    general_client = None
-) -> List[Any]:
-    """
-    通用的资源查询函数，根据资源类型执行SQL查询并映射到实体类
-
-    Args:
-        request: 资源调度请求对象
-        log_manager: 日志管理器实例
-        function_name: 功能名称，用于日志记录
-        accident_data: 事故事件数据，用于 AI 筛选
-        business_area: 业务领域（可选，用于救援队伍和应急专家）
-        number: 查询数量限制（默认5）
-        general_client: Dify general_chat client 实例（用于 AI 筛选）
-
-    Returns:
-        List[Any]: 实体类实例列表
-    """
-    logger = log_manager.get_function_logger(function_name)
-    logger.info(f"处理资源调度: {request.sourceType}")
-
-    # 实体类映射
-    entity_mapping = {
-        "emergencySupplies": EmergencySupply,
-        "rescueTeam": RescueTeam,
-        "emergencyExpert": EmergencyExpert,
-        "fireFightingFacilities": FireFightingFacility,
-        "shelter": Shelter,
-        "medicalInstitution": MedicalInstitution,
-        "rescueOrganization": RescueOrganization,
-        "protectionTarget": ProtectionTarget
-    }
-
-    # 实体类工厂方法映射（用于有位置字段的实体）
-    entity_factory_mapping = {
-        "fireFightingFacilities": ("from_db_row", ["id", "name", "latitude_longitude"]),
-        "shelter": ("from_db_row", ["id", "shelter_name", "lon_and_lat"]),
-        "medicalInstitution": ("from_db_row", ["id", "institution_name", "local_pos"]),
-        "rescueOrganization": ("from_db_row", ["id", "institution_name", "local_pos"]),
-        "protectionTarget": ("from_db_row", ["id", "target_name", "local_pos"])
-    }
-
-    # 获取映射配置
-    mapping = SOURCE_TYPE_MAPPING.get(request.sourceType)
+def _get_sql_from_mapping(
+    source_type: str,
+    business_area: Optional[str],
+    number: int
+) -> str:
+    """从映射配置获取SQL语句"""
+    mapping = SOURCE_TYPE_MAPPING.get(source_type)
     if not mapping:
-        raise ValueError(f"未找到资源类型 {request.sourceType} 的映射配置")
-
-    # 构建SQL语句
-    table_name = mapping["table_name"]
-    sql_template = mapping["sql_template"]
-
-    # 替换SQL模板参数
-    sql = sql_template.format(
-        table_name=table_name,
+        raise ValueError(f"未找到资源类型 {source_type} 的映射配置")
+    
+    return mapping["sql_template"].format(
+        table_name=mapping["table_name"],
         business_area=business_area or "",
         number=number
     )
-    logger.debug(f"执行SQL查询: {sql}")
 
-    # 执行查询
+
+async def _execute_resource_query(
+    source_type: str,
+    business_area: Optional[str] = None,
+    number: int = 5
+) -> List[Dict[str, Any]]:
+    """执行资源查询并返回原始数据行"""
+    sql = _get_sql_from_mapping(source_type, business_area, number)
     server = Server()
     query_result = server.QueryBySQL(sql)
-    logger.debug(f"查询结果类型: {type(query_result)}")
+    return _extract_data_list_from_query_result(query_result)
 
-    # 处理查询结果，提取数据列表
-    data_list = []
+
+def _map_to_entities(
+    rows: List[Dict[str, Any]],
+    entity_class: Type,
+    entity_factory_config: Optional[tuple] = None
+) -> List[Any]:
+    """将数据库行映射为实体对象"""
+    return _map_rows_to_entities(rows, entity_class, entity_factory_config, None)
+
+
+def _sort_by_distance(
+    entities: List[Any],
+    accident_data: AccidentEventData
+) -> List[Any]:
+    """按距离排序实体列表"""
+    from src.utils.geo_utils import sort_entities_by_distance
+    return sort_entities_by_distance(accident_data, entities)
+
+
+def _build_ai_prompt(
+    entities: List[Any],
+    request: SourceDispatchRequest,
+    accident_data: AccidentEventData,
+    prompt_generator: Callable
+) -> str:
+    """构建AI筛选提示词"""
+    entities_json = _serialize_entities_to_json(entities)
+    prompt = prompt_generator(
+        voice_text=request.voiceText,
+        accent_result=accident_data.to_json_str()
+    )
+    return prompt.replace(
+        "<数据库信息>\n\n</数据库信息>",
+        f"<数据库信息>\n{entities_json}\n</数据库信息>"
+    )
+
+
+async def _filter_with_ai(
+    entities: List[Any],
+    request: SourceDispatchRequest,
+    accident_data: AccidentEventData,
+    prompt_generator: Callable,
+    general_client,
+    log_manager: LogManager
+) -> List[Dict[str, Any]]:
+    """使用AI进行智能筛选"""
+    if general_client is None:
+        raise ValueError("Dify general_chat client 未配置")
+    
+    prompt = _build_ai_prompt(entities, request, accident_data, prompt_generator)
+    
+    dify_response = await asyncio.to_thread(
+        general_client.run_chat,
+        query=prompt,
+        user="system",
+        inputs={},
+        conversation_id=""
+    )
+    
+    answer = dify_response.answer if hasattr(dify_response, 'answer') else str(dify_response)
+    logger = log_manager.get_function_logger("filter_with_ai")
+    return _parse_ai_response_to_list(answer, logger)
+
+
+def _extract_data_list_from_query_result(query_result: Any) -> list:
+    """从查询结果中提取数据列表"""
     if isinstance(query_result, dict):
         if 'data' in query_result:
-            data_list = query_result['data']
+            return query_result['data']
         elif 'result' in query_result:
-            data_list = query_result['result']
+            return query_result['result']
         else:
-            data_list = [query_result]
+            return [query_result]
     elif isinstance(query_result, list):
-        data_list = query_result
+        return query_result
+    return []
 
-    logger.info(f"查询到 {len(data_list)} 条记录")
 
-    # 获取实体类
-    entity_class = entity_mapping.get(request.sourceType)
-    if not entity_class:
-        raise ValueError(f"未找到实体类: {request.sourceType}")
-
-    # 将数据库行映射到实体类
+def _map_rows_to_entities(
+    data_list: list,
+    entity_class,
+    entity_factory_config: Optional[tuple],
+    logger
+) -> list:
+    """将数据库行映射到实体类实例"""
     entities = []
     for row in data_list:
         try:
-            # 检查是否需要使用工厂方法
-            if request.sourceType in entity_factory_mapping:
-                factory_method, field_names = entity_factory_mapping[request.sourceType]
-                # 提取字段值（大小写不敏感）
+            if entity_factory_config:
+                # 使用工厂方法
+                factory_method, field_names = entity_factory_config
                 values = []
                 for field_name in field_names:
                     # 尝试不同的大小写组合
@@ -612,171 +659,174 @@ async def _query_resource_by_type(
         except Exception as e:
             logger.warning(f"加载实体失败: {e}, 数据: {row}")
             continue
+    return entities
 
-    logger.info(f"成功加载 {len(entities)} 个实体实例")
 
-    # 对有坐标的实体（除医疗机构外）按距离排序
-    entities_with_coords = [
-        "fireFightingFacilities",
-        "shelter",
-        "rescueOrganization",
-        "protectionTarget"
-    ]
-
-    if request.sourceType in entities_with_coords:
-        from src.utils.geo_utils import sort_entities_by_distance
-        entities = sort_entities_by_distance(accident_data, entities)
-        logger.info(f"已按距离排序 {request.sourceType} 实体")
-
-    # 验证 general_client 是否可用
-    if general_client is None:
-        raise ValueError("Dify general_chat client 未配置")
-
-    # 使用 AI 筛选实体 ID
-    # 将实体列表序列化为 JSON（作为数据库信息）
-    entities_json = json.dumps(
-        [{"id": entity.id, "name": getattr(entity, 'name', getattr(entity, 'shelter_name', getattr(entity, 'institution_name', getattr(entity, 'target_name', ''))))} for entity in entities],
-        ensure_ascii=False
-    )
-
-    # 获取提示词
-    prompt = SourceDispatchPrompts.get_database_id_extraction_prompt(
-        voice_text=request.voiceText,
-        accent_result=accident_data.to_json_str()
-    )
-
-    # 将数据库信息插入到提示词中
-    prompt = prompt.replace("<数据库信息>\n\n</数据库信息>", f"<数据库信息>\n{entities_json}\n</数据库信息>")
-
-    logger.debug(f"AI 筛选提示词: {prompt}")
-
-    # 调用 Dify
-    dify_response = await asyncio.to_thread(
-        general_client.run_chat,
-        query=prompt,
-        user="system",
-        inputs={},
-        conversation_id=""
-    )
-
-    # 提取 answer 并解析为列表
-    answer = dify_response.answer if hasattr(dify_response, 'answer') else str(dify_response)
-    logger.debug(f"AI 筛选响应: {answer}")
-
-    # 使用辅助函数解析 AI 响应
-    return _parse_ai_response_to_list(answer, logger)
+def _serialize_entities_to_json(entities: list) -> str:
+    """将实体列表序列化为JSON字符串"""
+    entity_list = []
+    for entity in entities:
+        # 尝试不同的名称字段
+        name = getattr(entity, 'name', None) or \
+               getattr(entity, 'shelter_name', None) or \
+               getattr(entity, 'institution_name', None) or \
+               getattr(entity, 'target_name', '')
+        entity_list.append({"id": entity.id, "name": name})
+    return json.dumps(entity_list, ensure_ascii=False)
 
 
 @trace_function
 async def handle_emergency_supplies(
     request: SourceDispatchRequest,
-    log_manager: LogManager
+    log_manager: LogManager,
+    accident_data: AccidentEventData,
+    general_client
 ) -> list:
     """处理应急物资资源调度"""
-    logger = log_manager.get_function_logger("emergency_supplies")
-    logger.info(f"处理应急物资资源调度: {request.sourceType}")
-
-    # 获取映射配置
-    mapping = SOURCE_TYPE_MAPPING.get(request.sourceType)
-    if not mapping:
-        raise ValueError(f"未找到资源类型 {request.sourceType} 的映射配置")
-
-    # 构建SQL语句
-    table_name = mapping["table_name"]
-    sql = mapping["sql_template"].format(table_name=table_name)
-    logger.debug(f"执行SQL查询: {sql}")
-
-    # 执行查询
-    server = Server()
-    query_result = server.QueryBySQL(sql)
-    logger.debug(f"查询结果: {query_result}")
-
-    # 处理查询结果
-    if isinstance(query_result, dict):
-        if 'data' in query_result:
-            return query_result['data']
-        elif 'result' in query_result:
-            return query_result['result']
-        else:
-            return [query_result]
-    elif isinstance(query_result, list):
-        return query_result
-    else:
-        return []
+    rows = await _execute_resource_query(request.sourceType, number=5)
+    entities = _map_to_entities(rows, EmergencySupply, None)
+    return await _filter_with_ai(
+        entities, request, accident_data,
+        SourceDispatchPrompts.get_emergency_supplies_prompt,
+        general_client, log_manager
+    )
 
 
 @trace_function
 async def handle_rescue_team(
     request: SourceDispatchRequest,
-    log_manager: LogManager
+    log_manager: LogManager,
+    accident_data: AccidentEventData,
+    business_area: str,
+    general_client
 ) -> list:
     """处理救援队伍资源调度"""
-    logger = log_manager.get_function_logger("rescue_team")
-    logger.info(f"处理救援队伍资源调度: {request.sourceType}")
-    return []
+    rows = await _execute_resource_query(request.sourceType, business_area, 5)
+    entities = _map_to_entities(rows, RescueTeam, None)
+    return await _filter_with_ai(
+        entities, request, accident_data,
+        SourceDispatchPrompts.get_rescue_team_prompt,
+        general_client, log_manager
+    )
 
 
 @trace_function
 async def handle_emergency_expert(
     request: SourceDispatchRequest,
-    log_manager: LogManager
+    log_manager: LogManager,
+    accident_data: AccidentEventData,
+    business_area: str,
+    general_client
 ) -> list:
     """处理应急专家资源调度"""
-    logger = log_manager.get_function_logger("emergency_expert")
-    logger.info(f"处理应急专家资源调度: {request.sourceType}")
-    return []
+    rows = await _execute_resource_query(request.sourceType, business_area, 5)
+    entities = _map_to_entities(rows, EmergencyExpert, None)
+    return await _filter_with_ai(
+        entities, request, accident_data,
+        SourceDispatchPrompts.get_emergency_expert_prompt,
+        general_client, log_manager
+    )
 
 
 @trace_function
 async def handle_fire_fighting_facilities(
     request: SourceDispatchRequest,
-    log_manager: LogManager
+    log_manager: LogManager,
+    accident_data: AccidentEventData,
+    general_client
 ) -> list:
     """处理消防设施资源调度"""
-    logger = log_manager.get_function_logger("fire_fighting_facilities")
-    logger.info(f"处理消防设施资源调度: {request.sourceType}")
-    return []
+    rows = await _execute_resource_query(request.sourceType, number=5)
+    entities = _map_to_entities(
+        rows, FireFightingFacility,
+        ("from_db_row", ["id", "name", "latitude_longitude"])
+    )
+    entities = _sort_by_distance(entities, accident_data)
+    return await _filter_with_ai(
+        entities, request, accident_data,
+        SourceDispatchPrompts.get_fire_fighting_facilities_prompt,
+        general_client, log_manager
+    )
 
 
 @trace_function
 async def handle_shelter(
     request: SourceDispatchRequest,
-    log_manager: LogManager
+    log_manager: LogManager,
+    accident_data: AccidentEventData,
+    general_client
 ) -> list:
     """处理避难场所资源调度"""
-    logger = log_manager.get_function_logger("shelter")
-    logger.info(f"处理避难场所资源调度: {request.sourceType}")
-    return []
+    rows = await _execute_resource_query(request.sourceType, number=5)
+    entities = _map_to_entities(
+        rows, Shelter,
+        ("from_db_row", ["id", "shelter_name", "lon_and_lat"])
+    )
+    entities = _sort_by_distance(entities, accident_data)
+    return await _filter_with_ai(
+        entities, request, accident_data,
+        SourceDispatchPrompts.get_shelter_prompt,
+        general_client, log_manager
+    )
 
 
 @trace_function
 async def handle_medical_institution(
     request: SourceDispatchRequest,
-    log_manager: LogManager
+    log_manager: LogManager,
+    accident_data: AccidentEventData,
+    general_client
 ) -> list:
     """处理医疗机构资源调度"""
-    logger = log_manager.get_function_logger("medical_institution")
-    logger.info(f"处理医疗机构资源调度: {request.sourceType}")
-    return []
+    rows = await _execute_resource_query(request.sourceType, number=5)
+    entities = _map_to_entities(
+        rows, MedicalInstitution,
+        ("from_db_row", ["id", "institution_name", "local_pos"])
+    )
+    return await _filter_with_ai(
+        entities, request, accident_data,
+        SourceDispatchPrompts.get_medical_institution_prompt,
+        general_client, log_manager
+    )
 
 
 @trace_function
 async def handle_rescue_organization(
     request: SourceDispatchRequest,
-    log_manager: LogManager
+    log_manager: LogManager,
+    accident_data: AccidentEventData,
+    general_client
 ) -> list:
     """处理救援机构资源调度"""
-    logger = log_manager.get_function_logger("rescue_organization")
-    logger.info(f"处理救援机构资源调度: {request.sourceType}")
-    return []
+    rows = await _execute_resource_query(request.sourceType, number=5)
+    entities = _map_to_entities(
+        rows, RescueOrganization,
+        ("from_db_row", ["id", "institution_name", "local_pos"])
+    )
+    entities = _sort_by_distance(entities, accident_data)
+    return await _filter_with_ai(
+        entities, request, accident_data,
+        SourceDispatchPrompts.get_rescue_organization_prompt,
+        general_client, log_manager
+    )
 
 
 @trace_function
 async def handle_protection_target(
     request: SourceDispatchRequest,
-    log_manager: LogManager
+    log_manager: LogManager,
+    accident_data: AccidentEventData,
+    general_client
 ) -> list:
     """处理防护目标资源调度"""
-    logger = log_manager.get_function_logger("protection_target")
-    logger.info(f"处理防护目标资源调度: {request.sourceType}")
-    return []
+    rows = await _execute_resource_query(request.sourceType, number=5)
+    entities = _map_to_entities(
+        rows, ProtectionTarget,
+        ("from_db_row", ["id", "target_name", "local_pos"])
+    )
+    entities = _sort_by_distance(entities, accident_data)
+    return await _filter_with_ai(
+        entities, request, accident_data,
+        SourceDispatchPrompts.get_protection_target_prompt,
+        general_client, log_manager
+    )

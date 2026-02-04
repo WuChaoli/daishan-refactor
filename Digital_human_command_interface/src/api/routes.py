@@ -154,7 +154,7 @@ def get_enterprise_statistics(logger) -> str:
         # 导入并调用
         import importlib
 
-        api_server_module = importlib.import_module("DaiShanSQL.api_server")
+        api_server_module = importlib.import_module("DaiShanSQL")
         server_instance = api_server_module.Server()
 
         logger.info("调用 sql_introduction...")
@@ -653,7 +653,7 @@ async def intent_handler_2(data: dict, user_id: str, http_request: Request):
             # 由于 DaiShanSQL 父目录在 sys.path 中,使用包名导入
             import importlib
 
-            api_server_module = importlib.import_module("DaiShanSQL.api_server")
+            api_server_module = importlib.import_module("DaiShanSQL")
             # 创建 Server 实例
             server_instance = api_server_module.Server()
 

@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 import yaml
+from dotenv import load_dotenv
 from pydantic import BaseModel, Field, field_validator
 
 # ============================================================
@@ -491,15 +492,32 @@ def _repo_dir() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+def _load_env_files() -> None:
+    """
+    加载环境变量文件
+
+    加载 rag_stream/.env - 包含 DIFY 相关配置
+    """
+    base_dir = _repo_dir()
+
+    # 加载 rag_stream 的 .env 文件
+    rag_stream_env_path = base_dir / ".env"
+    if rag_stream_env_path.exists():
+        load_dotenv(rag_stream_env_path, override=False)
+
+
 def load_settings() -> Settings:
     """
     加载全局配置
 
-    从项目根目录的 config.yaml 文件加载配置
+    从项目根目录的 config.yaml 文件加载配置，并从 .env 文件加载环境变量
 
     Returns:
         Settings 实例
     """
+    # 首先加载环境变量文件
+    _load_env_files()
+
     base_dir = _repo_dir()
     yaml_path = base_dir / "config.yaml"
 

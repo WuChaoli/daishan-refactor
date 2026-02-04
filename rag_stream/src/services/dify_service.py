@@ -5,7 +5,7 @@ import logging
 import re
 import time
 import os
-from typing import Optional
+from typing import Optional, AsyncIterator
 
 import aiohttp
 
@@ -191,3 +191,45 @@ async def stream_dify_chatflow_response(
         logger.exception(f"Dify Chatflow 流式调用异常: {e}")
         error_data = {"code": 1, "message": f"流式处理失败: {str(e)}", "data": None}
         yield f"data: {json.dumps(error_data, ensure_ascii=False)}\n\n"
+
+
+async def personnel_dispatch(
+    voice_text: str,
+    user_id: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    调用人员调度 Dify Chat 应用并返回结果
+
+    Args:
+        voice_text: 语音文本
+        user_id: 用户ID
+
+    Returns:
+        Dict[str, Any]: 包含人员调度结果的字典
+    """
+    from src.services.dify_client_factory import get_client
+
+    # 使用工厂获取 client
+    try:
+        client = get_client("PERSONNEL_DISPATCHING")
+    except ValueError as e:
+        raise ValueError(
+            "人员调度 client 未配置。"
+            "请在环境变量中设置 DIFY_CHAT_APIKEY_PERSONNEL_DISPATCHING"
+        ) from e
+
+    # 调用 Dify chat 非流式接口
+    response = client.run_chat(
+        query=voice_text,
+        user=user_id or "anonymous",
+        inputs={},
+        conversation_id=""
+    )
+
+    # 返回结构化结果
+    return {
+        "answer": response.answer,
+        "message_id": response.message_id,
+        "conversation_id": response.conversation_id,
+        "metadata": response.metadata
+    }

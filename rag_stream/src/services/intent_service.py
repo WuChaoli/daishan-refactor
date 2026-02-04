@@ -6,13 +6,13 @@ IntentService - 意图识别服务
 import asyncio
 import re
 
-from rag_stream.src.services.intent_judgment import IntentResult, intent_judgment
-from rag_stream.src.services.log_manager import LogManager
-from rag_stream.src.services.ragflow_client import RagflowClient
+from src.services.intent_judgment import IntentResult, intent_judgment
+from src.services.log_manager import LogManager
+from src.services.ragflow_client import RagflowClient
 # import DaiShanSQL.DaiShanSQL.api_server
-from DaiShanSQL.DaiShanSQL.api_server import Server
+from DaiShanSQL import Server
 
-# server = Server()
+server = Server()
 
 class IntentService:
     """意图识别服务"""

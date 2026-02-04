@@ -9,7 +9,7 @@ import os
 # 添加项目路径到 sys.path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from src.models.schemas import SourceDispatchRequest, SourceType
+from src.models.schemas import SourceDispatchRequest
 from src.services.source_dispath_srvice import handle_source_dispatch
 from src.services.log_manager import LogManager
 from src.config.settings import settings
@@ -20,49 +20,49 @@ TEST_CASES = [
     {
         "name": "消防设施 - 查询污水处理厂",
         "accident_id": "5844749472101664",
-        "source_type": SourceType.消防设施,
+        "source_type": "fireFightingFacilities",
         "voice_text": "最近的污水处理厂在哪里"
     },
     {
         "name": "救援队伍 - 调度消防队",
         "accident_id": "5844749472101664",
-        "source_type": SourceType.救援队伍,
+        "source_type": "rescueTeam",
         "voice_text": "调度消防队到现场"
     },
     {
         "name": "应急专家 - 需要化工专家",
         "accident_id": "5844749472101664",
-        "source_type": SourceType.应急专家,
+        "source_type": "emergencyExpert",
         "voice_text": "需要化工专家支援"
     },
     {
         "name": "医疗机构 - 查找最近医院",
         "accident_id": "5844749472101664",
-        "source_type": SourceType.医疗机构,
+        "source_type": "medicalInstitution",
         "voice_text": "最近的医院在哪里"
     },
     {
         "name": "避难场所 - 疏散点位置",
         "accident_id": "5844749472101664",
-        "source_type": SourceType.避难场所,
+        "source_type": "shelter",
         "voice_text": "附近的避难场所"
     },
     {
         "name": "应急物资 - 防护装备",
         "accident_id": "5844749472101664",
-        "source_type": SourceType.应急物资,
+        "source_type": "emergencySupplies",
         "voice_text": "需要防护装备和防毒面具"
     },
     {
         "name": "救援机构 - 调度救援力量",
         "accident_id": "5844749472101664",
-        "source_type": SourceType.救援机构,
+        "source_type": "rescueOrganization",
         "voice_text": "调度救援机构"
     },
     {
         "name": "防护目标 - 周边重点目标",
         "accident_id": "5844749472101664",
-        "source_type": SourceType.防护目标,
+        "source_type": "protectionTarget",
         "voice_text": "周边有哪些重点防护目标"
     }
 ]

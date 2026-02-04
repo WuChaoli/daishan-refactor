@@ -1,25 +1,8 @@
-
-import json
 import os
-from datetime import date, datetime, time
 from dotenv import load_dotenv
 import requests
 # 加载.env文件
 load_dotenv()
-import re
-
-
-
-class DateTimeEncoder(json.JSONEncoder):
-    """
-    自定义JSON编码器，用于处理日期时间类型
-    """
-
-    def default(self, obj):
-        if isinstance(obj, (datetime, date, time)):
-            return obj.isoformat()
-        return super().default(obj)
-
 
 class MySQLManager:
     def __init__(self, config_file: str = ".env"):

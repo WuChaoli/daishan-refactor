@@ -6,14 +6,8 @@ RagflowClient - RAGFlow 服务客户端适配器
 """
 
 import asyncio
-import sys
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Dict, List
-
-# 添加项目根目录到 Python 路径
-project_root = Path(__file__).resolve().parents[3]  # rag_stream/src/services/ -> ../ -> ../ -> project_root
-sys.path.insert(0, str(project_root))
 
 from src.services.log_manager import LogManager
 from src.config.settings import IntentConfig, RAGFlowConfig

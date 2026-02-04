@@ -1,0 +1,24 @@
+{
+  "id": "2026-02-02_dify-sdk-architecture-analysis_refactor-intent-recognition",
+  "contextId": "2026-02-02_dify-sdk-architecture-analysis",
+  "name": "refactor-intent-recognition",
+  "timestamp": "2026-02-04T05:25:09Z",
+  "stage": "manual",
+  "gitCommit": "ef686e323beec4651bb2adfea9e557066726417e",
+  "files": {
+    "added": 56,
+    "modified": 77,
+    "deleted": 23
+  },
+  "tests": {
+    "total": 0,
+    "passed": 0,
+    "failed": 0,
+    "coverage": 0
+  },
+  "metadata": {
+    "description": "重构意图势识别逻辑，增强意图识别准确性",
+    "agent": "manual",
+    "status": "success"
+  }
+}

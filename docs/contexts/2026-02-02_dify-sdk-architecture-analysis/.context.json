@@ -1,0 +1,20 @@
+{
+  "contextId": "2026-02-02_dify-sdk-architecture-analysis",
+  "status": "in_progress",
+  "createdAt": "2026-02-02T12:49:19.937860Z",
+  "updatedAt": "2026-02-02T12:49:19.937860Z",
+  "completedAt": null,
+  "title": "Dify Sdk Architecture Analysis",
+  "description": "实现 Dify Sdk Architecture Analysis 功能",
+  "assignee": "architect",
+  "gitBranch": "main",
+  "documents": {
+    "requirements": "requirements.md",
+    "architectureChanges": "architecture-changes.md",
+    "featureSpec": "feature-spec.md",
+    "plan": "plan.md",
+    "todos": "todos.md",
+    "testPlan": "test-plan.md"
+  },
+  "staticDocsUpdated": []
+}

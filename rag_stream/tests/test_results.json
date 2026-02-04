@@ -1,0 +1,523 @@
+[
+  {
+    "success": true,
+    "resource_type": "emergencySupplies",
+    "sql": "SELECT ID, MATERIAL_NAME FROM IPARK_AE_EMERGENCY_SUPPLIES WHERE MATERIAL_STATUS IN ('0', '2') FETCH FIRST 5 ROWS ONLY",
+    "total_rows": 5,
+    "loaded_entities": 5,
+    "entities": [
+      {
+        "id": "5762630040013024",
+        "material_name": "物资名称"
+      },
+      {
+        "id": "5762634022865120",
+        "material_name": "物资2"
+      },
+      {
+        "id": "5803093093927280",
+        "material_name": "短信物资"
+      },
+      {
+        "id": "5814082836645984",
+        "material_name": "测试企业物资1"
+      },
+      {
+        "id": "5814083897215072",
+        "material_name": "测试企业物资2"
+      }
+    ]
+  },
+  {
+    "success": true,
+    "resource_type": "rescueTeam",
+    "sql": "SELECT ID, TEAM_NAME FROM IPARK_AE_RESCUE_TEAM WHERE BUSINESS_AREA = '1' ORDER BY TEAM_TYPE ASC, TEAM_LEVEL ASC FETCH FIRST 3 ROWS ONLY",
+    "total_rows": 2,
+    "loaded_entities": 2,
+    "entities": [
+      {
+        "id": "5814080326617184",
+        "team_name": "测试企业队伍1"
+      },
+      {
+        "id": "5839629705988192",
+        "team_name": "应急救援队伍"
+      }
+    ]
+  },
+  {
+    "success": true,
+    "resource_type": "rescueTeam",
+    "sql": "SELECT ID, TEAM_NAME FROM IPARK_AE_RESCUE_TEAM WHERE BUSINESS_AREA = '2' ORDER BY TEAM_TYPE ASC, TEAM_LEVEL ASC FETCH FIRST 3 ROWS ONLY",
+    "total_rows": 2,
+    "loaded_entities": 2,
+    "entities": [
+      {
+        "id": "5845068380140832",
+        "team_name": "世倍尔救援"
+      },
+      {
+        "id": "5814081575929952",
+        "team_name": "测试企业队伍2"
+      }
+    ]
+  },
+  {
+    "success": true,
+    "resource_type": "rescueTeam",
+    "sql": "SELECT ID, TEAM_NAME FROM IPARK_AE_RESCUE_TEAM WHERE BUSINESS_AREA = '3' ORDER BY TEAM_TYPE ASC, TEAM_LEVEL ASC FETCH FIRST 3 ROWS ONLY",
+    "total_rows": 1,
+    "loaded_entities": 1,
+    "entities": [
+      {
+        "id": "5762653397371104",
+        "team_name": "救援队伍"
+      }
+    ]
+  },
+  {
+    "success": true,
+    "resource_type": "rescueTeam",
+    "sql": "SELECT ID, TEAM_NAME FROM IPARK_AE_RESCUE_TEAM WHERE BUSINESS_AREA = '4' ORDER BY TEAM_TYPE ASC, TEAM_LEVEL ASC FETCH FIRST 3 ROWS ONLY",
+    "total_rows": 0,
+    "loaded_entities": 0,
+    "entities": []
+  },
+  {
+    "success": true,
+    "resource_type": "rescueTeam",
+    "sql": "SELECT ID, TEAM_NAME FROM IPARK_AE_RESCUE_TEAM WHERE BUSINESS_AREA = '5' ORDER BY TEAM_TYPE ASC, TEAM_LEVEL ASC FETCH FIRST 3 ROWS ONLY",
+    "total_rows": 0,
+    "loaded_entities": 0,
+    "entities": []
+  },
+  {
+    "success": true,
+    "resource_type": "rescueTeam",
+    "sql": "SELECT ID, TEAM_NAME FROM IPARK_AE_RESCUE_TEAM WHERE BUSINESS_AREA = '6' ORDER BY TEAM_TYPE ASC, TEAM_LEVEL ASC FETCH FIRST 3 ROWS ONLY",
+    "total_rows": 0,
+    "loaded_entities": 0,
+    "entities": []
+  },
+  {
+    "success": true,
+    "resource_type": "rescueTeam",
+    "sql": "SELECT ID, TEAM_NAME FROM IPARK_AE_RESCUE_TEAM WHERE BUSINESS_AREA = '7' ORDER BY TEAM_TYPE ASC, TEAM_LEVEL ASC FETCH FIRST 3 ROWS ONLY",
+    "total_rows": 0,
+    "loaded_entities": 0,
+    "entities": []
+  },
+  {
+    "success": true,
+    "resource_type": "emergencyExpert",
+    "sql": "SELECT ID, EXPERT_NAME FROM IPARK_AE_EMERGENCY_EXPERT WHERE BUSINESS_AREA = '1' ORDER BY TITLE ASC FETCH FIRST 3 ROWS ONLY",
+    "total_rows": 3,
+    "loaded_entities": 3,
+    "entities": [
+      {
+        "id": "5762611983960288",
+        "expert_name": "1"
+      },
+      {
+        "id": "5845064958440736",
+        "expert_name": "世倍尔专家"
+      },
+      {
+        "id": "5845065802413344",
+        "expert_name": "世倍尔专家1"
+      }
+    ]
+  },
+  {
+    "success": true,
+    "resource_type": "emergencyExpert",
+    "sql": "SELECT ID, EXPERT_NAME FROM IPARK_AE_EMERGENCY_EXPERT WHERE BUSINESS_AREA = '2' ORDER BY TITLE ASC FETCH FIRST 3 ROWS ONLY",
+    "total_rows": 3,
+    "loaded_entities": 3,
+    "entities": [
+      {
+        "id": "5762605998819552",
+        "expert_name": "张三"
+      },
+      {
+        "id": "5759861257881824",
+        "expert_name": "张三"
+      },
+      {
+        "id": "5839746708850784",
+        "expert_name": "刘演翔"
+      }
+    ]
+  },
+  {
+    "success": true,
+    "resource_type": "emergencyExpert",
+    "sql": "SELECT ID, EXPERT_NAME FROM IPARK_AE_EMERGENCY_EXPERT WHERE BUSINESS_AREA = '3' ORDER BY TITLE ASC FETCH FIRST 3 ROWS ONLY",
+    "total_rows": 3,
+    "loaded_entities": 3,
+    "entities": [
+      {
+        "id": "5814068579289184",
+        "expert_name": "测试企业的专家"
+      },
+      {
+        "id": "5762607159363808",
+        "expert_name": "1"
+      },
+      {
+        "id": "5805468519188576",
+        "expert_name": "交通事故救援专家-企业"
+      }
+    ]
+  },
+  {
+    "success": true,
+    "resource_type": "emergencyExpert",
+    "sql": "SELECT ID, EXPERT_NAME FROM IPARK_AE_EMERGENCY_EXPERT WHERE BUSINESS_AREA = '4' ORDER BY TITLE ASC FETCH FIRST 3 ROWS ONLY",
+    "total_rows": 1,
+    "loaded_entities": 1,
+    "entities": [
+      {
+        "id": "5814111078107232",
+        "expert_name": "测试企业的专家2"
+      }
+    ]
+  },
+  {
+    "success": true,
+    "resource_type": "emergencyExpert",
+    "sql": "SELECT ID, EXPERT_NAME FROM IPARK_AE_EMERGENCY_EXPERT WHERE BUSINESS_AREA = '5' ORDER BY TITLE ASC FETCH FIRST 3 ROWS ONLY",
+    "total_rows": 0,
+    "loaded_entities": 0,
+    "entities": []
+  },
+  {
+    "success": true,
+    "resource_type": "emergencyExpert",
+    "sql": "SELECT ID, EXPERT_NAME FROM IPARK_AE_EMERGENCY_EXPERT WHERE BUSINESS_AREA = '6' ORDER BY TITLE ASC FETCH FIRST 3 ROWS ONLY",
+    "total_rows": 1,
+    "loaded_entities": 1,
+    "entities": [
+      {
+        "id": "5814112076679264",
+        "expert_name": "测试企业的专家3"
+      }
+    ]
+  },
+  {
+    "success": true,
+    "resource_type": "emergencyExpert",
+    "sql": "SELECT ID, EXPERT_NAME FROM IPARK_AE_EMERGENCY_EXPERT WHERE BUSINESS_AREA = '7' ORDER BY TITLE ASC FETCH FIRST 3 ROWS ONLY",
+    "total_rows": 1,
+    "loaded_entities": 1,
+    "entities": [
+      {
+        "id": "5816380738816096",
+        "expert_name": "园区专家2"
+      }
+    ]
+  },
+  {
+    "success": true,
+    "resource_type": "fireFightingFacilities",
+    "sql": "SELECT ID, NAME, LATITUDE_LONGITUDE FROM IPARK_AE_FIRE_PROTECTION WHERE LATITUDE_LONGITUDE IS NOT NULL",
+    "total_rows": 21,
+    "loaded_entities": 21,
+    "entities": [
+      {
+        "id": "5762661763795168",
+        "name": "消防设施",
+        "longitude": 122.21986530006659,
+        "latitude": 30.26526735087791
+      },
+      {
+        "id": "5762663949912288",
+        "name": "1",
+        "longitude": 120.13356754018565,
+        "latitude": 30.182217534419404
+      },
+      {
+        "id": "5762665448229088",
+        "name": "123",
+        "longitude": 120.13290721068903,
+        "latitude": 30.182434545046274
+      },
+      {
+        "id": "5819732498729056",
+        "name": "123",
+        "longitude": 120.13713369288403,
+        "latitude": 30.18407633347251
+      },
+      {
+        "id": "5819734867724384",
+        "name": "1",
+        "longitude": 120.13467416076357,
+        "latitude": 30.18278368645439
+      },
+      {
+        "id": "5839782972147808",
+        "name": "干粉灭火器",
+        "longitude": 122.119923,
+        "latitude": 30.272281
+      },
+      {
+        "id": "5839847809730656",
+        "name": "二氧化碳灭火器",
+        "longitude": 122.120052,
+        "latitude": 30.272178
+      },
+      {
+        "id": "5839849082898528",
+        "name": "火灾显示盘",
+        "longitude": 122.120206,
+        "latitude": 30.272209
+      },
+      {
+        "id": "5839850075375712",
+        "name": "局部D类干粉灭火系统",
+        "longitude": 122.120059,
+        "latitude": 30.272234
+      },
+      {
+        "id": "5839854587103328",
+        "name": "局部泡沫灭火系统",
+        "longitude": 122.120018,
+        "latitude": 30.272324
+      },
+      {
+        "id": "5839855577188448",
+        "name": "局部喷淋灭火系统",
+        "longitude": 122.120236,
+        "latitude": 30.272179
+      },
+      {
+        "id": "5839856672098400",
+        "name": "室内消火栓",
+        "longitude": 122.120109,
+        "latitude": 30.272182
+      },
+      {
+        "id": "5839867013089376",
+        "name": "手动报警装置",
+        "longitude": 122.119959,
+        "latitude": 30.272224
+      },
+      {
+        "id": "5839868272199776",
+        "name": "消防泵",
+        "longitude": 122.120078,
+        "latitude": 30.272226
+      },
+      {
+        "id": "5839869476948064",
+        "name": "消防锹、砂",
+        "longitude": 122.120087,
+        "latitude": 30.272137
+      },
+      {
+        "id": "5839877418797152",
+        "name": "消防水池",
+        "longitude": 122.119905,
+        "latitude": 30.272281
+      },
+      {
+        "id": "5839878580258912",
+        "name": "消防稳压泵",
+        "longitude": 122.120015,
+        "latitude": 30.272229
+      },
+      {
+        "id": "5839879896156256",
+        "name": "消防水炮",
+        "longitude": 122.119971,
+        "latitude": 30.272243
+      },
+      {
+        "id": "5839881501788256",
+        "name": "沙土",
+        "longitude": 122.120076,
+        "latitude": 30.272271
+      },
+      {
+        "id": "5839885385353312",
+        "name": "消防斧",
+        "longitude": 122.120098,
+        "latitude": 30.272145
+      },
+      {
+        "id": "5839886361708640",
+        "name": "固定消防水炮",
+        "longitude": 122.120036,
+        "latitude": 30.272145
+      }
+    ]
+  },
+  {
+    "success": true,
+    "resource_type": "shelter",
+    "sql": "SELECT ID, SHELTER_NAME, LON_AND_LAT FROM IPARK_AE_SHELTER WHERE LON_AND_LAT IS NOT NULL",
+    "total_rows": 4,
+    "loaded_entities": 4,
+    "entities": [
+      {
+        "id": "5762667709745376",
+        "shelter_name": "避难场所",
+        "longitude": 122.21791064206174,
+        "latitude": 30.267046388029907
+      },
+      {
+        "id": "5762669028493536",
+        "shelter_name": "1",
+        "longitude": 120.1331246883934,
+        "latitude": 30.18279045497076
+      },
+      {
+        "id": "5819744270895200",
+        "shelter_name": "qw",
+        "longitude": 120.13742984715824,
+        "latitude": 30.18311578245675
+      },
+      {
+        "id": "5839889087285344",
+        "shelter_name": "避难场所",
+        "longitude": 122.110273,
+        "latitude": 30.276873
+      }
+    ]
+  },
+  {
+    "success": true,
+    "resource_type": "medicalInstitution",
+    "sql": "SELECT ID, INSTITUTION_NAME, LOCAL_POS FROM IPARK_AE_MEDICAL_INSTITUTION ORDER BY INSTITUTION_TYPE ASC, INSTITUTION_LEVEL ASC FETCH FIRST 5 ROWS ONLY",
+    "total_rows": 5,
+    "loaded_entities": 5,
+    "entities": [
+      {
+        "id": "5850546207880480",
+        "institution_name": "岱山县第一人民医院",
+        "longitude": 122.203795,
+        "latitude": 30.249461
+      },
+      {
+        "id": "5762681305647328",
+        "institution_name": "1",
+        "longitude": 120.13484799486963,
+        "latitude": 30.182015451562467
+      },
+      {
+        "id": "5819883201972320",
+        "institution_name": "医疗机构二",
+        "longitude": 120.13324679955818,
+        "latitude": 30.183606568557344
+      },
+      {
+        "id": "5762680657234144",
+        "institution_name": "医疗机构",
+        "longitude": 122.21945804103106,
+        "latitude": 30.265265407892773
+      },
+      {
+        "id": "5839841149896800",
+        "institution_name": "岱西卫生院",
+        "longitude": 122.128812,
+        "latitude": 30.295999
+      }
+    ]
+  },
+  {
+    "success": true,
+    "resource_type": "rescueOrganization",
+    "sql": "SELECT ID, INSTITUTION_NAME, LOCAL_POS FROM IPARK_AE_RESCUE_INSTITUTION WHERE LOCAL_POS IS NOT NULL",
+    "total_rows": 5,
+    "loaded_entities": 5,
+    "entities": [
+      {
+        "id": "5762729602304352",
+        "institution_name": "救援机构",
+        "longitude": 122.22067085326367,
+        "latitude": 30.26600367176439
+      },
+      {
+        "id": "5762731374332256",
+        "institution_name": "1",
+        "longitude": 120.13403309324435,
+        "latitude": 30.181615236632485
+      },
+      {
+        "id": "5762732114037088",
+        "institution_name": "123",
+        "longitude": 120.13412629077403,
+        "latitude": 30.181628493312523
+      },
+      {
+        "id": "5904879143023984",
+        "institution_name": "测试",
+        "longitude": 122.105933,
+        "latitude": 30.282747
+      },
+      {
+        "id": "5995383136384624",
+        "institution_name": "救援机构",
+        "longitude": 122.105737,
+        "latitude": 30.282991
+      }
+    ]
+  },
+  {
+    "success": true,
+    "resource_type": "protectionTarget",
+    "sql": "SELECT ID, TARGET_NAME, LOCAL_POS FROM IPARK_AE_DEFEND_TARGET WHERE LOCAL_POS IS NOT NULL",
+    "total_rows": 8,
+    "loaded_entities": 8,
+    "entities": [
+      {
+        "id": "5763018846816448",
+        "target_name": "目标名称1",
+        "longitude": 122.2203934698872,
+        "latitude": 30.26513936402944
+      },
+      {
+        "id": "5763020509857984",
+        "target_name": "1",
+        "longitude": 120.13244134548084,
+        "latitude": 30.182123062168856
+      },
+      {
+        "id": "5763021878053056",
+        "target_name": "1",
+        "longitude": 120.13330498877592,
+        "latitude": 30.181390741381136
+      },
+      {
+        "id": "5763022444611776",
+        "target_name": "1",
+        "longitude": 120.1345913550542,
+        "latitude": 30.18160198231205
+      },
+      {
+        "id": "5763023085095104",
+        "target_name": "1",
+        "longitude": 120.12663391372858,
+        "latitude": 30.182298569571717
+      },
+      {
+        "id": "5834116477995104",
+        "target_name": "123",
+        "longitude": 120.13747307381276,
+        "latitude": 30.18434996584756
+      },
+      {
+        "id": "5904880746657136",
+        "target_name": "1",
+        "longitude": 122.105848,
+        "latitude": 30.28281
+      },
+      {
+        "id": "5994716559947376",
+        "target_name": "防护目标-测试-2025111700202",
+        "longitude": 120.138108,
+        "latitude": 30.17934
+      }
+    ]
+  }
+]

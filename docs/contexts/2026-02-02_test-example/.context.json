@@ -1,0 +1,20 @@
+{
+  "contextId": "2026-02-02_test-example",
+  "status": "completed",
+  "createdAt": "2026-02-02T11:45:57.480500Z",
+  "updatedAt": "2026-02-02T11:46:33.530218Z",
+  "completedAt": "2026-02-02T11:46:33.530218Z",
+  "title": "测试示例功能",
+  "description": "这是一个测试示例，用于演示上下文工程系统",
+  "assignee": "developer",
+  "gitBranch": "feature/test-example",
+  "documents": {
+    "requirements": "requirements.md",
+    "architectureChanges": "architecture-changes.md",
+    "featureSpec": "feature-spec.md",
+    "plan": "plan.md",
+    "todos": "todos.md",
+    "testPlan": "test-plan.md"
+  },
+  "staticDocsUpdated": []
+}

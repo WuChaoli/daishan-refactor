@@ -10,7 +10,7 @@ import pytest
 # 添加 rag_stream 目录（用于导入 src 包）
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from src.models.schemas import SourceDispatchRequest, SourceType
+from src.models.schemas import SourceDispatchRequest
 from src.services.source_dispath_srvice import handle_source_dispatch
 from src.services.log_manager import LogManager
 from src.config.settings import settings
@@ -26,7 +26,7 @@ async def test_source_dispatch():
     # 创建测试请求
     request = SourceDispatchRequest(
         accidentId="5844749472101664",
-        sourceType=SourceType.消防设施,
+        sourceType="fireFightingFacilities",
         voiceText="最近的污水处理厂在哪里"
     )
 
@@ -70,10 +70,10 @@ async def test_solid_resource_instruction():
 
     log_manager = LogManager(settings.logging)
 
-    # 创建测试请求，使用会触发resource意图的语音文本
+    # 创建测试请求,使用会触发resource意图的语音文本
     request = SourceDispatchRequest(
         accidentId="5844749472101664",
-        sourceType=SourceType.消防设施,
+        sourceType="fireFightingFacilities",
         voiceText="调度消防车、救护车到现场"
     )
 

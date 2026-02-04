@@ -1,0 +1,278 @@
+{
+  "summary": {
+    "total_tests": 24,
+    "passed_tests": 24,
+    "failed_tests": 0,
+    "accuracy": 100.0,
+    "resource_accuracy": 100.0,
+    "requirement_accuracy": 100.0,
+    "start_time": "2026-02-04T13:12:50.751439",
+    "end_time": "2026-02-04T13:13:01.797937"
+  },
+  "test_results": [
+    {
+      "test_id": "RESOURCE_001",
+      "category": "明确物品资源",
+      "voice_text": "给我酒精棉",
+      "expected_intent": "resource",
+      "actual_intent": "resource",
+      "is_correct": true,
+      "raw_response": "resource",
+      "error": null,
+      "timestamp": "2026-02-04T13:12:50.753330"
+    },
+    {
+      "test_id": "RESOURCE_002",
+      "category": "明确物品资源",
+      "voice_text": "我需要纱布和绷带",
+      "expected_intent": "resource",
+      "actual_intent": "resource",
+      "is_correct": true,
+      "raw_response": "resource",
+      "error": null,
+      "timestamp": "2026-02-04T13:12:51.209932"
+    },
+    {
+      "test_id": "RESOURCE_003",
+      "category": "明确人员资源",
+      "voice_text": "找张三专家",
+      "expected_intent": "resource",
+      "actual_intent": "resource",
+      "is_correct": true,
+      "raw_response": "resource",
+      "error": null,
+      "timestamp": "2026-02-04T13:12:51.836110"
+    },
+    {
+      "test_id": "RESOURCE_004",
+      "category": "明确人员资源",
+      "voice_text": "我要李四局长",
+      "expected_intent": "resource",
+      "actual_intent": "resource",
+      "is_correct": true,
+      "raw_response": "resource",
+      "error": null,
+      "timestamp": "2026-02-04T13:12:52.205251"
+    },
+    {
+      "test_id": "RESOURCE_005",
+      "category": "明确设施资源",
+      "voice_text": "找到东区污水处理厂",
+      "expected_intent": "resource",
+      "actual_intent": "resource",
+      "is_correct": true,
+      "raw_response": "resource",
+      "error": null,
+      "timestamp": "2026-02-04T13:12:52.573651"
+    },
+    {
+      "test_id": "RESOURCE_006",
+      "category": "明确设施资源",
+      "voice_text": "我要去东区人民医院",
+      "expected_intent": "resource",
+      "actual_intent": "resource",
+      "is_correct": true,
+      "raw_response": "resource",
+      "error": null,
+      "timestamp": "2026-02-04T13:12:52.964264"
+    },
+    {
+      "test_id": "RESOURCE_007",
+      "category": "明确物品资源",
+      "voice_text": "给我防护服和口罩",
+      "expected_intent": "resource",
+      "actual_intent": "resource",
+      "is_correct": true,
+      "raw_response": "resource",
+      "error": null,
+      "timestamp": "2026-02-04T13:12:53.567302"
+    },
+    {
+      "test_id": "RESOURCE_008",
+      "category": "明确人员资源",
+      "voice_text": "调派王五救援队",
+      "expected_intent": "resource",
+      "actual_intent": "resource",
+      "is_correct": true,
+      "raw_response": "resource",
+      "error": null,
+      "timestamp": "2026-02-04T13:12:53.969550"
+    },
+    {
+      "test_id": "RESOURCE_009",
+      "category": "明确设施资源",
+      "voice_text": "联系市中心消防站",
+      "expected_intent": "resource",
+      "actual_intent": "resource",
+      "is_correct": true,
+      "raw_response": "resource",
+      "error": null,
+      "timestamp": "2026-02-04T13:12:54.332475"
+    },
+    {
+      "test_id": "RESOURCE_010",
+      "category": "明确物品资源",
+      "voice_text": "需要灭火器和消防栓",
+      "expected_intent": "resource",
+      "actual_intent": "resource",
+      "is_correct": true,
+      "raw_response": "resource",
+      "error": null,
+      "timestamp": "2026-02-04T13:12:54.730453"
+    },
+    {
+      "test_id": "REQUIREMENT_001",
+      "category": "模糊位置需求",
+      "voice_text": "帮我找到最近的消防站",
+      "expected_intent": "requirement",
+      "actual_intent": "requirement",
+      "is_correct": true,
+      "raw_response": "requirement",
+      "error": null,
+      "timestamp": "2026-02-04T13:12:55.127539"
+    },
+    {
+      "test_id": "REQUIREMENT_002",
+      "category": "模糊事故处理",
+      "voice_text": "我遇到了火灾",
+      "expected_intent": "requirement",
+      "actual_intent": "requirement",
+      "is_correct": true,
+      "raw_response": "requirement",
+      "error": null,
+      "timestamp": "2026-02-04T13:12:55.526790"
+    },
+    {
+      "test_id": "REQUIREMENT_003",
+      "category": "模糊伤害处理",
+      "voice_text": "我被化学品腐蚀了怎么办",
+      "expected_intent": "requirement",
+      "actual_intent": "requirement",
+      "is_correct": true,
+      "raw_response": "requirement",
+      "error": null,
+      "timestamp": "2026-02-04T13:12:56.214812"
+    },
+    {
+      "test_id": "REQUIREMENT_004",
+      "category": "模糊位置需求",
+      "voice_text": "最近的医院在哪里",
+      "expected_intent": "requirement",
+      "actual_intent": "requirement",
+      "is_correct": true,
+      "raw_response": "requirement",
+      "error": null,
+      "timestamp": "2026-02-04T13:12:56.647942"
+    },
+    {
+      "test_id": "REQUIREMENT_005",
+      "category": "模糊救援需求",
+      "voice_text": "需要救援",
+      "expected_intent": "requirement",
+      "actual_intent": "requirement",
+      "is_correct": true,
+      "raw_response": "requirement",
+      "error": null,
+      "timestamp": "2026-02-04T13:12:57.074741"
+    },
+    {
+      "test_id": "REQUIREMENT_006",
+      "category": "模糊位置需求",
+      "voice_text": "附近有避难场所吗",
+      "expected_intent": "requirement",
+      "actual_intent": "requirement",
+      "is_correct": true,
+      "raw_response": "requirement",
+      "error": null,
+      "timestamp": "2026-02-04T13:12:57.512727"
+    },
+    {
+      "test_id": "REQUIREMENT_007",
+      "category": "模糊事故处理",
+      "voice_text": "发生了危化品泄漏",
+      "expected_intent": "requirement",
+      "actual_intent": "requirement",
+      "is_correct": true,
+      "raw_response": "requirement",
+      "error": null,
+      "timestamp": "2026-02-04T13:12:57.939484"
+    },
+    {
+      "test_id": "REQUIREMENT_008",
+      "category": "模糊救援需求",
+      "voice_text": "有人受伤了",
+      "expected_intent": "requirement",
+      "actual_intent": "requirement",
+      "is_correct": true,
+      "raw_response": "requirement",
+      "error": null,
+      "timestamp": "2026-02-04T13:12:58.574635"
+    },
+    {
+      "test_id": "REQUIREMENT_009",
+      "category": "模糊位置需求",
+      "voice_text": "哪里有救援队伍",
+      "expected_intent": "requirement",
+      "actual_intent": "requirement",
+      "is_correct": true,
+      "raw_response": "requirement",
+      "error": null,
+      "timestamp": "2026-02-04T13:12:58.991026"
+    },
+    {
+      "test_id": "REQUIREMENT_010",
+      "category": "模糊事故处理",
+      "voice_text": "发生交通事故了",
+      "expected_intent": "requirement",
+      "actual_intent": "requirement",
+      "is_correct": true,
+      "raw_response": "requirement",
+      "error": null,
+      "timestamp": "2026-02-04T13:12:59.409970"
+    },
+    {
+      "test_id": "REQUIREMENT_011",
+      "category": "模糊位置需求",
+      "voice_text": "找一个最近的避难点",
+      "expected_intent": "requirement",
+      "actual_intent": "requirement",
+      "is_correct": true,
+      "raw_response": "requirement",
+      "error": null,
+      "timestamp": "2026-02-04T13:12:59.835521"
+    },
+    {
+      "test_id": "REQUIREMENT_012",
+      "category": "模糊救援需求",
+      "voice_text": "需要专业救援人员",
+      "expected_intent": "requirement",
+      "actual_intent": "requirement",
+      "is_correct": true,
+      "raw_response": "requirement",
+      "error": null,
+      "timestamp": "2026-02-04T13:13:00.263437"
+    },
+    {
+      "test_id": "REQUIREMENT_013",
+      "category": "模糊设施需求",
+      "voice_text": "我要去XX医院",
+      "expected_intent": "requirement",
+      "actual_intent": "requirement",
+      "is_correct": true,
+      "raw_response": "requirement",
+      "error": null,
+      "timestamp": "2026-02-04T13:13:01.041455"
+    },
+    {
+      "test_id": "REQUIREMENT_014",
+      "category": "模糊设施需求",
+      "voice_text": "找到XX污水处理厂",
+      "expected_intent": "requirement",
+      "actual_intent": "requirement",
+      "is_correct": true,
+      "raw_response": "requirement",
+      "error": null,
+      "timestamp": "2026-02-04T13:13:01.431034"
+    }
+  ]
+}

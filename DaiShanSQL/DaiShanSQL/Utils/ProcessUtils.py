@@ -1,4 +1,7 @@
 class ProcessUtils:
+    '''
+    基于规则对匹配到的表进行扩充
+    '''
     def __init__(self):
         self.avaliable_function = {
             "v_ai_ipark_hm_hazard_info_detail": self.process_weixianyuan,
@@ -16,7 +19,13 @@ class ProcessUtils:
             "v_ai_ipark_ra_latest_risk_snapshot": self.process_fengxian,
             "v_ai_ipark_hm_company_promise": self.process_fengxian,
             "v_ai_ipark_ipark_dp_risk_obj": self.process_fengxiangAnalysis,
-            "v_ai_ipark_dp_evaluation": self.process_fengxiangAnalysis
+            "v_ai_ipark_dp_evaluation": self.process_fengxiangAnalysis,
+            "v_ai_ipark_hm_chemical":self.process_chemical,
+            "v_ai_ipark_hm_chemical_detail":self.process_chemical,
+            "v_ai_ipark_hm_hazard_info":self.process_hazard_info,
+            "v_ai_ipark_hm_hazard_info_detail":self.process_hazard_info,
+            "v_ai_ipark_hm_craft":self.process_craft,
+            "v_ai_ipark_hm_craft_detail":self.process_craft
         }
 
     # 危险源
@@ -71,22 +80,7 @@ class ProcessUtils:
 
         # 报警
     def process_baojing(self, query, origintable):
-            table = []
-            # v_ai_ipark_alarm_job关键词
-            KeyWords_1 = ["作业", "报警等级"]
-            # v_ai_ipark_alarm_monitor关键词
-            KeyWords_2 = ["危险源", "指标名称", "指标位号", "设备类型", "设备编码"]
-            # v_ai_ipark_alarm_ai_ledger关键词
-            KeyWords_3 = ["通道", "关联设备", "处理状态", "待处理", "处理中"]
-            if any(keyword in query for keyword in KeyWords_1):
-                table.append("v_ai_ipark_alarm_job")
-            if any(keyword in query for keyword in KeyWords_2):
-                table.append("v_ai_ipark_alarm_monitor")
-            if any(keyword in query for keyword in KeyWords_3):
-                table.append("v_ai_ipark_alarm_ai_ledger")
-            if table == []:
-                return [origintable]
-            return table
+        return ["v_ai_ipark_alarm_ai_ledger","v_ai_ipark_alarm_job","v_ai_ipark_alarm_monitor"]
 
         # 风险
     def process_fengxian(self, query, origintable):
@@ -118,7 +112,19 @@ class ProcessUtils:
             return ["v_ai_ipark_dp_evaluation"]
         else:
             return [origin_table]
-
+    
+    def process_chemical(self,query,origin_table):
+        return ["v_ai_ipark_hm_chemical_detail","v_ai_ipark_hm_chemical"]
+    def process_hazard_info(self,query,origin_table):
+        return ["v_ai_ipark_hm_hazard_info_detail","v_ai_ipark_hm_hazard_info"]
+    def process_craft(self,query,origin_table):
+        return ["v_ai_ipark_hm_craft","v_ai_ipark_hm_craft_detail"]
+    
+    def process_Includefengxiang(self,query):
+        if "风险" in query:
+            return ["v_ai_ipark_ra_daily_risk_summary_company","v_ai_ipark_ra_park_daily_risk_summary_park"]
+        else:
+            return []
     # 这里处理所有的表
     def process_all(self, query, tables):
         res_table = []
@@ -128,9 +134,9 @@ class ProcessUtils:
                 res_table.extend(now_table)
             else:
                 res_table.append(table)
-        FinalTable = list(set(tables + res_table))
+        fengxiangTable=self.process_Includefengxiang(query)
+        FinalTable = list(set(tables + res_table+ fengxiangTable))
         return FinalTable
-        return res_table
 
 if __name__ == "__main__":
     psutils=ProcessUtils()

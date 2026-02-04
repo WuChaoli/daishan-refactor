@@ -6,8 +6,8 @@ intent_judgment - 意图判断核心逻辑
 from dataclasses import dataclass
 from typing import List, Optional
 
-from rag_stream.src.services.log_manager import LogManager
-from rag_stream.src.services.ragflow_client import RagflowClient
+from src.services.log_manager import LogManager
+from src.services.ragflow_client import RagflowClient
 from src.config.settings import settings
 
 

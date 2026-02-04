@@ -1,0 +1,1284 @@
+{
+  "IPARK_AE_EMERGENCY_SUPPLIES": {
+    "source_type": "emergencySupplies",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "NUMBER",
+        "length": 22,
+        "nullable": "N"
+      },
+      {
+        "name": "DATA_ID",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "COMPANY_CODE",
+        "type": "VARCHAR2",
+        "length": 32,
+        "nullable": "Y"
+      },
+      {
+        "name": "PARK_CODE",
+        "type": "VARCHAR2",
+        "length": 32,
+        "nullable": "Y"
+      },
+      {
+        "name": "MATERIAL_CODE",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "MATERIAL_NAME",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "MATERIEL_TYPE",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "MATERIAL_STATUS",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "MATERIAL_PURPOSE",
+        "type": "CLOB",
+        "length": 2147483647,
+        "nullable": "Y"
+      },
+      {
+        "name": "REQUIREMENTS",
+        "type": "CLOB",
+        "length": 2147483647,
+        "nullable": "Y"
+      },
+      {
+        "name": "AFFILIATION",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "LOCATION_NAME",
+        "type": "CLOB",
+        "length": 2147483647,
+        "nullable": "Y"
+      },
+      {
+        "name": "LOCAL_POS",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "WAREHOUSE_ID",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "MT_COUNT",
+        "type": "DECIMAL",
+        "length": 22,
+        "nullable": "Y"
+      },
+      {
+        "name": "DIRECTOR",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "TELEPHONE",
+        "type": "VARCHAR2",
+        "length": 32,
+        "nullable": "Y"
+      },
+      {
+        "name": "EVALUATION_RECORD_ID",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "MATERIAL_PIC",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "ATTACHMENT",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "WHETHER_PARK",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "MT_COUNT_UNIT",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "SORT_ORDER",
+        "type": "INTEGER",
+        "length": 4,
+        "nullable": "Y"
+      },
+      {
+        "name": "CREATE_BY",
+        "type": "VARCHAR2",
+        "length": 32,
+        "nullable": "Y"
+      },
+      {
+        "name": "CREATE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "UPDATE_BY",
+        "type": "VARCHAR2",
+        "length": 32,
+        "nullable": "Y"
+      },
+      {
+        "name": "UPDATE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "DELETED",
+        "type": "VARCHAR2",
+        "length": 1,
+        "nullable": "Y"
+      },
+      {
+        "name": "DELETE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "COM_CREATE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "COM_UPDATE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "COM_DELETE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "EXT_DATA_ID",
+        "type": "NUMBER",
+        "length": 22,
+        "nullable": "Y"
+      },
+      {
+        "name": "DATA_VERSION",
+        "type": "NUMBER",
+        "length": 22,
+        "nullable": "Y"
+      }
+    ]
+  },
+  "IPARK_AE_RESCUE_TEAM": {
+    "source_type": "rescueTeam",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "NUMBER",
+        "length": 22,
+        "nullable": "N"
+      },
+      {
+        "name": "DATA_ID",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "COMPANY_CODE",
+        "type": "VARCHAR2",
+        "length": 32,
+        "nullable": "Y"
+      },
+      {
+        "name": "PARK_CODE",
+        "type": "VARCHAR2",
+        "length": 32,
+        "nullable": "Y"
+      },
+      {
+        "name": "TEAM_CODE",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "TEAM_NAME",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "TEAM_TYPE",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "TEAM_LEVEL",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "BUSINESS_AREA",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "AFFILIATION",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "TOTAL",
+        "type": "INTEGER",
+        "length": 4,
+        "nullable": "Y"
+      },
+      {
+        "name": "DIRECTOR",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "TELEPHONE",
+        "type": "VARCHAR2",
+        "length": 32,
+        "nullable": "Y"
+      },
+      {
+        "name": "ADDRESS",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "LATITUDE_LONGITUDE",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "MATERIAL_PIC",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "ATTACHMENT",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "EVALUATION_RECORD_ID",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "WHETHER_PARK",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "SORT_ORDER",
+        "type": "INTEGER",
+        "length": 4,
+        "nullable": "Y"
+      },
+      {
+        "name": "CREATE_BY",
+        "type": "VARCHAR2",
+        "length": 32,
+        "nullable": "Y"
+      },
+      {
+        "name": "CREATE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "UPDATE_BY",
+        "type": "VARCHAR2",
+        "length": 32,
+        "nullable": "Y"
+      },
+      {
+        "name": "UPDATE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "DELETED",
+        "type": "VARCHAR2",
+        "length": 1,
+        "nullable": "Y"
+      },
+      {
+        "name": "DELETE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "COM_CREATE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "COM_UPDATE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "COM_DELETE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "EXT_DATA_ID",
+        "type": "NUMBER",
+        "length": 22,
+        "nullable": "Y"
+      },
+      {
+        "name": "DATA_VERSION",
+        "type": "NUMBER",
+        "length": 22,
+        "nullable": "Y"
+      }
+    ]
+  },
+  "IPARK_AE_EMERGENCY_EXPERT": {
+    "source_type": "emergencyExpert",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "NUMBER",
+        "length": 22,
+        "nullable": "N"
+      },
+      {
+        "name": "DATA_ID",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "COMPANY_CODE",
+        "type": "VARCHAR2",
+        "length": 32,
+        "nullable": "Y"
+      },
+      {
+        "name": "PARK_CODE",
+        "type": "VARCHAR2",
+        "length": 32,
+        "nullable": "Y"
+      },
+      {
+        "name": "EXPERT_CODE",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "EXPERT_NAME",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "SEX",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "BIRTHDAY",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "DEGREE",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "MAJOR",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "TITLE",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "AFFILIATION",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "TELEPHONE",
+        "type": "VARCHAR2",
+        "length": 32,
+        "nullable": "Y"
+      },
+      {
+        "name": "EMAIL",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "BUSINESS_AREA",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "EXPERT_PHOTO",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "RELATED_MATERIALS",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "EVALUATION_RECORD_ID",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "WHETHER_PARK_EXPERT",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "SORT_ORDER",
+        "type": "INTEGER",
+        "length": 4,
+        "nullable": "Y"
+      },
+      {
+        "name": "CREATE_BY",
+        "type": "VARCHAR2",
+        "length": 32,
+        "nullable": "Y"
+      },
+      {
+        "name": "CREATE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "UPDATE_BY",
+        "type": "VARCHAR2",
+        "length": 32,
+        "nullable": "Y"
+      },
+      {
+        "name": "UPDATE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "DELETED",
+        "type": "VARCHAR2",
+        "length": 1,
+        "nullable": "Y"
+      },
+      {
+        "name": "DELETE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "COM_CREATE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "COM_UPDATE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "COM_DELETE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "EXT_DATA_ID",
+        "type": "NUMBER",
+        "length": 22,
+        "nullable": "Y"
+      },
+      {
+        "name": "DATA_VERSION",
+        "type": "NUMBER",
+        "length": 22,
+        "nullable": "Y"
+      }
+    ]
+  },
+  "IPARK_AE_FIRE_PROTECTION": {
+    "source_type": "fireFightingFacilities",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "NUMBER",
+        "length": 22,
+        "nullable": "N"
+      },
+      {
+        "name": "COMPANY_CODE",
+        "type": "VARCHAR2",
+        "length": 255,
+        "nullable": "Y"
+      },
+      {
+        "name": "PARK_CODE",
+        "type": "VARCHAR2",
+        "length": 255,
+        "nullable": "Y"
+      },
+      {
+        "name": "DATA_ID",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "CODE",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "N"
+      },
+      {
+        "name": "MATERIAL_EXPIR",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "N"
+      },
+      {
+        "name": "LATITUDE_LONGITUDE",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "N"
+      },
+      {
+        "name": "DIRECTOR",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "N"
+      },
+      {
+        "name": "NOTES",
+        "type": "CLOB",
+        "length": 2147483647,
+        "nullable": "Y"
+      },
+      {
+        "name": "ATTACHMENT",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "NAME",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "DEPOSIT_POSITION",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "N"
+      },
+      {
+        "name": "TELEPHONE",
+        "type": "VARCHAR2",
+        "length": 255,
+        "nullable": "N"
+      },
+      {
+        "name": "MATERIAL_PIC",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "WHETHER_PARK",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "SORT_ORDER",
+        "type": "INTEGER",
+        "length": 4,
+        "nullable": "Y"
+      },
+      {
+        "name": "COM_CREATE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "COM_DELETE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "COM_UPDATE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "CREATE_BY",
+        "type": "VARCHAR2",
+        "length": 32,
+        "nullable": "Y"
+      },
+      {
+        "name": "CREATE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "UPDATE_BY",
+        "type": "VARCHAR2",
+        "length": 32,
+        "nullable": "Y"
+      },
+      {
+        "name": "UPDATE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "DELETED",
+        "type": "VARCHAR2",
+        "length": 1,
+        "nullable": "Y"
+      },
+      {
+        "name": "DELETE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "EVALUATION_RECORD_ID",
+        "type": "VARCHAR",
+        "length": 32,
+        "nullable": "Y"
+      },
+      {
+        "name": "EXT_DATA_ID",
+        "type": "NUMBER",
+        "length": 22,
+        "nullable": "Y"
+      },
+      {
+        "name": "DATA_VERSION",
+        "type": "NUMBER",
+        "length": 22,
+        "nullable": "Y"
+      }
+    ]
+  },
+  "IPARK_AE_SHELTER": {
+    "source_type": "shelter",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "NUMBER",
+        "length": 22,
+        "nullable": "N"
+      },
+      {
+        "name": "COMPANY_CODE",
+        "type": "VARCHAR2",
+        "length": 255,
+        "nullable": "Y"
+      },
+      {
+        "name": "DATA_ID",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "PARK_CODE",
+        "type": "VARCHAR2",
+        "length": 255,
+        "nullable": "Y"
+      },
+      {
+        "name": "SHELTER_GRADE",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "ADDRESS",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "N"
+      },
+      {
+        "name": "CAPACITY_NUMS",
+        "type": "INTEGER",
+        "length": 4,
+        "nullable": "Y"
+      },
+      {
+        "name": "DIRECTOR",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "N"
+      },
+      {
+        "name": "MATERIAL_PIC",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "SHELTER_CODE",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "N"
+      },
+      {
+        "name": "SHELTER_NAME",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "N"
+      },
+      {
+        "name": "LON_AND_LAT",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "N"
+      },
+      {
+        "name": "EFFECTIVE_REFUGE_AREA",
+        "type": "DECIMAL",
+        "length": 22,
+        "nullable": "N"
+      },
+      {
+        "name": "TELEPHONE",
+        "type": "VARCHAR2",
+        "length": 255,
+        "nullable": "N"
+      },
+      {
+        "name": "ATTACHMENT",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "WHETHER_PARK",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "Y"
+      },
+      {
+        "name": "COM_CREATE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "COM_DELETE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "COM_UPDATE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "CREATE_BY",
+        "type": "VARCHAR2",
+        "length": 32,
+        "nullable": "Y"
+      },
+      {
+        "name": "CREATE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "UPDATE_BY",
+        "type": "VARCHAR2",
+        "length": 32,
+        "nullable": "Y"
+      },
+      {
+        "name": "UPDATE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "DELETED",
+        "type": "VARCHAR2",
+        "length": 1,
+        "nullable": "Y"
+      },
+      {
+        "name": "DELETE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "SORT_ORDER",
+        "type": "INTEGER",
+        "length": 4,
+        "nullable": "Y"
+      },
+      {
+        "name": "EXT_DATA_ID",
+        "type": "NUMBER",
+        "length": 22,
+        "nullable": "Y"
+      },
+      {
+        "name": "DATA_VERSION",
+        "type": "NUMBER",
+        "length": 22,
+        "nullable": "Y"
+      }
+    ]
+  },
+  "IPARK_AE_MEDICAL_INSTITUTION": {
+    "source_type": "medicalInstitution",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "NUMBER",
+        "length": 22,
+        "nullable": "N"
+      },
+      {
+        "name": "PARK_CODE",
+        "type": "VARCHAR2",
+        "length": 255,
+        "nullable": "Y"
+      },
+      {
+        "name": "INSTITUTION_NAME",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "N"
+      },
+      {
+        "name": "INSTITUTION_CODE",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "N"
+      },
+      {
+        "name": "INSTITUTION_TYPE",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "N"
+      },
+      {
+        "name": "INSTITUTION_LEVEL",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "N"
+      },
+      {
+        "name": "DIRECTOR",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "N"
+      },
+      {
+        "name": "TELEPHONE",
+        "type": "VARCHAR2",
+        "length": 255,
+        "nullable": "N"
+      },
+      {
+        "name": "LOCAL_POS",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "N"
+      },
+      {
+        "name": "INSTITUTION_ADDRESS",
+        "type": "CLOB",
+        "length": 2147483647,
+        "nullable": "Y"
+      },
+      {
+        "name": "MAIN_FEATURES",
+        "type": "CLOB",
+        "length": 2147483647,
+        "nullable": "Y"
+      },
+      {
+        "name": "SORT_ORDER",
+        "type": "INTEGER",
+        "length": 4,
+        "nullable": "Y"
+      },
+      {
+        "name": "CREATE_BY",
+        "type": "VARCHAR2",
+        "length": 32,
+        "nullable": "Y"
+      },
+      {
+        "name": "CREATE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "UPDATE_BY",
+        "type": "VARCHAR2",
+        "length": 32,
+        "nullable": "Y"
+      },
+      {
+        "name": "UPDATE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "DELETED",
+        "type": "VARCHAR2",
+        "length": 1,
+        "nullable": "Y"
+      },
+      {
+        "name": "DELETE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "EXT_DATA_ID",
+        "type": "NUMBER",
+        "length": 22,
+        "nullable": "Y"
+      }
+    ]
+  },
+  "IPARK_AE_RESCUE_INSTITUTION": {
+    "source_type": "rescueOrganization",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "NUMBER",
+        "length": 22,
+        "nullable": "N"
+      },
+      {
+        "name": "INSTITUTION_NAME",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "N"
+      },
+      {
+        "name": "PARK_CODE",
+        "type": "VARCHAR2",
+        "length": 255,
+        "nullable": "Y"
+      },
+      {
+        "name": "AFFILIATION",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "N"
+      },
+      {
+        "name": "LOCAL_POS",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "N"
+      },
+      {
+        "name": "DESCRIPTION",
+        "type": "CLOB",
+        "length": 2147483647,
+        "nullable": "Y"
+      },
+      {
+        "name": "INSTITUTION_CODE",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "N"
+      },
+      {
+        "name": "INSTITUTION_TYPE",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "N"
+      },
+      {
+        "name": "TELEPHONE",
+        "type": "VARCHAR2",
+        "length": 255,
+        "nullable": "Y"
+      },
+      {
+        "name": "INSTITUTION_ADDRESS",
+        "type": "CLOB",
+        "length": 2147483647,
+        "nullable": "Y"
+      },
+      {
+        "name": "SORT_ORDER",
+        "type": "INTEGER",
+        "length": 4,
+        "nullable": "Y"
+      },
+      {
+        "name": "CREATE_BY",
+        "type": "VARCHAR2",
+        "length": 32,
+        "nullable": "Y"
+      },
+      {
+        "name": "CREATE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "UPDATE_BY",
+        "type": "VARCHAR2",
+        "length": 32,
+        "nullable": "Y"
+      },
+      {
+        "name": "UPDATE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "DELETED",
+        "type": "VARCHAR2",
+        "length": 1,
+        "nullable": "Y"
+      },
+      {
+        "name": "DELETE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "EXT_DATA_ID",
+        "type": "NUMBER",
+        "length": 22,
+        "nullable": "Y"
+      }
+    ]
+  },
+  "IPARK_AE_DEFEND_TARGET": {
+    "source_type": "protectionTarget",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "NUMBER",
+        "length": 22,
+        "nullable": "N"
+      },
+      {
+        "name": "PARK_CODE",
+        "type": "VARCHAR2",
+        "length": 255,
+        "nullable": "Y"
+      },
+      {
+        "name": "TARGET_NAME",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "N"
+      },
+      {
+        "name": "TARGET_TYPE",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "N"
+      },
+      {
+        "name": "DIRECTOR",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "N"
+      },
+      {
+        "name": "TELEPHONE",
+        "type": "VARCHAR2",
+        "length": 255,
+        "nullable": "N"
+      },
+      {
+        "name": "LOCAL_POS",
+        "type": "VARCHAR2",
+        "length": 300,
+        "nullable": "N"
+      },
+      {
+        "name": "ADDRESS",
+        "type": "CLOB",
+        "length": 2147483647,
+        "nullable": "N"
+      },
+      {
+        "name": "SCALE",
+        "type": "CLOB",
+        "length": 2147483647,
+        "nullable": "Y"
+      },
+      {
+        "name": "DEFEND_MEASURE",
+        "type": "CLOB",
+        "length": 2147483647,
+        "nullable": "Y"
+      },
+      {
+        "name": "SORT_ORDER",
+        "type": "INTEGER",
+        "length": 4,
+        "nullable": "Y"
+      },
+      {
+        "name": "CREATE_BY",
+        "type": "VARCHAR2",
+        "length": 32,
+        "nullable": "Y"
+      },
+      {
+        "name": "CREATE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "UPDATE_BY",
+        "type": "VARCHAR2",
+        "length": 32,
+        "nullable": "Y"
+      },
+      {
+        "name": "UPDATE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "DELETED",
+        "type": "VARCHAR2",
+        "length": 1,
+        "nullable": "Y"
+      },
+      {
+        "name": "DELETE_TIME",
+        "type": "TIMESTAMP",
+        "length": 8,
+        "nullable": "Y"
+      },
+      {
+        "name": "EXT_DATA_ID",
+        "type": "NUMBER",
+        "length": 22,
+        "nullable": "Y"
+      }
+    ]
+  }
+}
