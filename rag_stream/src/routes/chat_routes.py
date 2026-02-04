@@ -16,9 +16,12 @@ from src.models.schemas import (
     ChatDeleteRequest,
     SessionRequest,
     SessionResponse,
+    PeopleDispatchRequest,
+    SourceDispatchRequest,
 )
-from src.services.dify_service import should_use_dify, stream_dify_chatflow_response
+from src.services.dify_service import should_use_dify, stream_dify_chatflow_response, personnel_dispatch
 from src.services.rag_service import get_or_create_session, stream_chat_response
+from src.services.source_dispath_srvice import handle_source_dispatch
 from src.utils.session_manager import session_manager
 from src.services.log_manager import LogManager
 from src.services.ragflow_client import RagflowClient
@@ -297,6 +300,51 @@ async def delete_session(session_id: str) -> Dict[str, Any]:
     session_manager.cleanup_expired_session(session_id)
     return {"code": 0, "message": "会话删除成功", "data": None}
 
+
+@router.post("/ipark-ae/personnel-dispatch")
+async def people_dispatch(request: PeopleDispatchRequest) -> Dict[str, Any]:
+    """
+    人员调度接口
+
+    接收事故信息和语音文本，调用 Dify 人员调度 Chat 应用，
+    返回人员ID列表（JSON格式）。
+
+    Args:
+        request: 包含 accidentId 和 voiceText 的请求体
+
+    Returns:
+        Dict[str, Any]: 包含人员调度结果的字典
+
+    Raises:
+        HTTPException: 当 voiceText 为空时
+    """
+    if not request.voiceText:
+        raise HTTPException(status_code=400, detail="voiceText 不能为空")
+
+    user_id = None  # 可以从请求头或其他地方获取
+
+    result = await personnel_dispatch(
+        voice_text=request.voiceText,
+        user_id=user_id
+    )
+
+    return result
+
+@router.post("/ipark-ae/source-dispatch")
+async def source_dispatch(request: SourceDispatchRequest):
+    """
+    资源调度接口
+
+    接收事故信息、资源类型和语音文本，处理资源调度请求。
+
+    Args:
+        request: 包含 accidentId、sourceType 和 voiceText 的请求体
+
+    Returns:
+        List[Dict[str, str]]: 资源列表
+    """
+    result = await handle_source_dispatch(request, log_manager)
+    return result
 
 @router.get("/health")
 async def health_check() -> Dict[str, Any]:
