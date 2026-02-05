@@ -83,11 +83,14 @@ async def lifespan(app: FastAPI):
         try:
             from dify_sdk import DifyClient
 
-            dify_chat_client = DifyClient.from_config(
-                name="sql_result_formatter",
-                app_type="chat",
-                environment="default",
-                config_path=config_path  # 显式传递配置文件路径
+            sql_formatter_key = os.getenv("DIFY_CHAT_SQL_FORMATTER_KEY")
+            if not sql_formatter_key:
+                raise ValueError("环境变量 DIFY_CHAT_SQL_FORMATTER_KEY 未设置")
+
+            dify_base_url = os.getenv("DIFY_BASE_RUL", "http://172.16.11.60/v1")
+            dify_chat_client = DifyClient(
+                api_key=sql_formatter_key,
+                base_url=dify_base_url
             )
             app.state.dify_chat_client = dify_chat_client
             print("✓ Dify Chat 客户端初始化完成 (SQL 结果格式化)")
@@ -100,29 +103,34 @@ async def lifespan(app: FastAPI):
         try:
             from dify_sdk import DifyClient
 
-            park_kb_client = DifyClient.from_config(
-                name="park_kb_chat",
-                app_type="chat",
-                environment="default",
-                config_path=config_path  # 显式传递配置文件路径
-            )
-            app.state.park_kb_client = park_kb_client
+            dify_base_url = os.getenv("DIFY_BASE_RUL", "http://172.16.11.60/v1")
 
-            enterprise_kb_client = DifyClient.from_config(
-                name="enterprise_kb_chat",
-                app_type="chat",
-                environment="default",
-                config_path=config_path  # 显式传递配置文件路径
-            )
-            app.state.enterprise_kb_client = enterprise_kb_client
+            park_kb_key = os.getenv("DIFY_CHAT_PARK_KB_KEY")
+            enterprise_kb_key = os.getenv("DIFY_CHAT_ENTERPRISE_KB_KEY")
+            safety_kb_key = os.getenv("DIFY_CHAT_SAFETY_KB_KEY")
 
-            safety_kb_client = DifyClient.from_config(
-                name="safety_kb_chat",
-                app_type="chat",
-                environment="default",
-                config_path=config_path  # 显式传递配置文件路径
+            if not all([park_kb_key, enterprise_kb_key, safety_kb_key]):
+                missing = []
+                if not park_kb_key:
+                    missing.append("DIFY_CHAT_PARK_KB_KEY")
+                if not enterprise_kb_key:
+                    missing.append("DIFY_CHAT_ENTERPRISE_KB_KEY")
+                if not safety_kb_key:
+                    missing.append("DIFY_CHAT_SAFETY_KB_KEY")
+                raise ValueError(f"环境变量未设置: {', '.join(missing)}")
+
+            app.state.park_kb_client = DifyClient(
+                api_key=park_kb_key,
+                base_url=dify_base_url
             )
-            app.state.safety_kb_client = safety_kb_client
+            app.state.enterprise_kb_client = DifyClient(
+                api_key=enterprise_kb_key,
+                base_url=dify_base_url
+            )
+            app.state.safety_kb_client = DifyClient(
+                api_key=safety_kb_key,
+                base_url=dify_base_url
+            )
 
             print("✓ 三个知识库 Chat 客户端初始化完成")
             print("  - 园区知识库 Chat: 已就绪")
@@ -140,13 +148,15 @@ async def lifespan(app: FastAPI):
         try:
             from dify_sdk import DifyClient
 
-            type0_semantic_client = DifyClient.from_config(
-                name="type0_semantic_chat",
-                app_type="chat",
-                environment="default",
-                config_path=config_path  # 显式传递配置文件路径
+            type0_semantic_key = os.getenv("DIFY_CHAT_TYPE0_SEMANTIC_KEY")
+            if not type0_semantic_key:
+                raise ValueError("环境变量 DIFY_CHAT_TYPE0_SEMANTIC_KEY 未设置")
+
+            dify_base_url = os.getenv("DIFY_BASE_RUL", "http://172.16.11.60/v1")
+            app.state.type0_semantic_client = DifyClient(
+                api_key=type0_semantic_key,
+                base_url=dify_base_url
             )
-            app.state.type0_semantic_client = type0_semantic_client
             print("✓ Type 0 语义问答 Chat 客户端初始化完成")
         except Exception as e:
             print(f"⚠ Type 0 语义问答 Chat 客户端初始化失败: {e}")
@@ -226,16 +236,19 @@ app.include_router(router)
 
 if __name__ == "__main__":
     import uvicorn
+    import sys
 
-    # 从配置读取端口（默认 11028）
+    # 从配置读取端口（使用绝对路径）
     try:
-        config_manager = ConfigManager("config.yaml")
+        config_path = os.path.join(os.path.dirname(__file__), "config.yaml")
+        config_manager = ConfigManager(config_path)
         config = config_manager.get_config()
-        port = config.server_port if config else 11028
-        host = config.server_host if config else "0.0.0.0"
-    except Exception:
-        port = 11028
-        host = "0.0.0.0"
+        port = config.server_port
+        host = config.server_host
+    except Exception as e:
+        print(f"✗ 配置加载失败: {e}")
+        print("服务启动中止，请检查配置文件")
+        sys.exit(1)
 
     print(f"FastAPI 服务启动中... 端口: {port}")
     print(f"接口文档地址: http://localhost:{port}/docs")
