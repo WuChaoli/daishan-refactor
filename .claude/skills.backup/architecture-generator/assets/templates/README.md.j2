@@ -1,0 +1,60 @@
+# {{ project_name }} 架构文档
+
+生成时间: {{ generated_at }}
+项目路径: {{ project_path }}
+
+---
+
+## 概述
+
+本文档由 `architecture-generator` 技能自动生成，包含项目的架构信息：
+
+- **总文件数**: {{ stats.total_files }}
+- **主要语言**:
+{% for ext, count in stats.by_extension.items() %}
+  - `{{ ext }}`: {{ count }} 个文件
+{% endfor %}
+
+---
+
+## 快速导航
+
+- [文件结构](./file-structure.md) - 完整的项目文件树
+- [依赖关系](./dependencies/level-0.md) - 模块和文件之间的依赖关系
+- [符号索引](./symbols-index.md) - 代码符号（类、函数）索引
+
+---
+
+## 如何使用本文档
+
+### 理解项目结构
+
+1. 阅读 [文件结构](./file-structure.md) 了解项目的组织方式
+2. 查看 [依赖关系图](./dependencies/level-0.md) 理解模块之间的依赖
+3. 使用 [符号索引](./symbols-index.md) 查找特定的类和函数
+
+### 代码导航
+
+```bash
+# 查找符号
+cd {{ project_path }}
+python {{ scripts_dir }}/query_index.py . find <symbol-name>
+
+# 搜索符号
+python {{ scripts_dir }}/query_index.py . search <keyword>
+
+# 查看文件的符号
+python {{ scripts_dir }}/query_index.py . file <file-path>
+```
+
+---
+
+## 项目信息
+
+- **根目录**: `{{ project_path }}`
+- **架构文档目录**: `{{ docs_dir }}`
+- **符号索引数据库**: `{{ index_db_path }}`
+
+---
+
+*本文档由 [architecture-generator](https://github.com/your-repo/architecture-generator) 技能自动生成*

@@ -57,3 +57,5 @@ htmlcov/
 .DS_Store
 *.tmp
 ccsw.log
+
+company/

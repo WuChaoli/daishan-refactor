@@ -6,8 +6,7 @@
 # ============================================================
 ragflow:
   # API Key 从环境变量读取
-  api_key: "${RAGFLOW_API_KEY}"
-  base_url: "${RAGFLOW_BASE_URL:-http://172.16.11.60:8081/api/v1}"
+  base_url: "http://172.16.11.60:8081/api/v1"
   timeout: 30
   max_retries: 3
 
@@ -29,61 +28,32 @@ intent:
 # 服务器配置
 # ============================================================
 server:
-  host: "${SERVER_HOST:-0.0.0.0}"
-  port: ${SERVER_PORT:-11028}
+  host: "0.0.0.0"
+  port: 11029
 
 # ============================================================
 # 日志配置
 # ============================================================
 logging:
-  log_dir: "${LOG_DIR:-logs}"
-  max_bytes: ${LOG_MAX_BYTES:-10485760}       # 10MB
-  backup_count: ${LOG_BACKUP_COUNT:-5}
-  total_size_limit: ${LOG_TOTAL_SIZE_LIMIT:-524288000}  # 500MB
+  log_dir: "logs"
+  max_bytes: 10485760   # 10MB
+  backup_count: 5
+  total_size_limit: 524288000  # 500MB
 
 # ============================================================
 # Dify 配置
 # ============================================================
 dify:
-  base_url: "${DIFY_BASE_URL:-http://172.16.11.60/v1}"
-  timeout: ${DIFY_TIMEOUT:-30}
-  max_retries: ${DIFY_MAX_RETRIES:-3}
-
-  # Workflows
-  workflows:
-    answer_summarize:
-      api_key: "${DIFY_WORKFLOW_ANSWER_SUMMARIZE_KEY}"
-      description: "安全隐患分析工作流"
-
-  # Chat 应用
-  chats:
-    sql_result_formatter:
-      api_key: "${DIFY_CHAT_SQL_FORMATTER_KEY}"
-      description: "SQL 查询结果格式化"
-
-    type0_semantic_chat:
-      api_key: "${DIFY_CHAT_TYPE0_SEMANTIC_KEY}"
-      description: "Type 0 语义类问答"
-
-    park_kb_chat:
-      api_key: "${DIFY_CHAT_PARK_KB_KEY}"
-      description: "园区知识库智能问答"
-
-    enterprise_kb_chat:
-      api_key: "${DIFY_CHAT_ENTERPRISE_KB_KEY}"
-      description: "企业知识库智能问答"
-
-    safety_kb_chat:
-      api_key: "${DIFY_CHAT_SAFETY_KB_KEY}"
-      description: "安全信息知识库智能问答"
+  base_url: "http://172.16.11.60/v1"
+  timeout: 30
+  max_retries: 3
 
 # ============================================================
 # 流式聊天配置（/api/stream-chat 接口）
 # ============================================================
 stream_chat:
   # Dify Chat API 配置（用于流式聊天）
-  api_key: "${DIFY_STREAM_CHAT_KEY}"
-  base_url: "${DIFY_BASE_URL:-http://172.16.11.60/v1}"
+  base_url: "http://172.16.11.60/v1"
   endpoint: "/chat-messages"
   timeout: 30.0
   max_retry_attempts: 2

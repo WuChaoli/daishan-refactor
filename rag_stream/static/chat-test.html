@@ -79,6 +79,60 @@
             cursor: pointer;
         }
 
+        /* ==================== Tab Navigation ==================== */
+        .tab-navigation {
+            display: flex;
+            gap: 0;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            padding: 0 20px;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            color: #6c757d;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            position: relative;
+            top: 2px;
+        }
+
+        .tab-btn:hover {
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            background: white;
+        }
+
+        /* ==================== Tab Content ==================== */
+        .tab-content-wrapper {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tab-content {
+            display: none;
+            flex: 1;
+            overflow-y: auto;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+        }
+
         /* 聊天区域 */
         .chat-area {
             flex: 1;
@@ -246,6 +300,22 @@
 
         #clear-btn:hover {
             background: #e9ecef;
+        }
+
+        #stop-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        #stop-btn:hover:not(:disabled) {
+            background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+        }
+
+        #stop-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         #refresh-categories-btn {
@@ -434,6 +504,238 @@
                 max-width: 85%;
             }
         }
+
+        /* ==================== Session Management ==================== */
+        .sessions-panel {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .sessions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .sessions-header h3 {
+            font-size: 20px;
+            color: #212529;
+            margin: 0;
+        }
+
+        .sessions-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+        }
+
+        .session-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 16px;
+            transition: all 0.2s;
+        }
+
+        .session-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .session-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #212529;
+            margin: 0 0 8px 0;
+        }
+
+        .session-category {
+            display: inline-block;
+            padding: 4px 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .session-info {
+            font-size: 13px;
+            color: #6c757d;
+            margin-bottom: 4px;
+        }
+
+        .session-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .session-actions button {
+            flex: 1;
+            padding: 8px 12px;
+            font-size: 13px;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+        }
+
+        /* ==================== Emergency Dispatch ==================== */
+        .dispatch-panel {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .dispatch-section {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .dispatch-section h3 {
+            font-size: 18px;
+            color: #212529;
+            margin: 0 0 16px 0;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .dispatch-section form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .dispatch-section input,
+        .dispatch-section textarea {
+            padding: 10px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .dispatch-section input:focus,
+        .dispatch-section textarea:focus {
+            border-color: #667eea;
+        }
+
+        .dispatch-section textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .result-area {
+            margin-top: 16px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            min-height: 100px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        /* ==================== Health Panel ==================== */
+        .health-panel {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .health-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .health-header h3 {
+            font-size: 20px;
+            color: #212529;
+            margin: 0;
+        }
+
+        .health-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #6c757d;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #212529;
+        }
+
+        .stat-value.healthy {
+            color: #28a745;
+        }
+
+        .stat-value.unhealthy {
+            color: #dc3545;
+        }
+
+        .all-sessions-section {
+            margin-top: 24px;
+        }
+
+        .all-sessions-section h4 {
+            font-size: 16px;
+            color: #212529;
+            margin-bottom: 12px;
+        }
+
+        .sessions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 12px;
+        }
+
+        .empty-message {
+            text-align: center;
+            color: #6c757d;
+            padding: 40px;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -458,25 +760,112 @@
             </div>
         </div>
 
-        <!-- 聊天区域 -->
-        <div class="chat-area" id="chat-area">
-            <div class="empty-state" id="empty-state">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
-                </svg>
-                <h3>RAG 流式聊天测试</h3>
-                <p>配置服务器地址和 Category，然后开始对话</p>
-            </div>
+        <!-- 标签导航 -->
+        <div class="tab-navigation">
+            <button class="tab-btn active" data-tab="chat">聊天</button>
+            <button class="tab-btn" data-tab="sessions">会话管理</button>
+            <button class="tab-btn" data-tab="dispatch">应急调度</button>
+            <button class="tab-btn" data-tab="health">系统监控</button>
         </div>
 
-        <!-- 输入区域 -->
-        <div class="input-area">
-            <div class="input-wrapper">
-                <textarea id="question-input" placeholder="输入你的问题..." rows="1"></textarea>
+        <!-- 标签内容区域 -->
+        <div class="tab-content-wrapper">
+            <!-- 标签 1: 聊天 -->
+            <div class="tab-content active" id="tab-chat">
+                <div class="chat-area" id="chat-area">
+                    <div class="empty-state" id="empty-state">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+                        </svg>
+                        <h3>RAG 流式聊天测试</h3>
+                        <p>配置服务器地址和 Category，然后开始对话</p>
+                    </div>
+                </div>
+
+                <!-- 输入区域 -->
+                <div class="input-area">
+                    <div class="input-wrapper">
+                        <textarea id="question-input" placeholder="输入你的问题..." rows="1"></textarea>
+                    </div>
+                    <div class="button-group">
+                        <button id="clear-btn">清空</button>
+                        <button id="stop-btn" style="display: none;">停止</button>
+                        <button id="send-btn">发送</button>
+                    </div>
+                </div>
             </div>
-            <div class="button-group">
-                <button id="clear-btn">清空</button>
-                <button id="send-btn">发送</button>
+
+            <!-- 标签 2: 会话管理 -->
+            <div class="tab-content" id="tab-sessions">
+                <div class="sessions-panel">
+                    <div class="sessions-header">
+                        <h3>会话管理</h3>
+                        <button id="refresh-sessions-btn">刷新</button>
+                    </div>
+                    <div class="sessions-list" id="sessions-list">
+                        <div class="empty-message">暂无会话数据</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 标签 3: 应急调度 -->
+            <div class="tab-content" id="tab-dispatch">
+                <div class="dispatch-panel">
+                    <div class="dispatch-section">
+                        <h3>人员调度</h3>
+                        <form id="personnel-dispatch-form">
+                            <input type="text" id="accident-id-personnel" placeholder="事故ID (可选)">
+                            <textarea id="voice-text-personnel" placeholder="语音识别文本" required></textarea>
+                            <button type="submit">调度人员</button>
+                        </form>
+                        <div class="result-area" id="personnel-result"></div>
+                    </div>
+
+                    <div class="dispatch-section">
+                        <h3>资源调度</h3>
+                        <form id="resource-dispatch-form">
+                            <input type="text" id="accident-id-resource" placeholder="事故ID (可选)">
+                            <input type="text" id="source-type" placeholder="资源类型 (可选)">
+                            <textarea id="voice-text-resource" placeholder="语音识别文本" required></textarea>
+                            <button type="submit">调度资源</button>
+                        </form>
+                        <div class="result-area" id="resource-result"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 标签 4: 系统监控 -->
+            <div class="tab-content" id="tab-health">
+                <div class="health-panel">
+                    <div class="health-header">
+                        <h3>系统监控</h3>
+                        <button id="refresh-health-btn">刷新</button>
+                    </div>
+                    <div class="health-stats">
+                        <div class="stat-card">
+                            <div class="stat-label">服务状态</div>
+                            <div class="stat-value" id="health-status">-</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">活跃会话</div>
+                            <div class="stat-value" id="active-sessions">-</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">活跃用户</div>
+                            <div class="stat-value" id="active-users">-</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">最后更新</div>
+                            <div class="stat-value" id="last-update">-</div>
+                        </div>
+                    </div>
+                    <div class="all-sessions-section">
+                        <h4>所有活跃会话</h4>
+                        <div class="sessions-grid" id="all-sessions-list">
+                            <div class="empty-message">暂无会话数据</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -495,7 +884,8 @@
             serverUrl: localStorage.getItem('serverUrl') || 'http://localhost:11028',
             category: localStorage.getItem('category') || '通用',
             userId: localStorage.getItem('userId') || 'test_user_' + Date.now(),
-            isStreaming: false
+            isStreaming: false,
+            currentReader: null
         };
 
         // Category 中文名称到 API 路径的映射
@@ -528,6 +918,7 @@
             chatArea: document.getElementById('chat-area'),
             questionInput: document.getElementById('question-input'),
             sendBtn: document.getElementById('send-btn'),
+            stopBtn: document.getElementById('stop-btn'),
             clearBtn: document.getElementById('clear-btn'),
             refreshCategoriesBtn: document.getElementById('refresh-categories-btn'),
             emptyState: document.getElementById('empty-state')
@@ -561,6 +952,7 @@
             });
 
             elements.sendBtn.addEventListener('click', sendQuestion);
+            elements.stopBtn.addEventListener('click', stopStreaming);
             elements.clearBtn.addEventListener('click', clearChat);
 
             // 刷新 category 列表按钮
@@ -587,6 +979,278 @@
             });
 
             updateUIState();
+        }
+
+        // ==================== Tab Switching ====================
+        // 初始化标签切换
+        function initTabs() {
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const targetTab = btn.dataset.tab;
+
+                    // 更新按钮状态
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    // 更新内容显示
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(`tab-${targetTab}`).classList.add('active');
+
+                    // 加载对应标签的数据
+                    if (targetTab === 'sessions') {
+                        loadUserSessions();
+                    } else if (targetTab === 'health') {
+                        loadHealthCheck();
+                    }
+                });
+            });
+        }
+
+        // ==================== Session Management ====================
+        // 加载用户会话
+        async function loadUserSessions() {
+            try {
+                const response = await fetch(
+                    `${state.serverUrl}/api/user/${state.userId}/sessions`
+                );
+                const result = await response.json();
+
+                if (result.code === 0 && result.data && result.data.sessions) {
+                    renderSessions(result.data.sessions);
+                } else {
+                    document.getElementById('sessions-list').innerHTML =
+                        '<div class="empty-message">暂无会话数据</div>';
+                }
+            } catch (error) {
+                console.error('加载会话失败:', error);
+                document.getElementById('sessions-list').innerHTML =
+                    '<div class="empty-message">加载失败，请检查服务器连接</div>';
+            }
+        }
+
+        // 渲染会话列表
+        function renderSessions(sessions) {
+            const container = document.getElementById('sessions-list');
+            container.innerHTML = '';
+
+            const sessionEntries = Object.entries(sessions);
+            if (sessionEntries.length === 0) {
+                container.innerHTML = '<div class="empty-message">暂无会话数据</div>';
+                return;
+            }
+
+            sessionEntries.forEach(([category, session]) => {
+                const card = createSessionCard(category, session);
+                container.appendChild(card);
+            });
+        }
+
+        // 创建会话卡片
+        function createSessionCard(category, session) {
+            const card = document.createElement('div');
+            card.className = 'session-card';
+
+            const createTime = new Date(session.create_time).toLocaleString('zh-CN');
+            const lastActivity = new Date(session.last_activity).toLocaleString('zh-CN');
+
+            card.innerHTML = `
+                <div class="session-name">${session.name || '未命名会话'}</div>
+                <div class="session-category">${category}</div>
+                <div class="session-info">会话ID: ${session.session_id}</div>
+                <div class="session-info">创建时间: ${createTime}</div>
+                <div class="session-info">最后活动: ${lastActivity}</div>
+                <div class="session-info">消息数: ${session.message_count || 0}</div>
+                <div class="session-actions">
+                    <button class="btn-delete" onclick="deleteSession('${session.session_id}')">删除</button>
+                </div>
+            `;
+
+            return card;
+        }
+
+        // 删除会话
+        async function deleteSession(sessionId) {
+            if (!confirm('确定要删除这个会话吗？')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(
+                    `${state.serverUrl}/api/sessions/${sessionId}`,
+                    { method: 'DELETE' }
+                );
+                const result = await response.json();
+
+                if (result.code === 0) {
+                    loadUserSessions(); // 刷新列表
+                    addSystemMessage('✓ 会话删除成功');
+                } else {
+                    addSystemMessage(`✗ 删除失败: ${result.message}`);
+                }
+            } catch (error) {
+                console.error('删除会话失败:', error);
+                addSystemMessage('✗ 删除失败，请检查服务器连接');
+            }
+        }
+
+        // ==================== Emergency Dispatch ====================
+        // 初始化应急调度表单
+        function initDispatchForms() {
+            // 人员调度表单
+            document.getElementById('personnel-dispatch-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const accidentId = document.getElementById('accident-id-personnel').value.trim();
+                const voiceText = document.getElementById('voice-text-personnel').value.trim();
+
+                if (!voiceText) {
+                    alert('请输入语音识别文本');
+                    return;
+                }
+
+                await dispatchPersonnel(accidentId, voiceText);
+            });
+
+            // 资源调度表单
+            document.getElementById('resource-dispatch-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const accidentId = document.getElementById('accident-id-resource').value.trim();
+                const sourceType = document.getElementById('source-type').value.trim();
+                const voiceText = document.getElementById('voice-text-resource').value.trim();
+
+                if (!voiceText) {
+                    alert('请输入语音识别文本');
+                    return;
+                }
+
+                await dispatchResource(accidentId, sourceType, voiceText);
+            });
+        }
+
+        // 人员调度
+        async function dispatchPersonnel(accidentId, voiceText) {
+            const resultArea = document.getElementById('personnel-result');
+            resultArea.textContent = '调度中...';
+
+            try {
+                const body = { voiceText };
+                if (accidentId) body.accidentId = accidentId;
+
+                const response = await fetch(
+                    `${state.serverUrl}/ipark-ae/personnel-dispatch`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    }
+                );
+                const result = await response.json();
+
+                resultArea.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                console.error('人员调度失败:', error);
+                resultArea.textContent = `调度失败: ${error.message}`;
+            }
+        }
+
+        // 资源调度
+        async function dispatchResource(accidentId, sourceType, voiceText) {
+            const resultArea = document.getElementById('resource-result');
+            resultArea.textContent = '调度中...';
+
+            try {
+                const body = { voiceText };
+                if (accidentId) body.accidentId = accidentId;
+                if (sourceType) body.sourceType = sourceType;
+
+                const response = await fetch(
+                    `${state.serverUrl}/ipark-ae/source-dispatch`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    }
+                );
+                const result = await response.json();
+
+                resultArea.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                console.error('资源调度失败:', error);
+                resultArea.textContent = `调度失败: ${error.message}`;
+            }
+        }
+
+        // ==================== Health Check ====================
+        // 加载健康检查
+        async function loadHealthCheck() {
+            try {
+                const response = await fetch(`${state.serverUrl}/health`);
+                const data = await response.json();
+
+                // 更新统计卡片
+                const statusElement = document.getElementById('health-status');
+                statusElement.textContent = data.status;
+                statusElement.className = 'stat-value ' + (data.status === 'healthy' ? 'healthy' : 'unhealthy');
+
+                document.getElementById('active-sessions').textContent = data.active_sessions || 0;
+                document.getElementById('active-users').textContent = data.active_users || 0;
+                document.getElementById('last-update').textContent =
+                    new Date(data.timestamp).toLocaleString('zh-CN');
+
+                // 加载所有会话
+                loadAllSessions();
+            } catch (error) {
+                console.error('健康检查失败:', error);
+                document.getElementById('health-status').textContent = '错误';
+                document.getElementById('health-status').className = 'stat-value unhealthy';
+            }
+        }
+
+        // 加载所有会话
+        async function loadAllSessions() {
+            try {
+                const response = await fetch(`${state.serverUrl}/api/sessions`);
+                const result = await response.json();
+
+                if (result.code === 0 && result.data && result.data.length > 0) {
+                    renderAllSessions(result.data);
+                } else {
+                    document.getElementById('all-sessions-list').innerHTML =
+                        '<div class="empty-message">暂无活跃会话</div>';
+                }
+            } catch (error) {
+                console.error('加载所有会话失败:', error);
+                document.getElementById('all-sessions-list').innerHTML =
+                    '<div class="empty-message">加载失败</div>';
+            }
+        }
+
+        // 渲染所有会话
+        function renderAllSessions(sessions) {
+            const container = document.getElementById('all-sessions-list');
+            container.innerHTML = '';
+
+            sessions.forEach(session => {
+                const card = document.createElement('div');
+                card.className = 'session-card';
+                card.innerHTML = `
+                    <div class="session-name">${session.name || '未命名会话'}</div>
+                    <div class="session-category">${session.category}</div>
+                    <div class="session-info">用户: ${session.user_id}</div>
+                    <div class="session-info">消息数: ${session.message_count || 0}</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // 初始化刷新按钮
+        function initRefreshButtons() {
+            document.getElementById('refresh-sessions-btn').addEventListener('click', loadUserSessions);
+            document.getElementById('refresh-health-btn').addEventListener('click', loadHealthCheck);
         }
 
         // 动态加载 category 列表
@@ -656,6 +1320,15 @@
             elements.sendBtn.disabled = state.isStreaming;
             elements.sendBtn.textContent = state.isStreaming ? '发送中...' : '发送';
             elements.questionInput.disabled = state.isStreaming;
+
+            // 控制停止按钮的显示
+            if (state.isStreaming) {
+                elements.stopBtn.style.display = 'block';
+                elements.sendBtn.style.display = 'none';
+            } else {
+                elements.stopBtn.style.display = 'none';
+                elements.sendBtn.style.display = 'block';
+            }
         }
 
         // 发送问题
@@ -700,6 +1373,7 @@
                 }
 
                 const reader = response.body.getReader();
+                state.currentReader = reader;
                 const decoder = new TextDecoder();
                 let buffer = '';
 
@@ -745,17 +1419,49 @@
 
                 // 流读取结束，恢复 UI 状态
                 state.isStreaming = false;
+                state.currentReader = null;
                 updateUIState();
             } catch (error) {
                 removeTypingIndicator(aiMessageId);
                 appendContent(aiMessageId, `[请求失败: ${error.message}]`);
                 state.isStreaming = false;
+                state.currentReader = null;
                 updateUIState();
             }
 
             // 清空输入框
             elements.questionInput.value = '';
             elements.questionInput.style.height = 'auto';
+        }
+
+        // 停止流式传输
+        async function stopStreaming() {
+            if (!state.isStreaming) return;
+
+            try {
+                // 调用停止接口
+                await fetch(`${state.serverUrl}/api/stop`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: state.userId })
+                });
+
+                // 中止当前的 reader
+                if (state.currentReader) {
+                    await state.currentReader.cancel();
+                    state.currentReader = null;
+                }
+
+                // 重置状态
+                state.isStreaming = false;
+                updateUIState();
+
+                // 添加系统消息
+                addSystemMessage('✓ 已停止流式传输');
+            } catch (error) {
+                console.error('停止失败:', error);
+                addSystemMessage('✗ 停止失败: ' + error.message);
+            }
         }
 
         // 添加消息
@@ -831,6 +1537,9 @@
 
         // 启动
         init();
+        initTabs();
+        initDispatchForms();
+        initRefreshButtons();
     </script>
 </body>
 </html>

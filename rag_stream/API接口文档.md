@@ -11,6 +11,13 @@
 - 支持格式: JSON
 - 认证方式: 无需认证
 
+**接口分类:**
+- 🔍 基础接口：健康检查、类别查询
+- 💬 流式问答接口：法律法规、标准规范、应急知识、事故案例、MSDS、标准政策、通用问答
+- 🏭 数字人接口：重大危险源预警、安全态势、双重预防、园区开停车、特殊作业、企业态势
+- 🔄 会话管理接口：创建、查询、删除会话
+- 🚨 应急调度接口：人员调度、资源调度
+
 ---
 
 ## 🔍 基础接口
@@ -217,7 +224,12 @@ curl -X POST "http://localhost:8000/api/policies" \
 
 **接口地址:** `POST /api/general`
 
-**功能描述:** 针对通用安全知识相关问题进行流式问答
+**功能描述:** 智能通用问答接口，使用意图识别自动路由到合适的知识库或数据源
+
+**特性:**
+- 自动识别问题意图
+- 支持SQL查询结果增强
+- 智能选择知识库
 
 **请求示例:**
 ```bash
@@ -231,7 +243,115 @@ curl -X POST "http://localhost:8000/api/general" \
 
 ---
 
-### 10. 通用聊天接口
+### 10. 重大危险源预警问答
+
+**接口地址:** `POST /api/warn`
+
+**功能描述:** 针对重大危险源预警相关问题进行流式问答
+
+**请求示例:**
+```bash
+curl -X POST "http://localhost:8000/api/warn" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "当前有哪些重大危险源预警？",
+    "user_id": "user001"
+  }'
+```
+
+---
+
+### 11. 当日安全态势问答
+
+**接口地址:** `POST /api/safesituation`
+
+**功能描述:** 针对当日安全态势相关问题进行流式问答
+
+**请求示例:**
+```bash
+curl -X POST "http://localhost:8000/api/safesituation" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "今天的安全态势如何？",
+    "user_id": "user001"
+  }'
+```
+
+---
+
+### 12. 双重预防机制效果问答
+
+**接口地址:** `POST /api/prevent`
+
+**功能描述:** 针对双重预防机制效果相关问题进行流式问答
+
+**请求示例:**
+```bash
+curl -X POST "http://localhost:8000/api/prevent" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "双重预防机制的效果如何？",
+    "user_id": "user001"
+  }'
+```
+
+---
+
+### 13. 园区开停车问答
+
+**接口地址:** `POST /api/park`
+
+**功能描述:** 针对园区开停车相关问题进行流式问答
+
+**请求示例:**
+```bash
+curl -X POST "http://localhost:8000/api/park" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "园区今天有哪些开停车情况？",
+    "user_id": "user001"
+  }'
+```
+
+---
+
+### 14. 园区特殊作业态势问答
+
+**接口地址:** `POST /api/special`
+
+**功能描述:** 针对园区特殊作业态势相关问题进行流式问答
+
+**请求示例:**
+```bash
+curl -X POST "http://localhost:8000/api/special" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "园区有哪些特殊作业正在进行？",
+    "user_id": "user001"
+  }'
+```
+
+---
+
+### 15. 园区企业态势问答
+
+**接口地址:** `POST /api/firmsituation`
+
+**功能描述:** 针对园区企业态势相关问题进行流式问答
+
+**请求示例:**
+```bash
+curl -X POST "http://localhost:8000/api/firmsituation" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "园区企业的整体态势如何？",
+    "user_id": "user001"
+  }'
+```
+
+---
+
+### 16. 通用聊天接口
 
 **接口地址:** `POST /api/chat/{category}`
 
@@ -257,7 +377,7 @@ curl -X POST "http://localhost:8000/api/chat/法律法规" \
 
 ## 🔄 会话管理接口
 
-### 11. 创建会话
+### 17. 创建会话
 
 **接口地址:** `POST /api/sessions/{category}`
 
@@ -297,7 +417,45 @@ curl -X POST "http://localhost:8000/api/sessions/法律法规" \
 
 ---
 
-### 12. 获取用户会话信息
+### 18. 暂停/删除会话
+
+**接口地址:** `POST /api/stop`
+
+**功能描述:** 暂停或删除指定的会话，支持按session_id或user_id删除
+
+**请求参数:**
+```json
+{
+  "session_id": "string",  // 可选，会话ID（删除单个会话）
+  "user_id": "string"      // 可选，用户ID（删除用户所有会话）
+}
+```
+
+**请求示例:**
+```bash
+# 删除单个会话
+curl -X POST "http://localhost:8000/api/stop" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "session_id": "abc123"
+  }'
+
+# 删除用户所有会话
+curl -X POST "http://localhost:8000/api/stop" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "user001"
+  }'
+```
+
+**响应示例:**
+```
+暂停成功
+```
+
+---
+
+### 19. 获取用户会话信息
 
 **接口地址:** `GET /api/user/{user_id}/sessions`
 
@@ -340,7 +498,7 @@ curl -X GET "http://localhost:8000/api/user/user001/sessions"
 
 ---
 
-### 13. 获取会话信息
+### 20. 获取会话信息
 
 **接口地址:** `GET /api/sessions/{session_id}`
 
@@ -375,7 +533,7 @@ curl -X GET "http://localhost:8000/api/sessions/abc123"
 
 ---
 
-### 14. 获取所有会话
+### 21. 获取所有会话
 
 **接口地址:** `GET /api/sessions`
 
@@ -410,7 +568,7 @@ curl -X GET "http://localhost:8000/api/sessions"
 
 ---
 
-### 15. 删除会话
+### 22. 删除会话
 
 **接口地址:** `DELETE /api/sessions/{session_id}`
 
@@ -431,6 +589,90 @@ curl -X DELETE "http://localhost:8000/api/sessions/abc123"
   "message": "会话删除成功",
   "data": null
 }
+```
+
+---
+
+## 🚨 应急调度接口
+
+### 23. 人员调度
+
+**接口地址:** `POST /ipark-ae/personnel-dispatch`
+
+**功能描述:** 根据事故信息和语音文本，智能调度应急人员
+
+**请求参数:**
+```json
+{
+  "accidentId": "string",  // 可选，事故ID
+  "voiceText": "string"    // 必填，语音识别文本
+}
+```
+
+**请求示例:**
+```bash
+curl -X POST "http://localhost:8000/ipark-ae/personnel-dispatch" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "accidentId": "ACC20240115001",
+    "voiceText": "需要调度消防人员和医疗人员到现场"
+  }'
+```
+
+**响应示例:**
+```json
+{
+  "code": 0,
+  "message": "人员调度成功",
+  "data": {
+    "personnel_ids": ["P001", "P002", "P003"],
+    "dispatch_time": "2024-01-15T10:30:00"
+  }
+}
+```
+
+---
+
+### 24. 资源调度
+
+**接口地址:** `POST /ipark-ae/source-dispatch`
+
+**功能描述:** 根据事故信息、资源类型和语音文本，智能调度应急资源
+
+**请求参数:**
+```json
+{
+  "accidentId": "string",   // 可选，事故ID
+  "sourceType": "string",   // 可选，资源类型
+  "voiceText": "string"     // 必填，语音识别文本
+}
+```
+
+**请求示例:**
+```bash
+curl -X POST "http://localhost:8000/ipark-ae/source-dispatch" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "accidentId": "ACC20240115001",
+    "sourceType": "消防设备",
+    "voiceText": "需要调度消防车和灭火器到现场"
+  }'
+```
+
+**响应示例:**
+```json
+[
+  {
+    "resource_id": "R001",
+    "resource_name": "消防车1号",
+    "resource_type": "消防设备"
+  },
+  {
+    "resource_id": "R002",
+    "resource_name": "灭火器组",
+    "resource_type": "消防设备"
+  }
+]
 ```
 
 ---

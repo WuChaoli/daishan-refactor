@@ -1,20 +1,16 @@
 {
   "activeContexts": [
     {
-      "contextId": "2026-02-02_dify-sdk-architecture-analysis",
-      "title": "Dify Sdk Architecture Analysis",
-      "status": "in_progress",
-      "assignee": "architect",
-      "updatedAt": "2026-02-02T12:49:19.937860Z"
+      "contextId": "2026-02-04_project-architecture",
+      "title": "项目架构分析",
+      "description": "岱山应急驾驶舱 AI 系统架构分析与文档化",
+      "createdAt": "2026-02-04T17:08:00Z",
+      "updatedAt": "2026-02-04T17:15:00Z",
+      "status": "active",
+      "owner": "师爷",
+      "tags": ["架构", "文档", "分析"]
     }
   ],
-  "archivedContexts": [
-    {
-      "contextId": "2026-02-02_test-example",
-      "title": "测试示例功能",
-      "status": "in_progress",
-      "assignee": "developer",
-      "updatedAt": "2026-02-02T11:45:57.480500Z"
-    }
-  ]
+  "archivedContexts": [],
+  "lastUpdated": "2026-02-04T17:15:00Z"
 }

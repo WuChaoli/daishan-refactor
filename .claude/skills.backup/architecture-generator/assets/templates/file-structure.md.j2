@@ -1,0 +1,28 @@
+# 文件结构
+
+## 统计信息
+
+- **总文件数**: {{ stats.total_files }}
+- **扫描深度**: {{ max_depth | default('无限制') }}
+
+## 文件类型分布
+
+| 扩展名 | 文件数 |
+|--------|--------|
+{% for ext, count in stats.by_extension.items() %}
+| `{{ ext }}` | {{ count }} |
+{% endfor %}
+
+## 文件树
+
+```
+{{ file_tree }}
+```
+
+---
+
+## 说明
+
+- 文件树遵循项目的 [`.gitignore`](../../.gitignore) 配置
+- 只包含源代码文件，排除构建产物和依赖目录
+- 文件按字母顺序排列

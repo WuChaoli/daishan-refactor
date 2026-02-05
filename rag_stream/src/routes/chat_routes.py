@@ -19,7 +19,8 @@ from src.models.schemas import (
     PeopleDispatchRequest,
     SourceDispatchRequest,
 )
-from src.services.dify_service import should_use_dify, stream_dify_chatflow_response, personnel_dispatch
+from src.services.dify_service import should_use_dify, stream_dify_chatflow_response
+from src.services.personnel_dispatch_service import handle_personnel_dispatch
 from src.services.rag_service import get_or_create_session, stream_chat_response
 from src.services.source_dispath_srvice import handle_source_dispatch
 from src.utils.session_manager import session_manager
@@ -323,8 +324,9 @@ async def people_dispatch(request: PeopleDispatchRequest) -> Dict[str, Any]:
 
     user_id = None  # 可以从请求头或其他地方获取
 
-    result = await personnel_dispatch(
+    result = await handle_personnel_dispatch(
         voice_text=request.voiceText,
+        log_manager=log_manager,
         user_id=user_id
     )
 

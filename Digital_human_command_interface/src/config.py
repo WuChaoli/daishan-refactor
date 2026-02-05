@@ -4,19 +4,26 @@ ConfigManager - 配置管理器
 """
 
 import os
-import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
+from dotenv import load_dotenv
 import yaml
+
+
+def _load_env_vars(project_root: Path):
+    """加载 .env 文件"""
+    env_path = project_root / ".env"
+    if env_path.exists():
+        load_dotenv(env_path)
 
 
 @dataclass
 class Config:
     """应用配置数据类"""
 
-    # RAGFlow 配置
+    # RAGFlow 配置 (从 .env 读取)
     ragflow_api_key: str
     ragflow_base_url: str
 
@@ -38,7 +45,7 @@ class Config:
     log_backup_count: int = 5
     log_total_size_limit: int = 524288000  # 500MB
 
-    # 流式聊天配置
+    # 流式聊天配置 (API Key 从 .env 读取)
     stream_chat_api_key: str = ""
     stream_chat_base_url: str = ""
     stream_chat_endpoint: str = "/chat-messages"
@@ -68,53 +75,6 @@ class Config:
         return self.database_mapping[db_name]
 
 
-def expand_env_vars(value: Any) -> Any:
-    """
-    展开环境变量引用
-
-    支持的格式:
-    - ${VAR_NAME}              - 必需引用
-    - ${VAR_NAME:-default}      - 可选引用,带默认值
-
-    Args:
-        value: 任意值 (字符串、数字、字典、列表等)
-
-    Returns:
-        展开环境变量后的值
-    """
-    if isinstance(value, str):
-        # 匹配 ${VAR_NAME} 或 ${VAR_NAME:-default}
-        pattern = r"\$\{([^}:]+)(:-([^}]*))?\}"
-
-        def replace(match):
-            var_name = match.group(1)
-            default_value = match.group(3) if match.group(2) else ""
-            return os.getenv(var_name, default_value)
-
-        return re.sub(pattern, replace, value)
-
-    elif isinstance(value, dict):
-        return {k: expand_env_vars(v) for k, v in value.items()}
-
-    elif isinstance(value, list):
-        return [expand_env_vars(item) for item in value]
-
-    return value
-
-
-def expand_env_vars_recursive(data: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    递归展开字典中所有环境变量引用
-
-    Args:
-        data: 配置字典
-
-    Returns:
-        展开环境变量后的配置字典
-    """
-    return expand_env_vars(data)
-
-
 class ConfigManager:
     """配置管理器"""
 
@@ -123,26 +83,32 @@ class ConfigManager:
         加载并验证配置
 
         Args:
-            config_path: 配置文件路径
+            config_path: YAML 配置文件路径
         """
         self.config_path = Path(config_path)
+        self.project_root = self.config_path.parent.parent
         self._config: Optional[Config] = None
         self._load_config()
 
     def _load_config(self):
         """加载配置文件"""
+        # 加载 .env 文件
+        _load_env_vars(self.project_root)
+
+        # 读取 YAML 配置文件
         if not self.config_path.exists():
             raise FileNotFoundError(f"配置文件不存在: {self.config_path}")
 
         with open(self.config_path, "r", encoding="utf-8") as f:
             config_data = yaml.safe_load(f)
 
-        config_data = expand_env_vars_recursive(config_data)
-
         if not config_data:
             raise ValueError("配置文件为空")
 
-        # 验证并创建 Config 对象
+        # 从环境变量读取 API Keys
+        ragflow_api_key = os.getenv("RAGFLOW_API_KEY", "")
+        stream_chat_api_key = os.getenv("DIFY_STREAM_CHAT_KEY", "")
+
         # 提取配置部分
         ragflow_config = config_data.get("ragflow", {})
         intent_config = config_data.get("intent", {})
@@ -165,7 +131,7 @@ class ConfigManager:
                 converted_database_mapping[db_name] = int(type_value)
 
         self._config = Config(
-            ragflow_api_key=ragflow_config.get("api_key", ""),
+            ragflow_api_key=ragflow_api_key,
             ragflow_base_url=ragflow_config.get("base_url", ""),
             database_mapping=converted_database_mapping,
             similarity_threshold=float(intent_config.get("similarity_threshold", 0.4)),
@@ -177,7 +143,7 @@ class ConfigManager:
             log_max_bytes=int(logging_config.get("max_bytes", 10485760)),
             log_backup_count=int(logging_config.get("backup_count", 5)),
             log_total_size_limit=int(logging_config.get("total_size_limit", 524288000)),
-            stream_chat_api_key=stream_chat_config.get("api_key", ""),
+            stream_chat_api_key=stream_chat_api_key,
             stream_chat_base_url=stream_chat_config.get("base_url", ""),
             stream_chat_endpoint=stream_chat_config.get("endpoint", "/chat-messages"),
             stream_chat_timeout=float(stream_chat_config.get("timeout", 30.0)),
