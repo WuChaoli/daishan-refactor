@@ -6,25 +6,30 @@
 
 ## 检查点列表
 
-### 检查点 1 - 2026-02-09 (待创建)
+### 检查点 1 - 2026-02-09 16:30
 **阶段**: 环境准备完成
 **分支**: feature/guess-you-may-ask
-**Stash ID**: 待创建
+**Stash ID**: (未创建stash，直接继续开发)
 **描述**: 创建feature分支，创建开发文档
-**恢复命令**: `git stash pop stash@{N}`
+**状态**: 已完成
 
-### 检查点 2 - (待创建)
-**阶段**: RED阶段 - 测试用例编写完成
+### 检查点 2 - 2026-02-09 17:00
+**阶段**: GREEN阶段 - 功能实现和单元测试通过
 **分支**: feature/guess-you-may-ask
-**Stash ID**: 待创建
-**描述**: 完成所有测试用例编写，测试失败确认
-**恢复命令**: `git stash pop stash@{N}`
+**Stash ID**: stash@{0}
+**描述**:
+- 创建guess_questions_service.py模块
+- 实现process_type1, process_type2, process_other_types函数
+- 在chat_routes.py中添加/api/guess-questions路由
+- 所有单元测试通过（9/9）
+**恢复命令**: `git stash list` 查看stash列表，然后 `git stash apply stash@{0}`
+**状态**: 当前检查点
 
 ### 检查点 3 - (待创建)
-**阶段**: GREEN阶段 - 功能实现完成
+**阶段**: REFACTOR阶段 - 重构优化完成
 **分支**: feature/guess-you-may-ask
 **Stash ID**: 待创建
-**描述**: 完成功能代码实现，所有测试通过
+**描述**: 完成代码重构优化，测试仍然通过
 **恢复命令**: `git stash pop stash@{N}`
 
 ### 检查点 4 - (待创建)

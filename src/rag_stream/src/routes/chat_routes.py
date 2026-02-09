@@ -367,61 +367,7 @@ async def guess_questions(request: GuessQuestionsRequest) -> Dict[str, Any]:
     Returns:
         包含推荐问题列表的响应
     """
-    from src.services.guess_questions_service import (
-        process_type1,
-        process_type2,
-        process_other_types
-    )
+    from src.services.guess_questions_service import handle_guess_questions
 
-    try:
-        # 输入验证
-        question = request.question.strip()
-        if not question:
-            return {
-                "code": 1,
-                "message": "问题不能为空",
-                "data": []
-            }
-
-        if len(question) > 1000:
-            return {
-                "code": 1,
-                "message": "问题长度不能超过1000字符",
-                "data": []
-            }
-
-        # 调用意图识别服务
-        intent_result = await intent_service.process_query(question, user_id=None)
-
-        # 将IntentResult转换为字典
-        if hasattr(intent_result, 'model_dump'):
-            intent_dict = intent_result.model_dump()
-        elif hasattr(intent_result, 'dict'):
-            intent_dict = intent_result.dict()
-        else:
-            intent_dict = intent_result
-
-        # 根据意图类型选择处理函数
-        intent_type = intent_dict.get("type", 0)
-
-        if intent_type == 1:
-            questions = process_type1(intent_dict)
-        elif intent_type == 2:
-            questions = process_type2(intent_dict)
-        else:
-            questions = process_other_types(intent_dict)
-
-        return {
-            "code": 0,
-            "message": "成功",
-            "data": questions
-        }
-
-    except Exception as e:
-        logger.error(f"猜你想问服务异常: {str(e)}", exc_info=True)
-        return {
-            "code": 1,
-            "message": "意图识别服务暂时不可用",
-            "data": []
-        }
+    return await handle_guess_questions(request.question, intent_service)
 
