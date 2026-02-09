@@ -1,0 +1,4 @@
+interface:
+  display_name: "Log Decorator"
+  short_description: "Build and tune log_decorator workflows"
+  default_prompt: "Configure and troubleshoot log_decorator usage in this project, including entry logs, Mermaid traces, and sensitive-data-safe handlers."

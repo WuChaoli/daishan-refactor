@@ -1,0 +1,37 @@
+# 依赖关系图{% if folder is defined %} - {{ folder }}{% endif %}
+
+## 概述
+
+- **层级**: Level {{ level }}
+{% if folder is defined %}- **模块**: {{ folder }}
+{% endif %}- **节点数**: {{ stats.node_count }}
+- **边数**: {{ stats.edge_count }}
+
+## 依赖图
+
+```mermaid
+{{ mermaid_graph }}
+```
+
+## 节点列表
+
+{% for node in nodes %}
+### {{ node.label }}
+
+- **类型**: {{ node.type }}
+- **路径**: [`{{ node.id }}`](../../{{ node.id }})
+{% endfor %}
+
+## 边列表
+
+{% for edge in edges %}
+- [`{{ edge.from }}`](../../{{ edge.from }}) → [`{{ edge.to }}`](../../{{ edge.to }}){% if edge.label %} (`{{ edge.label }}`){% endif %}
+{% endfor %}
+
+---
+
+## 说明
+
+- 此图显示项目中的文件级依赖关系
+- 箭头表示依赖方向：A → B 表示 A 依赖 B
+- 对于大型项目，依赖关系可能拆分到多个层级

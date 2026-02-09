@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/Users/wuchaoli/codespace/my-company-plugin/skills/architecture-generator/scripts/enhanced_ast_analyzer.py", line 15, in <module>
+    from ast_extractors.pattern_extractor import PatternExtractor
+  File "/Users/wuchaoli/codespace/my-company-plugin/skills/architecture-generator/scripts/ast_extractors/pattern_extractor.py", line 40, in <module>
+    class PatternExtractor(BaseExtractor):
+    ...<93 lines>...
+            return lambdas
+  File "/Users/wuchaoli/codespace/my-company-plugin/skills/architecture-generator/scripts/ast_extractors/pattern_extractor.py", line 43, in PatternExtractor
+    def extract(self) -> Dict[str, List]:
+                         ^^^^
+NameError: name 'Dict' is not defined. Did you mean: 'dict'?

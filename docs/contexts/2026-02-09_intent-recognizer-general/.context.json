@@ -1,0 +1,14 @@
+{
+  "contextId": "2026-02-09_intent-recognizer-general",
+  "title": "rag_stream 通用意图识别模块",
+  "description": "提炼 intent_judgment 通用识别逻辑：全量排序、命中查询表映射、返回表内结果。",
+  "status": "in_progress",
+  "createdAt": "2026-02-09T13:10:00Z",
+  "updatedAt": "2026-02-09T13:10:00Z",
+  "completedAt": null,
+  "assignee": "Codex",
+  "documents": {
+    "requirements": "requirements.md",
+    "progress": "progress.md"
+  }
+}

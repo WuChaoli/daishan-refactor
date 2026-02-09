@@ -1,0 +1,12 @@
+# rag_stream 特定的临时文件
+1.md
+chat.md
+stream_request-*.py-bak
+
+# 测试结果 JSON（保留报告和计划 MD 文件）
+tests/*_results.json
+tests/test_results.json
+
+# 临时数据文件
+*.tmp
+temp_*

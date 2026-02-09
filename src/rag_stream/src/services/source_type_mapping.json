@@ -1,0 +1,34 @@
+{
+  "emergencySupplies": {
+    "table_name": "IPARK_AE_EMERGENCY_SUPPLIES",
+    "sql_template": "SELECT ID, MATERIAL_NAME FROM {table_name} WHERE MATERIAL_STATUS IN ('0', '2') FETCH FIRST {number} ROWS ONLY"
+  },
+  "rescueTeam": {
+    "table_name": "IPARK_AE_RESCUE_TEAM",
+    "sql_template": "SELECT ID, TEAM_NAME FROM {table_name} WHERE BUSINESS_AREA = '{business_area}' ORDER BY TEAM_TYPE ASC, TEAM_LEVEL ASC FETCH FIRST {number} ROWS ONLY"
+  },
+  "emergencyExpert": {
+    "table_name": "IPARK_AE_EMERGENCY_EXPERT",
+    "sql_template": "SELECT ID, EXPERT_NAME FROM {table_name} WHERE BUSINESS_AREA = '{business_area}' ORDER BY TITLE ASC FETCH FIRST {number} ROWS ONLY"
+  },
+  "fireFightingFacilities": {
+    "table_name": "IPARK_AE_FIRE_PROTECTION",
+    "sql_template": "SELECT ID, NAME, LATITUDE_LONGITUDE FROM {table_name} WHERE LATITUDE_LONGITUDE IS NOT NULL"
+  },
+  "shelter": {
+    "table_name": "IPARK_AE_SHELTER",
+    "sql_template": "SELECT ID, SHELTER_NAME, LON_AND_LAT FROM {table_name} WHERE LON_AND_LAT IS NOT NULL"
+  },
+  "medicalInstitution": {
+    "table_name": "IPARK_AE_MEDICAL_INSTITUTION",
+    "sql_template": "SELECT ID, INSTITUTION_NAME, LOCAL_POS FROM {table_name} ORDER BY INSTITUTION_TYPE ASC, INSTITUTION_LEVEL ASC FETCH FIRST {number} ROWS ONLY"
+  },
+  "rescueOrganization": {
+    "table_name": "IPARK_AE_RESCUE_INSTITUTION",
+    "sql_template": "SELECT ID, INSTITUTION_NAME, LOCAL_POS FROM {table_name} WHERE LOCAL_POS IS NOT NULL"
+  },
+  "protectionTarget": {
+    "table_name": "IPARK_AE_DEFEND_TARGET",
+    "sql_template": "SELECT ID, TARGET_NAME, LOCAL_POS FROM {table_name} WHERE LOCAL_POS IS NOT NULL"
+  }
+}

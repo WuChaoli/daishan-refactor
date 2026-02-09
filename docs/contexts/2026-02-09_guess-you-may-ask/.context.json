@@ -1,0 +1,20 @@
+{
+  "contextId": "2026-02-09_guess-you-may-ask",
+  "status": "in_progress",
+  "createdAt": "2026-02-09T16:09:23.748720Z",
+  "updatedAt": "2026-02-09T16:09:23.748720Z",
+  "completedAt": null,
+  "title": "Guess You May Ask",
+  "description": "实现 Guess You May Ask 功能",
+  "assignee": "developer",
+  "gitBranch": "feature/guess-you-may-ask",
+  "documents": {
+    "requirements": "requirements.md",
+    "architectureChanges": "architecture-changes.md",
+    "featureSpec": "feature-spec.md",
+    "plan": "plan.md",
+    "todos": "todos.md",
+    "testPlan": "test-plan.md"
+  },
+  "staticDocsUpdated": []
+}

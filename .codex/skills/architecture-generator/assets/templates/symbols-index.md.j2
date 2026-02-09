@@ -1,0 +1,97 @@
+# 符号索引
+
+## 概述
+
+本项目包含 {{ total_symbols }} 个符号，分布在 {{ total_files }} 个文件中。
+
+## 按类型统计
+
+| 类型 | 数量 |
+|------|------|
+{% for kind, count in by_kind.items() %}
+| {{ kind }} | {{ count }} |
+{% endfor %}
+
+## 使用符号索引
+
+符号索引存储在 SQLite 数据库中，可以使用查询接口进行搜索：
+
+### 查找符号
+
+```bash
+# 查找特定名称的符号
+python scripts/query_index.py . find <symbol-name>
+
+# 查找特定类型的符号
+python scripts/query_index.py . find <symbol-name> <kind>
+```
+
+示例：
+```bash
+# 查找 User 类
+python scripts/query_index.py . find User class
+
+# 查找 parseData 函数
+python scripts/query_index.py . find parseData function
+```
+
+### 搜索符号
+
+```bash
+# 搜索包含关键字的符号
+python scripts/query_index.py . search <keyword>
+```
+
+示例：
+```bash
+# 搜索所有包含 "config" 的符号
+python scripts/query_index.py . search config
+```
+
+### 查看文件符号
+
+```bash
+# 列出文件中的所有符号
+python scripts/query_index.py . file <file-path>
+```
+
+示例：
+```bash
+# 查看 src/main.py 中的符号
+python scripts/query_index.py . file src/main.py
+```
+
+## 数据库结构
+
+符号索引数据库包含以下表：
+
+### symbols 表
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | INTEGER | 符号唯一标识 |
+| name | TEXT | 符号名称 |
+| kind | TEXT | 符号类型（class, function, method, variable, file） |
+| file_path | TEXT | 文件路径（相对路径） |
+| line_number | INTEGER | 定义所在行号 |
+| end_line_number | INTEGER | 定义结束行号 |
+| parent_id | INTEGER | 父符号 ID（用于嵌套定义） |
+| metadata | TEXT | 元数据（JSON 格式） |
+
+### dependencies 表
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | INTEGER | 依赖关系唯一标识 |
+| from_symbol | INTEGER | 源符号 ID |
+| to_symbol | INTEGER | 目标符号 ID |
+| dep_type | TEXT | 依赖类型（imports, extends, implements, calls, uses） |
+
+## 索引位置
+
+- **数据库路径**: `{{ db_path }}`
+- **项目根目录**: `{{ project_path }}`
+
+---
+
+*符号索引由 [architecture-generator](https://github.com/your-repo/architecture-generator) 技能自动生成*

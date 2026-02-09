@@ -1,0 +1,15 @@
+{
+  "contextId": "2026-02-09_src-migration",
+  "title": "代码项目统一迁移到 src 目录",
+  "description": "按两阶段实施项目目录统一：先做兼容迁移（方案1）确保稳定，再做彻底路径收敛（方案2）。",
+  "status": "completed",
+  "createdAt": "2026-02-09T12:00:00Z",
+  "updatedAt": "2026-02-09T12:40:00Z",
+  "assignee": "Codex",
+  "documents": {
+    "plan": "plan.md",
+    "progress": "progress.md",
+    "baseline": "baseline.md"
+  },
+  "completedAt": "2026-02-09T12:40:00Z"
+}

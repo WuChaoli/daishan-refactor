@@ -1,0 +1,39 @@
+# 日志装饰器配置文件
+# 所有配置项都是可选的，未配置时使用默认值
+
+logging:
+  # 日志格式
+  # 支持的占位符: %(asctime)s, %(levelname)s, %(message)s, %(name)s
+  # %(levelname)-5s 表示日志级别固定5个字符宽度，左对齐，确保树形结构对齐
+  format: "%(asctime)s - %(levelname)-5s - %(message)s"
+
+  # 时间格式
+  # 注意: logging模块不支持%f（微秒），如需精确时间请使用其他方案
+  time_format: "%Y-%m-%d %H:%M:%S"
+
+  # 日志级别
+  # 可选值: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  level: INFO
+
+  # 文件编码
+  encoding: utf-8
+
+  # 日志目录
+  # 所有日志文件（全局日志和功能级日志）都存放在此目录
+  log_dir: logs
+
+  # 全局日志文件名
+  global_log_file: global.log
+
+  # 是否启用控制台输出
+  console_enabled: true
+
+  # Mermaid执行路径图配置
+  # 是否启用Mermaid图生成（默认关闭，需在装饰器参数中显式启用）
+  mermaid_enabled: false
+
+  # Mermaid文件目录（相对于log_dir）
+  mermaid_dir: mermaid
+
+  # Mermaid文件夹大小限制（MB），超限自动删除最旧文件
+  mermaid_max_size_mb: 10
