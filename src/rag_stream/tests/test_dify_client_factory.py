@@ -6,7 +6,7 @@ import os
 import pytest
 from unittest.mock import patch
 
-from src.services.dify_client_factory import DifyClientFactory
+from src.utils.dify_client_factory import DifyClientFactory
 
 
 class TestDifyClientFactory:

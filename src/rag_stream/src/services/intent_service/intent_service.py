@@ -6,9 +6,9 @@ IntentService - 意图识别服务
 from typing import Any, Dict, List
 
 from log_decorator import log
-from src.services.intent_recognizer import IntentRecognizerSettings
 from src.services.intent_service.base_intent_service import (
     BaseIntentService,
+    IntentRecognizerSettings,
     IntentResult,
 )
 
@@ -61,18 +61,13 @@ class IntentService(BaseIntentService):
         super().__init__(ragflow_client=ragflow_client)
 
     @log()
-    def _load_process_settings(
-        self,
-        text_input: str,
-        user_id: str,
-    ) -> IntentRecognizerSettings:
+    def _load_process_settings(self) -> IntentRecognizerSettings:
         return self._load_intent_recognizer_settings()
 
     @log()
     async def _query_process_table_results(
         self,
         text_input: str,
-        user_id: str,
         recognizer_settings: IntentRecognizerSettings,
     ) -> Dict[str, List[Any]]:
         return await self._query_table_results(
@@ -83,8 +78,6 @@ class IntentService(BaseIntentService):
     @log()
     def _sort_process_table_results(
         self,
-        text_input: str,
-        user_id: str,
         table_results: Dict[str, List[Any]],
         recognizer_settings: IntentRecognizerSettings,
     ) -> List[Any]:
@@ -94,21 +87,11 @@ class IntentService(BaseIntentService):
         )
 
     @log()
-    def _get_process_judge_function(
-        self,
-        text_input: str,
-        user_id: str,
-        recognizer_settings: IntentRecognizerSettings,
-    ):
+    def _get_process_judge_function(self):
         return self._judge_daishan_intent_priority
 
     @log()
-    async def _post_process_result(
-        self,
-        text_input: str,
-        user_id: str,
-        intent_result: IntentResult,
-    ) -> dict:
+    async def _post_process_result(self, intent_result: IntentResult) -> dict:
         return {
             "type": intent_result.type,
             "query": intent_result.query,

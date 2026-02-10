@@ -18,8 +18,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 env_path = Path(__file__).parent.parent / '.env'
 load_dotenv(env_path)
 
-from src.services.prompts import SourceDispatchPrompts
-from src.services.dify_client_factory import get_client
+from src.utils.prompts import SourceDispatchPrompts
+from src.utils.dify_client_factory import get_client
 
 
 class IntentClassificationTester:

@@ -13,6 +13,9 @@ from dotenv import load_dotenv
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
+src_root = os.path.join(project_root, "src")
+if src_root not in sys.path:
+    sys.path.insert(0, src_root)
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware

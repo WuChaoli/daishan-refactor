@@ -39,7 +39,7 @@ print("\n4. 测试在 rag_stream 服务中导入...")
 try:
     import sys
     import os
-    sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'rag_stream'))
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src', 'rag_stream'))
     from src.services.source_dispath_srvice import handle_source_dispatch
     print("   ✓ 成功从 rag_stream 导入 handle_source_dispatch")
 except ImportError as e:

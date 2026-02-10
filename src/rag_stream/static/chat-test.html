@@ -198,6 +198,45 @@
             border-radius: 6px;
         }
 
+        .guess-questions-message {
+            margin-top: -8px;
+        }
+
+        .guess-questions-content {
+            background: #f0f4ff !important;
+            border: 1px solid #dbe3ff;
+        }
+
+        .guess-questions-title {
+            font-size: 13px;
+            color: #4c5cc0;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .guess-questions-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .guess-question-btn {
+            border: 1px solid #c9d4ff;
+            background: #ffffff;
+            color: #3346b5;
+            border-radius: 14px;
+            font-size: 12px;
+            padding: 4px 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .guess-question-btn:hover {
+            background: #3346b5;
+            border-color: #3346b5;
+            color: #ffffff;
+        }
+
         /* 流式输出动画 */
         .typing-indicator {
             display: inline-block;
@@ -1331,9 +1370,109 @@
             }
         }
 
+        function extractGuessQuestionText(item) {
+            if (typeof item === 'string') {
+                return item.trim();
+            }
+
+            if (item && typeof item === 'object') {
+                const text = item.guess_your_question || item.question || item.text || '';
+                if (typeof text === 'string') {
+                    return text.trim();
+                }
+            }
+
+            return '';
+        }
+
+        function normalizeGuessQuestions(payload) {
+            const rawQuestions = Array.isArray(payload)
+                ? payload
+                : (payload && Array.isArray(payload.data) ? payload.data : []);
+
+            const normalized = rawQuestions
+                .map(extractGuessQuestionText)
+                .filter(Boolean);
+
+            return [...new Set(normalized)].slice(0, 5);
+        }
+
+        async function fetchGuessQuestions(question) {
+            try {
+                const response = await fetch(`${state.serverUrl}/api/guess-questions`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                return normalizeGuessQuestions(result);
+            } catch (error) {
+                console.warn('猜你想问接口调用失败:', error);
+                return [];
+            }
+        }
+
+        function renderGuessQuestions(messageId, guessQuestions) {
+            const aiMessageElement = document.getElementById(messageId);
+            if (!aiMessageElement) return;
+
+            const guessMessageId = `${messageId}-guess`;
+            let guessMessageElement = document.getElementById(guessMessageId);
+
+            if (!guessQuestions || guessQuestions.length === 0) {
+                if (guessMessageElement) {
+                    guessMessageElement.remove();
+                }
+                return;
+            }
+
+            if (!guessMessageElement) {
+                guessMessageElement = document.createElement('div');
+                guessMessageElement.className = 'message assistant-message guess-questions-message';
+                guessMessageElement.id = guessMessageId;
+                aiMessageElement.insertAdjacentElement('afterend', guessMessageElement);
+            }
+
+            guessMessageElement.innerHTML = '';
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content guess-questions-content';
+
+            const titleDiv = document.createElement('div');
+            titleDiv.className = 'guess-questions-title';
+            titleDiv.textContent = '猜你想问';
+
+            const questionsListDiv = document.createElement('div');
+            questionsListDiv.className = 'guess-questions-list';
+
+            guessQuestions.forEach((guessQuestion) => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'guess-question-btn';
+                button.textContent = guessQuestion;
+                button.addEventListener('click', () => {
+                    sendQuestion(guessQuestion);
+                });
+                questionsListDiv.appendChild(button);
+            });
+
+            contentDiv.appendChild(titleDiv);
+            contentDiv.appendChild(questionsListDiv);
+            guessMessageElement.appendChild(contentDiv);
+            scrollToBottom();
+        }
+
         // 发送问题
-        async function sendQuestion() {
-            const question = elements.questionInput.value.trim();
+        async function sendQuestion(inputQuestion = null) {
+            const sourceQuestion = typeof inputQuestion === 'string'
+                ? inputQuestion
+                : elements.questionInput.value;
+            const question = sourceQuestion.trim();
             if (!question || state.isStreaming) return;
 
             // 隐藏空状态
@@ -1349,6 +1488,8 @@
             const aiMessageId = 'msg-' + Date.now();
             addMessage('assistant', '', aiMessageId);
             addTypingIndicator(aiMessageId);
+
+            const guessQuestionsPromise = fetchGuessQuestions(question);
 
             state.isStreaming = true;
             updateUIState();
@@ -1428,6 +1569,9 @@
                 state.currentReader = null;
                 updateUIState();
             }
+
+            const guessQuestions = await guessQuestionsPromise;
+            renderGuessQuestions(aiMessageId, guessQuestions);
 
             // 清空输入框
             elements.questionInput.value = '';

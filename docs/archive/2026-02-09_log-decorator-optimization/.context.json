@@ -1,0 +1,20 @@
+{
+  "contextId": "2026-02-09_log-decorator-optimization",
+  "status": "in_progress",
+  "createdAt": "2026-02-09T18:32:44.933604Z",
+  "updatedAt": "2026-02-09T18:32:44.933604Z",
+  "completedAt": null,
+  "title": "Log Decorator Optimization",
+  "description": "实现 Log Decorator Optimization 功能",
+  "assignee": "wuchaoli",
+  "gitBranch": "feature/log-decorator-optimization",
+  "documents": {
+    "requirements": "requirements.md",
+    "architectureChanges": "architecture-changes.md",
+    "featureSpec": "feature-spec.md",
+    "plan": "plan.md",
+    "todos": "todos.md",
+    "testPlan": "test-plan.md"
+  },
+  "staticDocsUpdated": []
+}

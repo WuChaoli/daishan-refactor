@@ -27,7 +27,7 @@ class TestSourceDispatchDifyIntegration:
         }
         with patch.dict(os.environ, env_vars, clear=True):
             # 重置全局工厂实例
-            import src.services.dify_client_factory as factory_module
+            import src.utils.dify_client_factory as factory_module
             factory_module._factory_instance = None
             yield env_vars
 
@@ -69,7 +69,7 @@ class TestSourceDispatchDifyIntegration:
             }
 
             # Mock DifyClient
-            with patch('src.services.dify_client_factory.DifyClient') as mock_dify_client:
+            with patch('src.utils.dify_client_factory.DifyClient') as mock_dify_client:
                 mock_client_instance = MagicMock()
                 mock_dify_client.return_value = mock_client_instance
 
@@ -93,7 +93,7 @@ class TestSourceDispatchDifyIntegration:
     ):
         """测试 _get_solid_resource_instruction 使用工厂获取 client"""
         # Mock DifyClient
-        with patch('src.services.dify_client_factory.DifyClient') as mock_dify_client:
+        with patch('src.utils.dify_client_factory.DifyClient') as mock_dify_client:
             mock_client_instance = MagicMock()
             mock_dify_client.return_value = mock_client_instance
 
@@ -120,7 +120,7 @@ class TestSourceDispatchDifyIntegration:
         # 清空环境变量
         with patch.dict(os.environ, {}, clear=True):
             # 重置全局工厂实例
-            import src.services.dify_client_factory as factory_module
+            import src.utils.dify_client_factory as factory_module
             factory_module._factory_instance = None
 
             # Mock DaiShanSQL Server

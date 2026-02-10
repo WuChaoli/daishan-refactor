@@ -19,13 +19,13 @@ from src.models.emergency_entities import (
     RescueOrganization,
     ProtectionTarget
 )
-from src.services.prompts import SourceDispatchPrompts
+from src.utils.prompts import SourceDispatchPrompts
 from src.config.settings import settings
 from log_decorator import log, logger
 from DaiShanSQL import Server
 
 # 加载sourceType映射配置
-MAPPING_FILE = Path(__file__).parent / "source_type_mapping.json"
+MAPPING_FILE = Path(__file__).resolve().parents[1] / "utils" / "source_type_mapping.json"
 with open(MAPPING_FILE, "r", encoding="utf-8") as f:
     SOURCE_TYPE_MAPPING = json.load(f)
 
@@ -320,7 +320,7 @@ def _parse_accident_query_result(query_result: Any, accident_id: int) -> Acciden
 @log()
 def _get_dify_clients() -> tuple:
     """获取Dify客户端实例"""
-    from src.services.dify_client_factory import get_client
+    from src.utils.dify_client_factory import get_client
 
     general_client = get_client("GENRAL_CHAT")
     if general_client is None:

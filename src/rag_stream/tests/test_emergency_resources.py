@@ -10,7 +10,7 @@ from pathlib import Path
 # 添加项目路径
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root / "DaiShanSQL"))
-sys.path.insert(0, str(project_root / "rag_stream"))
+sys.path.insert(0, str(project_root / "src" / "rag_stream"))
 
 from src.models.emergency_entities import (
     EmergencySupply,
@@ -44,7 +44,7 @@ class EmergencyResourceTester:
         self.server = Server()
 
         # 加载SQL模板配置
-        mapping_file = project_root / "rag_stream/src/services/source_type_mapping.json"
+        mapping_file = project_root / "rag_stream/src/utils/source_type_mapping.json"
         with open(mapping_file, 'r', encoding='utf-8') as f:
             self.sql_mapping = json.load(f)
 

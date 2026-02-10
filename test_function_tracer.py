@@ -3,17 +3,22 @@
 """
 
 import asyncio
-from rag_stream.src.utils.function_tracer import trace_function
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent / "src" / "rag_stream"))
+sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
+from log_decorator import log
 
 
-@trace_function
+@log()
 async def test_async_function(name: str, age: int) -> dict:
     """测试异步函数"""
     await asyncio.sleep(0.1)
     return {"name": name, "age": age, "status": "success"}
 
 
-@trace_function
+@log()
 def test_sync_function(x: int, y: int) -> int:
     """测试同步函数"""
     return x + y
@@ -30,7 +35,7 @@ async def main():
     result2 = test_sync_function(10, 20)
     print(f"同步函数结果: {result2}")
 
-    print("\n追踪日志已写入: rag_stream/logs/function_trace.log")
+    print("\n追踪日志已写入: src/rag_stream/logs/")
     print("请查看该文件以验证追踪功能")
 
 

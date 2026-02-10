@@ -13,14 +13,14 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import AsyncGenerator, Dict, List, Optional
 
-# 添加项目根目录到 sys.path
-project_root = Path(__file__).parents[2]
-sys.path.insert(0, str(project_root))
+# 添加 rag_stream 根目录到 sys.path
+rag_stream_root = Path(__file__).parents[1]
+sys.path.insert(0, str(rag_stream_root))
 
-from rag_stream.src.services.intent_service import IntentResult, QueryResult
-from rag_stream.src.services.log_manager import LogManager
-from rag_stream.src.services.intent_service import IntentService
-from rag_stream.src.services.ragflow_client import RetrievalResult
+from src.services.intent_service import IntentResult, QueryResult
+from src.services.log_manager import LogManager
+from src.services.intent_service import IntentService
+from src.utils.ragflow_client import RetrievalResult
 from src.config.settings import IntentConfig, LoggingConfig, RAGFlowConfig
 
 

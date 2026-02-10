@@ -3,8 +3,8 @@ import json
 from dataclasses import dataclass
 from typing import Any, Dict, List
 
-from src.services.intent_recognizer import IntentRecognizerSettings
 from src.services.intent_service import BaseIntentService
+from src.services.intent_service.base_intent_service import IntentRecognizerSettings
 
 
 @dataclass
@@ -26,13 +26,12 @@ class MockRagflowClient:
 
 
 class DummyIntentService(BaseIntentService):
-    def _load_process_settings(self, text_input: str, user_id: str) -> IntentRecognizerSettings:
+    def _load_process_settings(self) -> IntentRecognizerSettings:
         return self._load_intent_recognizer_settings()
 
     async def _query_process_table_results(
         self,
         text_input: str,
-        user_id: str,
         recognizer_settings: IntentRecognizerSettings,
     ) -> Dict[str, List[Any]]:
         return await self._query_table_results(
@@ -42,8 +41,6 @@ class DummyIntentService(BaseIntentService):
 
     def _sort_process_table_results(
         self,
-        text_input: str,
-        user_id: str,
         table_results: Dict[str, List[Any]],
         recognizer_settings: IntentRecognizerSettings,
     ) -> List[Any]:
@@ -52,8 +49,8 @@ class DummyIntentService(BaseIntentService):
             recognizer_settings=recognizer_settings,
         )
 
-    async def _post_process_result(self, text_input: str, user_id: str, intent_result) -> dict:
-        return {"type": intent_result.type, "data": {"query": text_input, "user_id": user_id}}
+    async def _post_process_result(self, intent_result) -> dict:
+        return {"type": intent_result.type, "data": {"query": intent_result.query}}
 
 
 def test_base_intent_service_should_run_full_intent_judgment_flow(tmp_path):
@@ -83,11 +80,23 @@ def test_base_intent_service_should_run_full_intent_judgment_flow(tmp_path):
     )
     service = DummyIntentService(ragflow_client=client)
 
-    result = asyncio.run(
-        service._intent_judgment(
+    recognizer_settings = service._load_intent_recognizer_settings(
+        mapping_file=str(mapping_path),
+    )
+    table_results = asyncio.run(
+        service._query_table_results(
             query="查询企业态势",
-            mapping_file=str(mapping_path),
+            recognizer_settings=recognizer_settings,
         )
+    )
+    sorted_results = service._sort_table_results(
+        table_results=table_results,
+        recognizer_settings=recognizer_settings,
+    )
+    result = service._build_intent_result(
+        query="查询企业态势",
+        sorted_results=sorted_results,
+        recognizer_settings=recognizer_settings,
     )
 
     assert result.type == 2

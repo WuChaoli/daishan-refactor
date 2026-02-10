@@ -12,7 +12,7 @@ print("=" * 60)
 # 先导入 rag_stream 的配置（会加载 rag_stream/.env）
 print("\n1. 导入 rag_stream 配置...")
 try:
-    from rag_stream.src.config.settings import settings
+    from src.rag_stream.src.config.settings import settings
     print("   ✓ rag_stream 配置加载成功")
 except Exception as e:
     print(f"   ✗ rag_stream 配置加载失败: {e}")

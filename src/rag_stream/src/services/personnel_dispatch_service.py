@@ -62,7 +62,7 @@ async def handle_personnel_dispatch(
 @log()
 def _get_dify_clients() -> tuple:
     """获取Dify客户端实例"""
-    from src.services.dify_client_factory import get_client
+    from src.utils.dify_client_factory import get_client
 
     general_client = get_client("GENRAL_CHAT")
     if general_client is None:
@@ -94,7 +94,7 @@ async def _extract_entities(
     Returns:
         List[str]: 提取的实体列表
     """
-    from src.services.prompts import SourceDispatchPrompts
+    from src.utils.prompts import SourceDispatchPrompts
 
     # 构建实体提取 prompt
     entity_query = SourceDispatchPrompts.get_entity_extraction_prompt(voice_text)

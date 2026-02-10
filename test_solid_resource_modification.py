@@ -1,6 +1,6 @@
 """验证 _get_solid_resource_instruction 函数修改"""
 import sys
-sys.path.insert(0, '/home/wuchaoli/codespace/daishan-refactor/rag_stream')
+sys.path.insert(0, '/home/wuchaoli/codespace/daishan-refactor/src/rag_stream')
 
 from src.services.source_dispath_srvice import _get_solid_resource_instruction
 import inspect
