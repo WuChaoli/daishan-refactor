@@ -69,13 +69,18 @@ async def _route_with_sql_result(
     target_category: str,
     chat_with_category: Callable[[str, ChatRequest], Awaitable[Any]],
 ):
-    if not sql_result or not target_category:
+    if not target_category:
         return None
 
-    sql_result_str = str(sql_result)
+    sql_result_str = "" if sql_result is None else str(sql_result).strip()
+    if not sql_result_str:
+        return await chat_with_category(target_category, request)
+
     updated_request = ChatRequest(
         question=f"{request.question}\n\n{sql_result_str}",
+        session_id=request.session_id,
         user_id=request.user_id,
+        stream=request.stream,
     )
 
     return await chat_with_category(target_category, updated_request)
@@ -143,26 +148,33 @@ async def handle_chat_general(
 
     try:
         if has_error:
-            return _skip_intent_error_result(result_dict)
+            _skip_intent_error_result(result_dict)
+            return await chat_with_category("通用", request)
         elif result_type == 1:
-            return await _post_process_and_route_type1(
+            routed_result = await _post_process_and_route_type1(
                 request=request,
                 result_dict=result_dict,
                 chat_with_category=chat_with_category,
             )
+            if routed_result is not None:
+                return routed_result
+            return await chat_with_category("通用", request)
         else:
-            return await _post_process_and_route_type2(
+            routed_result = await _post_process_and_route_type2(
                 request=request,
                 result_dict=result_dict,
                 chat_with_category=chat_with_category,
             )
+            if routed_result is not None:
+                return routed_result
+            return await chat_with_category("通用", request)
     except ImportError as error:
         try:
             _log_fallback_error_and_reraise(error)
         except Exception:
-            return None
+            return await chat_with_category("通用", request)
     except Exception as error:
         try:
             _log_fallback_error_and_reraise(error)
         except Exception:
-            return None
+            return await chat_with_category("通用", request)

@@ -3,8 +3,13 @@
 
 根据意图识别结果，返回推荐问题列表
 """
+import json
+import re
 from typing import Dict, List, Any
 from log_decorator import logger
+
+from src.utils.dify_client_factory import get_client
+from src.utils.prompts import GuessQuestionsPrompts
 
 
 # 类别1的固定问题模板
@@ -15,7 +20,7 @@ TYPE1_FIXED_QUESTIONS = [
 ]
 
 
-async def handle_guess_questions(question: str, intent_service) -> Dict[str, Any]:
+async def handle_guess_questions(question: str, intent_service) -> List[Dict[str, str]]:
     """
     处理猜你想问请求的主函数
 
@@ -24,24 +29,16 @@ async def handle_guess_questions(question: str, intent_service) -> Dict[str, Any
         intent_service: 意图识别服务实例
 
     Returns:
-        包含推荐问题列表的响应字典
+        推荐问题列表
     """
     try:
         # 输入验证
         question = question.strip()
         if not question:
-            return {
-                "code": 1,
-                "message": "问题不能为空",
-                "data": []
-            }
+            return []
 
         if len(question) > 1000:
-            return {
-                "code": 1,
-                "message": "问题长度不能超过1000字符",
-                "data": []
-            }
+            return []
 
         # 调用意图识别服务
         intent_result = await intent_service.process_query(question, user_id=None)
@@ -50,21 +47,13 @@ async def handle_guess_questions(question: str, intent_service) -> Dict[str, Any
         intent_dict = _convert_to_dict(intent_result)
 
         # 根据意图类型选择处理函数
-        questions = _process_by_type(intent_dict)
+        questions = await _process_by_type(intent_dict, question)
 
-        return {
-            "code": 0,
-            "message": "成功",
-            "data": questions
-        }
+        return questions
 
     except Exception as e:
         logger.error(f"猜你想问服务异常: {str(e)}", exc_info=True)
-        return {
-            "code": 1,
-            "message": "意图识别服务暂时不可用",
-            "data": []
-        }
+        return []
 
 
 def _convert_to_dict(intent_result: Any) -> Dict[str, Any]:
@@ -85,7 +74,7 @@ def _convert_to_dict(intent_result: Any) -> Dict[str, Any]:
         return intent_result
 
 
-def _process_by_type(intent_dict: Dict[str, Any]) -> List[Dict[str, str]]:
+async def _process_by_type(intent_dict: Dict[str, Any], original_question: str) -> List[Dict[str, str]]:
     """
     根据意图类型选择处理函数
 
@@ -100,7 +89,10 @@ def _process_by_type(intent_dict: Dict[str, Any]) -> List[Dict[str, str]]:
     if intent_type == 1:
         return process_type1(intent_dict)
     elif intent_type == 2:
-        return process_type2(intent_dict)
+        questions = process_type2(intent_dict)
+        if questions:
+            return questions
+        return await _generate_type2_fallback_questions(original_question)
     else:
         return process_other_types(intent_dict)
 
@@ -146,7 +138,7 @@ def process_type1(intent_result: Dict[str, Any]) -> List[Dict[str, str]]:
         包含3个固定问题的列表
     """
     return [
-        {"guess_your_question": question}
+        {"question": question}
         for question in TYPE1_FIXED_QUESTIONS
     ]
 
@@ -164,16 +156,86 @@ def process_type2(intent_result: Dict[str, Any]) -> List[Dict[str, str]]:
         提取的问题列表（最多3个）
     """
     results = intent_result.get("results", [])
+    if not isinstance(results, list):
+        return []
 
     # 提取第2-4个结果（索引1-3）
     extracted_results = results[1:4]
 
     # 提取并解析question字段
     return [
-        {"guess_your_question": _parse_question_field(item.get("question", ""))}
+        {"question": _parse_question_field(item.get("question", ""))}
         for item in extracted_results
         if isinstance(item, dict) and "question" in item
     ]
+
+
+def _parse_llm_generated_questions(answer_text: str) -> List[str]:
+    text = (answer_text or "").strip()
+    if not text:
+        return []
+
+    candidates: List[str] = []
+
+    # 优先尝试 JSON 数组
+    json_text = text
+    if "[" in text and "]" in text:
+        json_text = text[text.find("[") : text.rfind("]") + 1]
+
+    try:
+        parsed = json.loads(json_text)
+        if isinstance(parsed, list):
+            for item in parsed:
+                if isinstance(item, str):
+                    value = item.strip()
+                elif isinstance(item, dict):
+                    value = str(item.get("question") or item.get("guess_your_question") or "").strip()
+                else:
+                    value = str(item).strip()
+
+                if value:
+                    candidates.append(value)
+    except json.JSONDecodeError:
+        # 兼容普通文本：按行拆分并去除编号
+        for line in text.splitlines():
+            normalized = re.sub(r"^\s*(?:[-*]|\d+[\.\)\、\:]?)\s*", "", line).strip()
+            if normalized:
+                candidates.append(normalized)
+
+    deduplicated: List[str] = []
+    seen = set()
+    for item in candidates:
+        if item not in seen:
+            seen.add(item)
+            deduplicated.append(item)
+
+    return deduplicated[:3]
+
+
+async def _generate_type2_fallback_questions(original_question: str) -> List[Dict[str, str]]:
+    try:
+        general_client = get_client("GENRAL_CHAT")
+    except Exception as error:
+        logger.error(f"获取 GENRAL_CHAT client 失败: {error}")
+        return []
+
+    prompt = GuessQuestionsPrompts.get_type2_fallback_prompt(original_question)
+
+    try:
+        response = general_client.run_chat(
+            query=prompt,
+            user="system",
+            inputs={},
+            conversation_id="",
+        )
+    except Exception as error:
+        logger.error(f"调用 GENRAL_CHAT 生成猜你想问失败: {error}", exc_info=True)
+        return []
+
+    answer_text = response.answer if hasattr(response, "answer") else str(response)
+    generated = _parse_llm_generated_questions(answer_text)
+
+    return [{"question": item} for item in generated]
 
 
 def process_other_types(intent_result: Dict[str, Any]) -> List[Dict[str, str]]:

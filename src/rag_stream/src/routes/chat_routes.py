@@ -3,9 +3,9 @@ from __future__ import annotations
 import asyncio
 import json
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, List
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from log_decorator import log, logger
 
@@ -26,13 +26,6 @@ from src.services.personnel_dispatch_service import handle_personnel_dispatch
 from src.services.rag_service import get_or_create_session, stream_chat_response
 from src.services.source_dispath_srvice import handle_source_dispatch
 from src.utils.session_manager import session_manager
-from src.services.ragflow_client import RagflowClient
-from src.services.intent_service import IntentService
-
-# 直接初始化意图识别服务所需的组件
-ragflow_client = RagflowClient(settings.ragflow, settings.intent)
-intent_service = IntentService(ragflow_client)
-
 router = APIRouter()
 
 
@@ -156,10 +149,14 @@ async def dict_to_stream_generator(result_dict: dict):
 
 @log(is_entry=True, enable_mermaid=True)
 @router.post("/api/general", response_model=ChatResponse)
-async def chat_general(request: ChatRequest):
+async def chat_general(request: ChatRequest, http_request: Request):
     """
     通用问答接口 - 使用意图识别路由
     """
+    intent_service = getattr(http_request.app.state, "intent_service", None)
+    if intent_service is None:
+        raise HTTPException(status_code=500, detail="intent_service 未初始化")
+
     return await handle_chat_general(
         request=request,
         intent_service=intent_service,
@@ -355,7 +352,7 @@ async def get_categories() -> Dict[str, Any]:
 
 @log()
 @router.post("/api/guess-questions")
-async def guess_questions(request: GuessQuestionsRequest) -> Dict[str, Any]:
+async def guess_questions(request: GuessQuestionsRequest, http_request: Request) -> List[Dict[str, str]]:
     """
     猜你想问接口
 
@@ -365,9 +362,12 @@ async def guess_questions(request: GuessQuestionsRequest) -> Dict[str, Any]:
         request: 包含用户问题的请求
 
     Returns:
-        包含推荐问题列表的响应
+        推荐问题列表
     """
     from src.services.guess_questions_service import handle_guess_questions
 
-    return await handle_guess_questions(request.question, intent_service)
+    intent_service = getattr(http_request.app.state, "intent_service", None)
+    if intent_service is None:
+        raise HTTPException(status_code=500, detail="intent_service 未初始化")
 
+    return await handle_guess_questions(request.question, intent_service)
