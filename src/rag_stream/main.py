@@ -7,6 +7,9 @@ from pathlib import Path
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
+src_root = os.path.join(project_root, "src")
+if src_root not in sys.path:
+    sys.path.insert(0, src_root)
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
@@ -33,7 +36,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.routes.chat_routes import router
 from src.config.settings import settings
-from src.services.ragflow_client import RagflowClient
+from src.utils.ragflow_client import RagflowClient
 from src.services.intent_service import IntentService
 
 # 全局服务实例
@@ -67,6 +70,8 @@ async def lifespan(app: FastAPI):
 
         # 初始化意图识别服务
         intent_service = IntentService(ragflow_client)
+        app.state.ragflow_client = ragflow_client
+        app.state.intent_service = intent_service
         logger.info("✓ 意图识别服务初始化完成")
 
         logger.info("=" * 60)

@@ -1,16 +1,54 @@
 {
-  "activeContexts": [
+  "activeContexts": [],
+  "archivedContexts": [
     {
       "contextId": "2026-02-04_project-architecture",
       "title": "项目架构分析",
       "description": "岱山应急驾驶舱 AI 系统架构分析与文档化",
       "createdAt": "2026-02-04T17:08:00Z",
       "updatedAt": "2026-02-04T17:15:00Z",
-      "status": "active",
+      "status": "archived",
       "owner": "师爷",
-      "tags": ["架构", "文档", "分析"]
+      "tags": [
+        "架构",
+        "文档",
+        "分析"
+      ],
+      "archivedAt": "2026-02-10T00:00:00Z",
+      "archivePath": "docs/archive/2026-02-04_project-architecture"
+    },
+    {
+      "contextId": "2026-02-09_log-decorator-optimization",
+      "title": "Log Decorator Optimization",
+      "status": "archived",
+      "assignee": "wuchaoli",
+      "updatedAt": "2026-02-09T18:32:44.933604Z",
+      "archivedAt": "2026-02-10T00:00:00Z",
+      "archivePath": "docs/archive/2026-02-09_log-decorator-optimization"
+    },
+    {
+      "contextId": "2026-02-09_src-migration",
+      "title": "src-migration",
+      "status": "archived",
+      "archivedAt": "2026-02-10T00:00:00Z",
+      "archivePath": "docs/archive/2026-02-09_src-migration"
+    },
+    {
+      "contextId": "2026-02-10_chat-general-chain-optimization",
+      "title": "Chat General Chain Optimization",
+      "description": "优化 /api/general 接口链路稳定性与服务注入一致性",
+      "createdAt": "2026-02-10T10:00:00Z",
+      "updatedAt": "2026-02-10T10:25:00Z",
+      "status": "archived",
+      "owner": "罗辑",
+      "tags": [
+        "rag_stream",
+        "refactor",
+        "chat-general"
+      ],
+      "archivedAt": "2026-02-10T11:10:00Z",
+      "archivePath": "docs/archive/2026-02-10_chat-general-chain-optimization"
     }
   ],
-  "archivedContexts": [],
-  "lastUpdated": "2026-02-04T17:15:00Z"
+  "lastUpdated": "2026-02-10T11:10:00Z"
 }
