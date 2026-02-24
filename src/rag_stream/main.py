@@ -1,37 +1,52 @@
 import os
 import sys
 from contextlib import asynccontextmanager
+from datetime import datetime
 from pathlib import Path
 
-# 添加项目根目录到 Python 路径，以便导入 log_decorator
-project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# 添加项目根目录到 Python 路径
+# 当前文件: <repo>/src/rag_stream/main.py
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 src_root = os.path.join(project_root, "src")
 if src_root not in sys.path:
     sys.path.insert(0, src_root)
+log_manager_root = os.path.join(src_root, "log-manager")
+if log_manager_root not in sys.path:
+    sys.path.insert(0, log_manager_root)
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
-from log_decorator import log, log_entry, logger
+from log_manager import LogManagerConfig, configure, marker, entry_trace
+
+# 初始化 log-manager
+cfg = LogManagerConfig()
+cfg.base_dir = Path(".log-manager")
+cfg.session_id = f"rag_stream_{int(datetime.now().timestamp())}"
+cfg.parameter_whitelist = ("user_id", "session_id", "category", "chat_id")
+cfg.enable_background_threads = True
+cfg.report.trigger_timer_s = 60
+cfg.report.immediate_on_error = True
+runtime = configure(cfg)
 
 # 加载 rag_stream 的 .env 文件（包含 DIFY 配置）
 rag_stream_env_path = Path(__file__).parent / ".env"
 if rag_stream_env_path.exists():
     load_dotenv(rag_stream_env_path)
-    logger.info(f"✓ 已加载 rag_stream 环境变量: {rag_stream_env_path}")
+    marker("环境变量加载", {"path": str(rag_stream_env_path), "source": "rag_stream"})
 else:
-    logger.warning(f"⚠ rag_stream .env 文件不存在: {rag_stream_env_path}")
+    marker("环境变量加载", {"path": str(rag_stream_env_path), "exists": False}, level="WARNING")
 
 # 加载 DaiShanSQL 的 .env 文件（包含 OPENAI_API_KEY 等配置）
 daishan_env_path = Path(__file__).parent.parent / "DaiShanSQL" / "DaiShanSQL" / ".env"
 if daishan_env_path.exists():
     load_dotenv(daishan_env_path)
-    logger.info(f"✓ 已加载 DaiShanSQL 环境变量: {daishan_env_path}")
+    marker("环境变量加载", {"path": str(daishan_env_path), "source": "DaiShanSQL"})
 else:
-    logger.warning(f"⚠ DaiShanSQL .env 文件不存在: {daishan_env_path}")
+    marker("环境变量加载", {"path": str(daishan_env_path), "exists": False}, level="WARNING")
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.routes.chat_routes import router
@@ -44,45 +59,43 @@ ragflow_client = None
 intent_service = None
 
 
-@log()
 @asynccontextmanager
+@entry_trace("app-lifespan")
 async def lifespan(app: FastAPI):
     """应用生命周期管理"""
     global ragflow_client, intent_service
 
-    # 启动时初始化
-    logger.info("=" * 60)
-    logger.info("RAG 流式回复服务启动中...")
-    logger.info("=" * 60)
+    marker("服务启动开始", {"version": "1.0.0"})
 
     try:
-        logger.info("✓ 配置加载成功")
-        logger.info("✓ 日志系统初始化完成")
+        marker("配置加载完成", {})
+        marker("日志系统初始化完成", {"system": "log-manager"})
 
         # 初始化 RAGFlow 客户端
         ragflow_client = RagflowClient(settings.ragflow, settings.intent)
 
         # 测试 RAGFlow 连接
-        if ragflow_client.test_connection():
-            logger.info("✓ RAGFlow 连接测试成功")
-        else:
-            logger.warning("⚠ RAGFlow 连接测试失败,服务将降级运行")
+        connection_ok = ragflow_client.test_connection()
+        marker("RAGFlow连接测试", {"success": connection_ok})
+        if not connection_ok:
+            marker("RAGFlow连接测试失败", {"mode": "降级运行"}, level="WARNING")
 
         # 初始化意图识别服务
         intent_service = IntentService(ragflow_client)
         app.state.ragflow_client = ragflow_client
         app.state.intent_service = intent_service
-        logger.info("✓ 意图识别服务初始化完成")
+        marker("意图识别服务初始化完成", {})
 
-        logger.info("=" * 60)
-        logger.info("✓ 服务启动成功!")
-        logger.info("=" * 60)
+        marker("服务启动成功", {"host": settings.server.host, "port": settings.server.port})
 
         yield
 
     except Exception as e:
-        logger.error(f"✗ 服务启动失败: {str(e)}")
+        marker("服务启动失败", {"error": str(e)}, level="ERROR")
         raise
+    finally:
+        marker("服务关闭开始", {})
+        runtime.shutdown()
 
 
 app = FastAPI(
@@ -106,7 +119,6 @@ app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
 # 添加根路径重定向
 @app.get("/")
-@log_entry(enable_mermaid=True)
 async def root():
     return RedirectResponse(url="/static/chat-test.html")
 

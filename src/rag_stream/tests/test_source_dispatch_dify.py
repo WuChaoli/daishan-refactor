@@ -11,7 +11,6 @@ from src.services.source_dispath_srvice import (
     _get_solid_resource_instruction
 )
 from src.models.schemas import SourceDispatchRequest
-from src.services.log_manager import LogManager
 
 
 class TestSourceDispatchDifyIntegration:
@@ -32,12 +31,6 @@ class TestSourceDispatchDifyIntegration:
             yield env_vars
 
     @pytest.fixture
-    def log_manager(self):
-        """创建日志管理器"""
-        from src.config.settings import settings
-        return LogManager(settings.logging)
-
-    @pytest.fixture
     def sample_request(self):
         """创建示例请求"""
         return SourceDispatchRequest(
@@ -50,7 +43,6 @@ class TestSourceDispatchDifyIntegration:
     async def test_handle_source_dispatch_uses_factory(
         self,
         mock_env,
-        log_manager,
         sample_request
     ):
         """测试 handle_source_dispatch 使用工厂获取 client"""
@@ -79,7 +71,7 @@ class TestSourceDispatchDifyIntegration:
                 mock_client_instance.run_chat.return_value = mock_response
 
                 # 调用函数
-                result = await handle_source_dispatch(sample_request, log_manager)
+                result = await handle_source_dispatch(sample_request)
 
                 # 验证 DifyClient 被创建（通过工厂）
                 assert mock_dify_client.called
@@ -88,32 +80,31 @@ class TestSourceDispatchDifyIntegration:
     async def test_get_solid_resource_instruction_uses_factory(
         self,
         mock_env,
-        log_manager,
         sample_request
     ):
         """测试 _get_solid_resource_instruction 使用工厂获取 client"""
         # Mock DifyClient
-        with patch('src.utils.dify_client_factory.DifyClient') as mock_dify_client:
-            mock_client_instance = MagicMock()
-            mock_dify_client.return_value = mock_client_instance
+        mock_client = MagicMock()
 
-            # Mock Dify 响应
-            mock_response = MagicMock()
-            mock_response.answer = '[{"id":"1"},{"id":"2"}]'
-            mock_client_instance.run_chat.return_value = mock_response
+        # Mock Dify 响应
+        mock_response = MagicMock()
+        mock_response.answer = '[{"id":"1"},{"id":"2"}]'
+        mock_client.run_chat.return_value = mock_response
 
-            # 调用函数
-            result = await _get_solid_resource_instruction(sample_request, log_manager)
+        # 调用函数
+        result = await _get_solid_resource_instruction(
+            sample_request,
+            mock_client,
+            ["entity1", "entity2"]
+        )
 
-            # 验证 DifyClient 被创建（通过工厂）
-            assert mock_dify_client.called
-            # 验证返回结果
-            assert result == '[{"id":"1"},{"id":"2"}]'
+        # 验证返回结果
+        assert len(result) == 2
+        assert result[0]["id"] == "1"
 
     @pytest.mark.asyncio
     async def test_handle_source_dispatch_missing_client(
         self,
-        log_manager,
         sample_request
     ):
         """测试缺少 client 配置时的错误处理"""
@@ -137,8 +128,7 @@ class TestSourceDispatchDifyIntegration:
                 }
 
                 # 调用函数
-                result = await handle_source_dispatch(sample_request, log_manager)
+                result = await handle_source_dispatch(sample_request)
 
-                # 验证返回错误
-                assert result["code"] == 1
-                assert "未配置" in result["message"]
+                # 验证返回空列表（错误处理）
+                assert result == []

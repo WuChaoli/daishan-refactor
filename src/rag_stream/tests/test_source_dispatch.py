@@ -12,16 +12,11 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from src.models.schemas import SourceDispatchRequest
 from src.services.source_dispath_srvice import handle_source_dispatch
-from src.services.log_manager import LogManager
-from src.config.settings import settings
 
 
 @pytest.mark.asyncio
 async def test_source_dispatch():
     """测试资源调度功能"""
-
-    # 初始化 LogManager
-    log_manager = LogManager(settings.logging)
 
     # 创建测试请求
     request = SourceDispatchRequest(
@@ -40,7 +35,7 @@ async def test_source_dispatch():
 
     try:
         # 调用服务函数
-        result = await handle_source_dispatch(request, log_manager)
+        result = await handle_source_dispatch(request)
 
         print("\n处理结果:")
         print(f"返回类型: {type(result)}")
@@ -68,8 +63,6 @@ async def test_source_dispatch():
 async def test_solid_resource_instruction():
     """测试固体资源指令功能（通过handle_source_dispatch）"""
 
-    log_manager = LogManager(settings.logging)
-
     # 创建测试请求,使用会触发resource意图的语音文本
     request = SourceDispatchRequest(
         accidentId="5844749472101664",
@@ -86,7 +79,7 @@ async def test_solid_resource_instruction():
     print("-" * 60)
 
     try:
-        result = await handle_source_dispatch(request, log_manager)
+        result = await handle_source_dispatch(request)
 
         print("\n处理结果:")
         print(f"结果: {result}")

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Log Manager Observability"
+  short_description: "Implement and operate log-manager workflows"
+  default_prompt: "Use $log-manager-observability to implement or debug decorators, event routing, Chinese reports, and memory telemetry in this project."

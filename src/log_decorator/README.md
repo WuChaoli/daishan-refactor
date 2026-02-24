@@ -22,7 +22,6 @@ uv add pyyaml
 ```python
 from log_decorator import log
 
-@log()
 def add(x: int, y: int) -> int:
     return x + y
 
@@ -95,7 +94,6 @@ def log(
 ```python
 from log_decorator import log
 
-@log(
     args_handler=lambda args, kwargs: {"uid": args[0], "op": kwargs.get("action")},
     result_handler=lambda result: {"status": result.get("status")},
 )
@@ -113,7 +111,6 @@ def do_action(user_id: int, action: str):
 ```python
 from log_decorator import log, logging
 
-@log()
 def process_order(order_id: int):
     logging.DEBUF(f"准备处理订单 {order_id}")
     logging.INFO("执行库存校验")
@@ -214,11 +211,9 @@ detail = parse_obj(obj, compact=False, max_depth=3)
 import os
 from log_decorator import log
 
-@log(log_level="DEBUG")
 def debug_func():
     return 1
 
-@log(log_level=lambda: os.getenv("LOG_LEVEL", "INFO"))
 def dynamic_level_func():
     return 2
 ```
@@ -319,17 +314,14 @@ from log_decorator import log, log_entry, log_end, logger, logging, parse_obj, l
 
 ```python
 # 旧写法（不再支持）
-@log(is_entry=True, enable_mermaid=True)
 def handler():
     ...
 
 # 新写法
-@log_entry(enable_mermaid=True)
 def handler():
     ...
 
 # 在流程边界截止当前分支
-@log_end()
 def finalize_step():
     ...
 ```

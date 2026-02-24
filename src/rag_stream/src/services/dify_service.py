@@ -7,14 +7,14 @@ import os
 from typing import Optional, AsyncIterator
 
 import aiohttp
-from log_decorator import log, logger
+from src.utils.log_manager_import import marker, trace
 
 from src.config.settings import settings
 
 _SUPPRESS_INTERNAL_LOGS = os.getenv("DIFY_SUPPRESS_INTERNAL_LOGS", "").lower() in {"1", "true", "yes", "on"}
 
 
-@log()
+@trace
 def should_use_dify(request_question: str) -> bool:
     q = request_question.strip()
     patterns = [
@@ -35,7 +35,7 @@ def should_use_dify(request_question: str) -> bool:
     return any(re.search(pat, q) for pat in patterns)
 
 
-@log()
+@trace
 async def stream_dify_chatflow_response(
     query: str,
     session_id: Optional[str],
@@ -63,7 +63,7 @@ async def stream_dify_chatflow_response(
             async with session.post(url, headers=headers, json=payload) as response:
                 if response.status != 200:
                     error_text = await response.text()
-                    logger.error(f"Dify Chatflow 返回错误: {response.status} - {error_text}")
+                    marker("dify.error", {"status": response.status, "error": error_text}, level="ERROR")
                     yield f"data: {json.dumps({'code': 1, 'message': f'Dify 服务错误: {error_text}', 'data': None}, ensure_ascii=False)}\n\n"
                     return
 
@@ -187,7 +187,7 @@ async def stream_dify_chatflow_response(
                 yield f"data: {json.dumps(end_data, ensure_ascii=False)}\n\n"
 
     except Exception as e:
-        logger.exception(f"Dify Chatflow 流式调用异常: {e}")
+        marker("dify.exception", {"error": str(e)}, level="ERROR")
         error_data = {"code": 1, "message": f"流式处理失败: {str(e)}", "data": None}
         yield f"data: {json.dumps(error_data, ensure_ascii=False)}\n\n"
 

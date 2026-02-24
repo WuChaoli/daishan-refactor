@@ -1,0 +1,27 @@
+log-manager 增量报告
+会话ID: rag_stream_1771930555
+入口ID: entry_ae8d1937
+快照时间: 2026-02-24 18:57:48
+分析窗口: 累计事件 28 条
+模式: lite
+
+【错误摘要】
+无错误。
+
+【函数调用链】
+Trace: tr_975f3b49
+handle_chat_general [状态=OK, 耗时=2459.7ms, 内存变化=+8704KB]
+  RagflowClient.query_single_database [状态=OK, 耗时=1606.5ms, 内存变化=+0KB]
+  RagflowClient.query_single_database [状态=OK, 耗时=1466.2ms, 内存变化=+0KB]
+  RagflowClient.query_single_database [状态=OK, 耗时=773.4ms, 内存变化=+0KB]
+  _extract_question_from_qa_text [状态=OK, 耗时=0.3ms, 内存变化=+0KB]
+
+【错误路径链】
+无错误路径。
+
+【调用链内存Top】
+1. handle_chat_general 内存变化=+8704KB
+2. RagflowClient.query_single_database 内存变化=+0KB
+3. RagflowClient.query_single_database 内存变化=+0KB
+4. RagflowClient.query_single_database 内存变化=+0KB
+5. _extract_question_from_qa_text 内存变化=+0KB

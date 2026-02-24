@@ -23,7 +23,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.config import ConfigManager
 from src.ragflow_client import RagflowClient
 from src.api.routes import router
-from log_decorator import log, logger
+from log_decorator import logger
 
 # 加载环境变量 - 使用绝对路径确保正确加载
 env_path = os.path.join(os.path.dirname(__file__), ".env")
@@ -34,7 +34,6 @@ load_dotenv(env_path)
 # 应用生命周期管理
 # ============================================================
 
-@log()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """统一的应用生命周期管理"""

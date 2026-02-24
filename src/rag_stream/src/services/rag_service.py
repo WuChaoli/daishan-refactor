@@ -7,25 +7,24 @@ from typing import Optional
 
 import aiohttp
 from fastapi import HTTPException
-from log_decorator import log, logger, logging
+from src.utils.log_manager_import import trace, marker
 
 from src.config.settings import settings
 from src.utils.session_manager import session_manager
 
+@trace
 async def get_rag_client():
     """获取RAG客户端会话"""
     timeout = aiohttp.ClientTimeout(total=settings.ragflow.timeout)
     return aiohttp.ClientSession(timeout=timeout)
 
 
-@log()
+@trace
 async def create_rag_session(
     chat_id: str, session_name: str, user_id: Optional[str] = None
 ) -> str:
     """在RAG服务中创建会话"""
-    logging.INFO(
-        f"创建RAG会话开始: chat_id={chat_id}, session_name={session_name}, has_user_id={bool(user_id)}"
-    )
+    marker("创建RAG会话开始", {"chat_id": chat_id, "session_name": session_name, "has_user_id": bool(user_id)})
     async with aiohttp.ClientSession() as session:
         url = f"{settings.ragflow.base_url}/chats/{chat_id}/sessions"
         headers = {
@@ -41,9 +40,7 @@ async def create_rag_session(
                 if response.status == 200:
                     result = await response.json()
                     if result.get("code") == 0:
-                        logging.INFO(
-                            f"创建RAG会话成功: rag_session_id={result['data']['id']}"
-                        )
+                        marker("创建RAG会话成功", {"rag_session_id": result['data']['id']})
                         return result["data"]["id"]
                     raise HTTPException(
                         status_code=400,
@@ -51,11 +48,11 @@ async def create_rag_session(
                     )
                 raise HTTPException(status_code=response.status, detail="RAG服务响应错误")
         except Exception as e:
-            logger.error(f"创建RAG会话失败: {str(e)}")
+            marker("创建RAG会话失败", {"error": str(e)}, level="ERROR")
             raise HTTPException(status_code=500, detail=f"创建RAG会话失败: {str(e)}")
 
 
-@log()
+@trace
 async def get_or_create_session(
     chat_id: str, category: str, user_id: Optional[str] = None
 ) -> str:
@@ -65,12 +62,8 @@ async def get_or_create_session(
     if user_id:
         existing_session_id = session_manager.get_user_session(user_id, category)
         if existing_session_id:
-            logger.info(
-                f"使用现有会话: {existing_session_id}, 用户: {user_id}, 类别: {category}"
-            )
-            logging.INFO(
-                f"命中现有会话: session_id={existing_session_id}, user_id={user_id}, category={category}"
-            )
+            marker("使用现有会话", {"session_id": existing_session_id, "user_id": user_id, "category": category})
+            marker("命中现有会话", {"session_id": existing_session_id, "user_id": user_id, "category": category})
             return existing_session_id
 
     session_name = f"{category}_session_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -81,24 +74,18 @@ async def get_or_create_session(
 
     session_manager.sessions[local_session_id]["rag_session_id"] = rag_session_id
 
-    logger.info(
-        f"创建新会话: {local_session_id}, RAG会话: {rag_session_id}, 用户: {user_id}, 类别: {category}"
-    )
-    logging.INFO(
-        f"新会话创建完成: local_session_id={local_session_id}, rag_session_id={rag_session_id}"
-    )
+    marker("创建新会话", {"local_session_id": local_session_id, "rag_session_id": rag_session_id, "user_id": user_id, "category": category})
+    marker("新会话创建完成", {"local_session_id": local_session_id, "rag_session_id": rag_session_id})
     return local_session_id
 
 
-@log()
+@trace
 async def stream_chat_response(
     chat_id: str, question: str, session_id: str, user_id: Optional[str] = None
 ):
     """流式聊天响应"""
     rag_session_id = session_manager.sessions.get(session_id, {}).get("rag_session_id", session_id)
-    logging.INFO(
-        f"RAG流式响应开始: chat_id={chat_id}, session_id={session_id}, has_user_id={bool(user_id)}"
-    )
+    marker("RAG流式响应开始", {"chat_id": chat_id, "session_id": session_id, "has_user_id": bool(user_id)})
 
     url = f"{settings.ragflow.base_url}/chats/{chat_id}/completions"
     headers = {
@@ -116,7 +103,7 @@ async def stream_chat_response(
             async with session.post(url, headers=headers, json=data) as response:
                 if response.status != 200:
                     error_text = await response.text()
-                    logging.ERROR(f"RAG流式响应状态异常: status={response.status}")
+                    marker("RAG流式响应状态异常", {"status": response.status}, level="ERROR")
                     yield f"data: {json.dumps({'code': 1, 'message': f'RAG服务错误: {error_text}', 'data': None})}\n\n"
                     return
 
@@ -274,10 +261,10 @@ async def stream_chat_response(
                     }
                     yield f"data: {json.dumps(end_data, ensure_ascii=False)}\n\n"
 
-                logging.INFO(f"RAG流式响应结束: session_id={session_id}, chunks={word_id}")
+                marker("RAG流式响应结束", {"session_id": session_id, "chunks": word_id})
 
     except Exception as e:
-        logger.error(f"流式响应处理失败: {str(e)}")
-        logging.ERROR(f"RAG流式响应异常: {str(e)}")
+        marker("流式响应处理失败", {"error": str(e)}, level="ERROR")
+        marker("RAG流式响应异常", {"error": str(e)}, level="ERROR")
         error_data = {"code": 1, "message": f"流式响应处理失败: {str(e)}", "data": None}
         yield f"data: {json.dumps(error_data, ensure_ascii=False)}\n\n"

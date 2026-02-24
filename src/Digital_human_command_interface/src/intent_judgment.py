@@ -8,7 +8,7 @@ from typing import List, Optional
 
 from src.config import Config
 from src.ragflow_client import RagflowClient
-from log_decorator import log, logger
+from log_decorator import logger
 
 
 @dataclass
@@ -30,7 +30,6 @@ class IntentResult:
     database: str  # 匹配的知识库名称
 
 
-@log()
 async def intent_judgment(
     query: str,
     client: Optional[RagflowClient],
@@ -127,7 +126,6 @@ async def intent_judgment(
             database="",
         )
 
-@log()
 async def instrcut_judgement(
     query: str,
     client: Optional[RagflowClient],

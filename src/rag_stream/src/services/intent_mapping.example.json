@@ -1,9 +1,11 @@
 {
-  "similarity_threshold": 0.5,
+  "similarity_threshold": 0.6,
+  "priority_similarity_threshold": 0.6,
   "top_k": 10,
   "default_type": 2,
   "database_mapping": {
     "岱山-指令集": 1,
-    "岱山-数据库问题": 2
+    "岱山-数据库问题": 2,
+    "岱山-指令集-固定问题": 3
   }
 }

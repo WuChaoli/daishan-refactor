@@ -12,7 +12,7 @@ from typing import Dict, List, Optional
 from src.config import Config
 from ragflow_sdk import RAGFlowClient
 from ragflow_sdk.models import RetrievalRequest
-from log_decorator import log, logger
+from log_decorator import logger
 
 
 @dataclass
@@ -29,7 +29,6 @@ class RetrievalResult:
 class RagflowClient:
     """RAGFlow 客户端适配器"""
 
-    @log()
     def __init__(self, config: Config):
         """
         初始化 RAGFlow 客户端
@@ -52,7 +51,6 @@ class RagflowClient:
         self.datasets = self._get_datasets()
         self.dataset_map = {ds.name: ds for ds in self.datasets}
 
-    @log()
     def _get_datasets(self) -> List:
         """获取知识库对象列表"""
         try:
@@ -80,7 +78,6 @@ class RagflowClient:
             logger.error(f"获取知识库列表失败: {str(e)}")
             raise
 
-    @log()
     async def query_all_databases(self, query: str) -> List[RetrievalResult]:
         """
         查询所有知识库并返回合并后的结果
@@ -113,7 +110,6 @@ class RagflowClient:
 
         return all_results
 
-    @log()
     async def query_single_database(
         self, query: str, database: str
     ) -> List[RetrievalResult]:
@@ -150,7 +146,6 @@ class RagflowClient:
             logger.error(f"知识库 '{database}' 查询失败: {str(e)}")
             return []
 
-    @log()
     async def _query_with_sdk(self, query: str, dataset) -> List[RetrievalResult]:
         """
         使用 RAGFlow SDK 执行查询
@@ -193,7 +188,6 @@ class RagflowClient:
 
         return results
 
-    @log()
     def _parse_similarity(self, chunk, similarity_type: str) -> float:
         """
         解析 RAGFlow 返回的相似度分数
@@ -224,7 +218,6 @@ class RagflowClient:
 
         return 0.0
 
-    @log()
     def test_connection(self) -> bool:
         """
         测试 RAGFlow 服务连接状态

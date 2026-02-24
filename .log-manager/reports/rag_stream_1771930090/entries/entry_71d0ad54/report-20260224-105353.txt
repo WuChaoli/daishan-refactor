@@ -1,0 +1,29 @@
+log-manager 增量报告
+会话ID: rag_stream_1771930090
+入口ID: entry_71d0ad54
+快照时间: 2026-02-24 18:53:53
+分析窗口: 累计事件 25 条
+模式: lite
+
+【错误摘要】
+无错误。
+
+【函数调用链】
+Trace: tr_fbde8c07
+chat_with_category [状态=OK, 耗时=77.2ms, 内存变化=+128KB]
+  get_or_create_session [状态=OK, 耗时=75.6ms, 内存变化=+128KB]
+    SessionManager.cleanup_all_expired_sessions [状态=OK, 耗时=0.3ms, 内存变化=+0KB]
+    SessionManager.get_user_session [状态=OK, 耗时=0.3ms, 内存变化=+0KB]
+    create_rag_session [状态=OK, 耗时=73.3ms, 内存变化=+128KB]
+    SessionManager.create_session [状态=OK, 耗时=0.4ms, 内存变化=+0KB]
+  stream_chat_response [状态=OK, 耗时=0.2ms, 内存变化=+0KB]
+
+【错误路径链】
+无错误路径。
+
+【调用链内存Top】
+1. create_rag_session 内存变化=+128KB
+2. get_or_create_session 内存变化=+128KB
+3. chat_with_category 内存变化=+128KB
+4. SessionManager.cleanup_all_expired_sessions 内存变化=+0KB
+5. SessionManager.get_user_session 内存变化=+0KB

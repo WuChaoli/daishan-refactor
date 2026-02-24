@@ -11,8 +11,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from src.models.schemas import SourceDispatchRequest
 from src.services.source_dispath_srvice import handle_source_dispatch
-from src.services.log_manager import LogManager
-from src.config.settings import settings
 
 
 # 测试用例配置
@@ -68,7 +66,7 @@ TEST_CASES = [
 ]
 
 
-async def run_single_test(test_case: dict, log_manager: LogManager):
+async def run_single_test(test_case: dict):
     """运行单个测试用例"""
     print("\n" + "=" * 80)
     print(f"测试: {test_case['name']}")
@@ -87,20 +85,20 @@ async def run_single_test(test_case: dict, log_manager: LogManager):
 
     try:
         # 调用服务函数
-        result = await handle_source_dispatch(request, log_manager)
+        result = await handle_source_dispatch(request)
 
         print(f"\n✅ 测试成功")
         print(f"返回类型: {type(result)}")
-        print(f"结果数量: {len(result)}")
+        print(f"结果数量: {len(result) if isinstance(result, list) else 1}")
 
         if result:
             print("\n资源列表:")
-            for idx, resource in enumerate(result, 1):
+            for idx, resource in enumerate(result if isinstance(result, list) else [result], 1):
                 print(f"  资源 {idx}: {resource}")
         else:
             print("\n⚠️  未找到资源或处理失败")
 
-        return True, len(result)
+        return True, len(result) if isinstance(result, list) else 1
 
     except Exception as e:
         print(f"\n❌ 测试失败")
@@ -112,8 +110,6 @@ async def run_single_test(test_case: dict, log_manager: LogManager):
 
 async def run_all_tests():
     """运行所有测试用例"""
-    log_manager = LogManager(settings.logging)
-
     print("\n" + "=" * 80)
     print("开始多场景资源调度测试")
     print(f"测试用例数量: {len(TEST_CASES)}")
@@ -121,7 +117,7 @@ async def run_all_tests():
 
     results = []
     for test_case in TEST_CASES:
-        success, count = await run_single_test(test_case, log_manager)
+        success, count = await run_single_test(test_case)
         results.append({
             "name": test_case['name'],
             "success": success,
@@ -141,7 +137,8 @@ async def run_all_tests():
     print(f"\n总测试数: {total_count}")
     print(f"成功: {success_count}")
     print(f"失败: {total_count - success_count}")
-    print(f"成功率: {success_count / total_count * 100:.1f}%")
+    if total_count > 0:
+        print(f"成功率: {success_count / total_count * 100:.1f}%")
 
     print("\n详细结果:")
     for result in results:

@@ -9,7 +9,7 @@ import asyncio
 from dataclasses import dataclass
 from typing import Dict, List
 
-from log_decorator import log, logger, logging
+from src.utils.log_manager_import import marker, trace
 from src.config.settings import IntentConfig, RAGFlowConfig
 from ragflow_sdk import RAGFlowClient
 from ragflow_sdk.models import RetrievalRequest
@@ -29,7 +29,6 @@ class RetrievalResult:
 class RagflowClient:
     """RAGFlow 客户端适配器"""
 
-    @log()
     def __init__(
         self,
         ragflow_config: RAGFlowConfig,
@@ -58,29 +57,20 @@ class RagflowClient:
         self.datasets = self._get_datasets()
         self.dataset_map = {ds.name: ds for ds in self.datasets}
 
-        logger.info(
-            f"RAGFlow 客户端初始化成功,已加载 {len(self.datasets)} 个知识库"
-        )
-        logger.info(
-            f"RAGFlow 客户端初始化完成,知识库列表: {list(self.dataset_map.keys())}"
-        )
+        marker("ragflow.init", {"dataset_count": len(self.datasets), "names": list(self.dataset_map.keys())})
 
-    @log()
     def _get_datasets(self) -> List:
         """获取知识库对象列表"""
         try:
             all_datasets = self.client.list_datasets(page=1, page_size=100)
             configured_databases = list(self.ragflow_config.database_mapping.keys())
-            logging.INFO(
-                f"知识库列表获取成功: configured_count={len(configured_databases)}"
-            )
+            marker("ragflow.datasets.listed", {"configured_count": len(configured_databases)})
 
             found_datasets = []
             found_names = []
 
             for dataset in all_datasets.get("items", []):
                 if dataset.name in configured_databases:
-                    logger.info(f"找到知识库 '{dataset.name}',ID: {dataset.id}")
                     found_datasets.append(dataset)
                     found_names.append(dataset.name)
 
@@ -89,19 +79,16 @@ class RagflowClient:
                 name for name in configured_databases if name not in found_names
             ]
             if missing_names:
-                logger.warning(f"未找到以下知识库: {', '.join(missing_names)}")
+                marker("ragflow.datasets.missing", {"names": ', '.join(missing_names)}, level="WARNING")
 
-            logging.INFO(
-                f"知识库映射完成: found_count={len(found_datasets)}, missing_count={len(missing_names)}"
-            )
+            marker("ragflow.datasets.mapped", {"found_count": len(found_datasets), "missing_count": len(missing_names)})
             return found_datasets
 
         except Exception as e:
-            logger.error(f"获取知识库列表失败: {str(e)}", exc_info=True)
-            logging.ERROR(f"知识库列表获取失败: {str(e)}")
+            marker("ragflow.datasets.error", {"error": str(e)}, level="ERROR")
             raise
 
-    @log()
+    @trace
     async def query_all_databases(self, query: str) -> List[RetrievalResult]:
         """
         查询所有知识库并返回合并后的结果
@@ -112,9 +99,9 @@ class RagflowClient:
         Returns:
             按相似度降序排序的检索结果列表
         """
-        logger.info(f"开始查询所有知识库,query='{query[:50]}...'")
+        marker("ragflow.query_all.start", {"query_preview": query[:50], "query_len": len(query)})
         database_count = len(self.ragflow_config.database_mapping.keys())
-        logging.INFO(f"并行查询开始: database_count={database_count}, query_len={len(query)}")
+        marker("ragflow.query_all.parallel_start", {"database_count": database_count, "query_len": len(query)})
 
         # 并发查询所有知识库
         tasks = [
@@ -129,16 +116,13 @@ class RagflowClient:
         exception_count = 0
         for result in results:
             if isinstance(result, Exception):
-                logger.error(f"查询异常: {str(result)}")
+                marker("ragflow.query_all.exception", {"error": str(result)}, level="ERROR")
                 exception_count += 1
                 continue
             if isinstance(result, list):
                 all_results.extend(result)
 
-        logger.info(f"查询完成,共获得 {len(all_results)} 条结果")
-        logging.INFO(
-            f"并行查询完成: database_count={database_count}, result_count={len(all_results)}, exception_count={exception_count}"
-        )
+        marker("ragflow.query_all.complete", {"result_count": len(all_results), "exception_count": exception_count})
 
         # 按相似度降序排序
         all_results.sort(key=lambda x: x.total_similarity, reverse=True)
@@ -152,7 +136,7 @@ class RagflowClient:
         return all_results, instruct_results
         # return all_results
 
-    @log()
+    @trace
     async def query_single_database(
         self, query: str, database: str
     ) -> List[RetrievalResult]:
@@ -166,13 +150,11 @@ class RagflowClient:
         Returns:
             检索结果列表
         """
-        logger.info(f"查询知识库: {database}")
-        logging.DEBUF(f"单库查询开始: database={database}, query_len={len(query)}")
+        marker("ragflow.query_single.start", {"database": database, "query_len": len(query)})
 
         # 检查知识库是否存在
         if database not in self.dataset_map:
-            logger.error(f"知识库 '{database}' 不存在")
-            logging.WARNING(f"单库查询跳过: database={database} 不存在")
+            marker("ragflow.query_single.not_found", {"database": database}, level="WARNING")
             return []
 
         dataset = self.dataset_map[database]
@@ -183,23 +165,17 @@ class RagflowClient:
                 self._query_with_sdk(query, dataset), timeout=5.0
             )
 
-            logger.info(
-                f"知识库 '{database}' 查询成功,返回 {len(results)} 条结果"
-            )
-            logging.INFO(f"单库查询完成: database={database}, result_count={len(results)}")
+            marker("单库查询完成", {"database": database, "result_count": len(results)})
             return results
 
         except asyncio.TimeoutError:
-            logger.warning(f"知识库 '{database}' 查询超时 (5秒)")
-            logging.WARNING(f"单库查询超时: database={database}, timeout=5s")
+            marker("单库查询超时", {"database": database, "timeout": 5}, level="WARNING")
             return []
 
         except Exception as e:
-            logger.error(f"知识库 '{database}' 查询失败: {str(e)}")
-            logging.ERROR(f"单库查询失败: database={database}, reason={str(e)}")
+            marker("单库查询失败", {"database": database, "error": str(e)}, level="ERROR")
             return []
 
-    @log()
     async def _query_with_sdk(self, query: str, dataset) -> List[RetrievalResult]:
         """
         使用 RAGFlow SDK 执行查询
@@ -228,7 +204,7 @@ class RagflowClient:
             None, lambda: self.client.retrieve(retrieval)
         )
         chunk_count = len(chunks) if chunks else 0
-        logging.DEBUF(f"SDK 检索返回: database={dataset.name}, chunk_count={chunk_count}")
+        marker("SDK检索返回", {"database": dataset.name, "chunk_count": chunk_count})
 
         results = []
         if chunks:
@@ -283,10 +259,8 @@ class RagflowClient:
         """
         try:
             datasets = self.client.list_datasets(page=1, page_size=1)
-            logger.info(f"连接测试成功")
-            logging.INFO("RAGFlow 连接测试成功")
+            marker("RAGFlow连接测试成功", {})
             return True
         except Exception as e:
-            logger.error(f"连接测试失败: {str(e)}")
-            logging.ERROR(f"RAGFlow 连接测试失败: {str(e)}")
+            marker("RAGFlow连接测试失败", {"error": str(e)}, level="ERROR")
             return False

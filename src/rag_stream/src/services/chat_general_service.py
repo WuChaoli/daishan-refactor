@@ -4,27 +4,26 @@ import asyncio
 import re
 from typing import Any, Awaitable, Callable
 
-from log_decorator import log
-from DaiShanSQL import Server
+from src.utils.log_manager_import import entry_trace, marker, trace
+from DaiShanSQL.DaiShanSQL.api_server import Server
 
 from src.models.schemas import ChatRequest
 
 server = Server()
 
 
-@log(message="意图识别返回错误，跳过后处理", print_result=False)
 def _skip_intent_error_result(result_dict: dict) -> None:
     _ = result_dict
     return None
 
 
-@log(message="后处理兜底异常", print_result=False)
 def _log_fallback_error_and_reraise(error: Exception) -> None:
     raise error
 
 
-@log()
+@trace
 def _extract_questions_for_sql(text_input: str, result_items: list[dict]) -> list[str]:
+    marker("extract_questions.start", {"text_len": len(text_input or ''), "candidates": len(result_items or [])})
     questions: list[str] = []
     for item in result_items:
         question_text = item.get("question", "")
@@ -36,11 +35,27 @@ def _extract_questions_for_sql(text_input: str, result_items: list[dict]) -> lis
 
     if not questions:
         questions = [text_input]
+        marker("extract_questions.fallback_to_input")
 
     return questions
 
 
-@log()
+@trace
+def _extract_question_from_qa_text(question_text: str) -> str:
+    marker("extract_question_from_qa.start", {"text_len": len(question_text or '')})
+    if not isinstance(question_text, str):
+        return ""
+
+    if question_text.startswith("Question: "):
+        parts = question_text.split("\tAnswer: ", 1)
+        if parts and parts[0].startswith("Question: "):
+            extracted = parts[0][10:].strip()
+            return extracted
+
+    return ""
+
+
+@trace
 async def _post_process_type1(result_dict: dict) -> dict:
     result_items = result_dict.get("results", [])
     first_question = result_items[0].get("question", "") if result_items else ""
@@ -59,6 +74,7 @@ async def _post_process_type1(result_dict: dict) -> dict:
     elif kb_name == "安全信息知识库":
         result = server.sqlFixed.sql_SecuritySituation()
 
+    marker("type1.sql_result_ready", {"kb_name": kb_name, "result_len": len(str(result or ''))})
     return {"type": 1, "data": {"kb_name": kb_name, "sql_result": str(result)}}
 
 
@@ -100,7 +116,6 @@ async def _post_process_and_route_type1(
     )
 
 
-@log()
 async def _post_process_type2(text_input: str, result_dict: dict) -> dict:
     questions = _extract_questions_for_sql(text_input, result_dict.get("results", []))
 
@@ -129,13 +144,51 @@ async def _post_process_and_route_type2(
     )
 
 
-@log()
+async def _post_process_and_route_type3(
+    request: ChatRequest,
+    result_dict: dict,
+    chat_with_category: Callable[[str, ChatRequest], Awaitable[Any]],
+):
+    answer_text = str(result_dict.get("answer", "") or "").strip()
+    if not answer_text:
+        return None
+
+    result_items = result_dict.get("results", [])
+    first_question = result_items[0].get("question", "") if result_items else ""
+    return_question = _extract_question_from_qa_text(first_question)
+    if not return_question:
+        return None
+
+    try:
+        judge_result = await asyncio.to_thread(
+            server.judgeQuery,
+            request.question,
+            return_question,
+        )
+    except Exception:
+        return None
+
+    judge_result_str = "" if judge_result is None else str(judge_result).strip()
+    if not judge_result_str:
+        return None
+
+    updated_request = ChatRequest(
+        question=f"{answer_text}\n\n{judge_result_str}\n\n{request.question}",
+        session_id=request.session_id,
+        user_id=request.user_id,
+        stream=request.stream,
+    )
+    return await chat_with_category("通用", updated_request)
+
+
+@entry_trace("chat-general")
 async def handle_chat_general(
     request: ChatRequest,
     intent_service,
     chat_with_category: Callable[[str, ChatRequest], Awaitable[Any]],
 ):
     """通用问答业务逻辑（从路由层下沉）"""
+
     def replace_economic_zone(query: str) -> str:
         if not query:
             return query
@@ -162,6 +215,7 @@ async def handle_chat_general(
 
     if isinstance(request.question, str):
         request.question = replace_economic_zone(request.question)
+        marker("query_normalized", {"normalized": request.question != original_question})
 
     try:
         result_dict = await intent_service.process_query(request.question, user_id)
@@ -177,6 +231,15 @@ async def handle_chat_general(
             return await chat_with_category("通用", request)
         elif result_type == 1:
             routed_result = await _post_process_and_route_type1(
+                request=request,
+                result_dict=result_dict,
+                chat_with_category=chat_with_category,
+            )
+            if routed_result is not None:
+                return routed_result
+            return await chat_with_category("通用", request)
+        elif result_type == 3:
+            routed_result = await _post_process_and_route_type3(
                 request=request,
                 result_dict=result_dict,
                 chat_with_category=chat_with_category,

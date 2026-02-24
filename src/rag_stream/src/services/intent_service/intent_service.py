@@ -1,11 +1,11 @@
 """
 IntentService - 意图识别服务
-负责处理三种意图类型(Type 0/1/2)的业务逻辑
+负责处理意图类型(Type 0/1/2/3)的业务逻辑
 """
 
 from typing import Any, Dict, List
 
-from log_decorator import log
+from src.utils.log_manager_import import marker, trace
 from src.services.intent_service.base_intent_service import (
     BaseIntentService,
     IntentRecognizerSettings,
@@ -16,7 +16,10 @@ from src.services.intent_service.base_intent_service import (
 class IntentService(BaseIntentService):
     """意图识别服务"""
 
-    @log()
+    def __init__(self, ragflow_client):
+        super().__init__(ragflow_client=ragflow_client)
+        self._use_daishan_priority = False
+
     async def process_query(self, text_input: str, user_id: str) -> dict:
         return await super().process_query(text_input, user_id)
 
@@ -24,45 +27,72 @@ class IntentService(BaseIntentService):
     def _judge_daishan_intent_priority(table_results, recognizer_settings):
         """
         岱山优先级判断逻辑：
-        1) 优先看【岱山-指令集】最大相似度，若 >= 阈值则直接返回其最佳结果
-        2) 否则返回【岱山-数据库问题】最佳结果（若存在）
-        3) 都无结果则返回 None
+        1) 优先判断【岱山-指令集】和【岱山-指令集-固定问题】中的最高相似度结果
+        2) 若该结果 >= priority_similarity_threshold，则直接返回
+        3) 否则在所有返回结果中取全局最高相似度结果
         """
         instruction_table = "岱山-指令集"
-        db_question_table = "岱山-数据库问题"
+        fixed_instruction_table = "岱山-指令集-固定问题"
+        priority_threshold = float(recognizer_settings.priority_similarity_threshold)
 
-        instruction_results = table_results.get(instruction_table, [])
-        if instruction_results:
-            best_instruction = max(
-                instruction_results,
-                key=lambda item: float(getattr(item, "total_similarity", 0.0) or 0.0),
-            )
-            if float(getattr(best_instruction, "total_similarity", 0.0) or 0.0) >= float(
-                recognizer_settings.similarity_threshold
-            ):
-                return best_instruction
+        marker("岱山优先级判断启动", {"priority_threshold": priority_threshold, "tables": [instruction_table, fixed_instruction_table]})
 
-        db_results = table_results.get(db_question_table, [])
-        if db_results:
-            return max(
-                db_results,
-                key=lambda item: float(getattr(item, "total_similarity", 0.0) or 0.0),
-            )
+        # 第一步：收集优先级候选结果
+        priority_candidates = []
+        for table_name in (instruction_table, fixed_instruction_table):
+            table_items = table_results.get(table_name, [])
+            if table_items:
+                best_in_table = max(table_items, key=BaseIntentService._safe_similarity)
+                best_similarity = BaseIntentService._safe_similarity(best_in_table)
+                priority_candidates.append(best_in_table)
+                marker("优先表最高相似度", {"table": table_name, "similarity": best_similarity, "question_preview": getattr(best_in_table, "question", "")[:50]})
 
+        # 第二步：判断优先级候选是否满足阈值
+        if priority_candidates:
+            best_priority = max(priority_candidates, key=BaseIntentService._safe_similarity)
+            best_priority_similarity = BaseIntentService._safe_similarity(best_priority)
+
+            marker("优先级最佳候选", {
+                "similarity": best_priority_similarity,
+                "threshold": priority_threshold,
+                "satisfied": best_priority_similarity >= priority_threshold
+            })
+
+            if best_priority_similarity >= priority_threshold:
+                return best_priority
+
+        # 第三步：全局筛选最高相似度
+        all_results = []
+        for table_items in table_results.values():
+            all_results.extend(table_items)
+
+        if all_results:
+            global_best = max(all_results, key=BaseIntentService._safe_similarity)
+            global_best_similarity = BaseIntentService._safe_similarity(global_best)
+            global_best_table = getattr(global_best, "database", "未知")
+
+            marker("全局最高相似度", {
+                "similarity": global_best_similarity,
+                "database": global_best_table,
+                "question_preview": getattr(global_best, "question", "")[:50]
+            })
+            return global_best
+
+        marker("所有知识库均无检索结果", {}, level="WARNING")
         return None
 
     @staticmethod
     def _should_use_daishan_priority(recognizer_settings) -> bool:
-        """仅在存在岱山双表映射时启用优先级规则"""
+        """仅在存在岱山指令双表映射时启用优先级规则"""
         mapping_keys = set(recognizer_settings.database_mapping.keys())
-        return {"岱山-指令集", "岱山-数据库问题"}.issubset(mapping_keys)
+        return {"岱山-指令集", "岱山-指令集-固定问题"}.issubset(mapping_keys)
 
-    def __init__(self, ragflow_client):
-        super().__init__(ragflow_client=ragflow_client)
-
-    @log()
     def _load_process_settings(self) -> IntentRecognizerSettings:
-        return self._load_intent_recognizer_settings()
+        recognizer_settings = self._load_intent_recognizer_settings()
+        self._use_daishan_priority = self._should_use_daishan_priority(
+            recognizer_settings
+        )
+        return recognizer_settings
 
     
     async def _query_process_table_results(
@@ -87,21 +117,14 @@ class IntentService(BaseIntentService):
         )
 
     
-    # def _get_process_judge_function(self):
-    #     return self._judge_daishan_intent_priority
+    def _get_process_judge_function(self):
+        if self._use_daishan_priority:
+            return self._judge_daishan_intent_priority
+        return None
 
-    @log()
     async def _post_process_result(self, intent_result: IntentResult) -> dict:
-        return {
-            "type": intent_result.type,
-            "query": intent_result.query,
-            "results": [
-                {"question": item.question, "similarity": item.similarity}
-                for item in intent_result.results
-            ],
-            "similarity": intent_result.similarity,
-            "database": intent_result.database,
-        }
+        """使用基类默认实现，已包含 question 和 answer 字段"""
+        return await super()._post_process_result(intent_result)
 
     # async def _query_dify_chat_blocking(
     #     self, client, query: str, user_id: str

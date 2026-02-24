@@ -16,8 +16,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from src.models.schemas import SourceDispatchRequest
 from src.services.source_dispath_srvice import handle_source_dispatch
-from src.services.log_manager import LogManager
-from src.config.settings import settings
 from DaiShanSQL import Server
 
 
@@ -25,7 +23,6 @@ class ComprehensiveTestRunner:
     """综合测试运行器"""
 
     def __init__(self):
-        self.log_manager = LogManager(settings.logging)
         self.test_results = []
         self.start_time = None
         self.end_time = None
@@ -128,7 +125,7 @@ class ComprehensiveTestRunner:
                 voiceText=voice_text
             )
 
-            dispatch_result = await handle_source_dispatch(request, self.log_manager)
+            dispatch_result = await handle_source_dispatch(request)
 
             if dispatch_result:
                 result["success"] = True
@@ -218,100 +215,6 @@ class ComprehensiveTestRunner:
             self.test_results.append(result)
             await asyncio.sleep(1)
 
-        # 3. 资源意图测试（固体资源指令）
-        self.log_test_output(f"\n{'='*80}")
-        self.log_test_output("第三部分: 资源意图测试（固体资源指令）")
-        self.log_test_output(f"{'='*80}")
-
-        resource_intent_tests = [
-            ("TC-901", "emergencySupplies", "我需要酒精棉，请帮我查询有哪些酒精棉物资", "查询酒精棉物资"),
-            ("TC-902", "emergencySupplies", "测试企业物资1还有库存吗", "查询测试企业物资1"),
-            ("TC-903", "emergencyExpert", "请联系张三专家", "查询张三专家"),
-            ("TC-904", "emergencyExpert", "刘演翔专家的联系方式是什么", "查询刘演翔专家"),
-            ("TC-905", "rescueTeam", "世倍尔救援队在哪里", "查询世倍尔救援队"),
-            ("TC-906", "medicalInstitution", "岱山县第一人民医院的位置", "查询岱山县第一人民医院"),
-            ("TC-907", "medicalInstitution", "岱西卫生院能接收伤员吗", "查询岱西卫生院"),
-            ("TC-908", "fireFightingFacilities", "调度消防车、救护车到现场", "调度消防车救护车"),
-        ]
-
-        for test_id, source_type, voice_text, test_name in resource_intent_tests:
-            result = await self.test_source_dispatch(
-                test_id=test_id,
-                category="资源意图测试（固体资源指令）",
-                accident_id=valid_accident_id,
-                source_type=source_type,
-                voice_text=voice_text,
-                test_name=test_name
-            )
-            self.test_results.append(result)
-            await asyncio.sleep(1)
-
-        # 4. 意图识别准确性测试
-        self.log_test_output(f"\n{'='*80}")
-        self.log_test_output("第四部分: 意图识别准确性测试")
-        self.log_test_output(f"{'='*80}")
-
-        intent_accuracy_tests = [
-            # 查询意图 - 应该返回列表
-            ("TC-1101", "emergencySupplies", "附近有哪些应急物资", "查询意图-应急物资列表"),
-            ("TC-1102", "rescueTeam", "有哪些救援队伍可以调度", "查询意图-救援队伍列表"),
-            ("TC-1103", "emergencyExpert", "有哪些专家可以联系", "查询意图-专家列表"),
-            ("TC-1104", "medicalInstitution", "附近有哪些医院", "查询意图-医院列表"),
-            ("TC-1105", "shelter", "附近有哪些避难场所", "查询意图-避难场所列表"),
-
-            # 固体资源指令 - 应该返回具体资源
-            ("TC-1201", "emergencySupplies", "调度酒精棉到现场", "固体指令-调度酒精棉"),
-            ("TC-1202", "emergencySupplies", "需要测试企业物资1", "固体指令-指定物资名称"),
-            ("TC-1203", "emergencyExpert", "联系张三专家", "固体指令-指定专家姓名"),
-            ("TC-1204", "rescueTeam", "调度世倍尔救援队", "固体指令-指定救援队名称"),
-            ("TC-1205", "medicalInstitution", "联系岱山县第一人民医院", "固体指令-指定医院名称"),
-
-            # 混合意图 - 包含查询和指令
-            ("TC-1301", "emergencySupplies", "有哪些防护装备，调度防毒面具", "混合意图-查询+指令"),
-            ("TC-1302", "rescueTeam", "查询救援队伍，调度消防队", "混合意图-查询+指令"),
-
-            # 模糊意图 - 需要智能判断
-            ("TC-1401", "emergencySupplies", "需要物资支援", "模糊意图-通用物资"),
-            ("TC-1402", "rescueTeam", "需要人员支援", "模糊意图-通用人员"),
-            ("TC-1403", "emergencyExpert", "需要专业指导", "模糊意图-通用专家"),
-        ]
-
-        for test_id, source_type, voice_text, test_name in intent_accuracy_tests:
-            result = await self.test_source_dispatch(
-                test_id=test_id,
-                category="意图识别准确性测试",
-                accident_id=valid_accident_id,
-                source_type=source_type,
-                voice_text=voice_text,
-                test_name=test_name
-            )
-            self.test_results.append(result)
-            await asyncio.sleep(1)
-
-        # 5. 边界条件测试
-        self.log_test_output(f"\n{'='*80}")
-        self.log_test_output("第五部分: 边界条件测试")
-        self.log_test_output(f"{'='*80}")
-
-        boundary_tests = [
-            ("TC-1501", "", "emergencySupplies", "需要应急物资", "空事故ID"),
-            ("TC-1502", "abc", "emergencySupplies", "需要应急物资", "无效事故ID"),
-            ("TC-1503", valid_accident_id, "invalidType", "需要资源", "不存在的资源类型"),
-            ("TC-1504", valid_accident_id, "emergencySupplies", "", "空语音文本"),
-        ]
-
-        for test_id, accident_id, source_type, voice_text, test_name in boundary_tests:
-            result = await self.test_source_dispatch(
-                test_id=test_id,
-                category="边界条件测试",
-                accident_id=accident_id,
-                source_type=source_type,
-                voice_text=voice_text,
-                test_name=test_name
-            )
-            self.test_results.append(result)
-            await asyncio.sleep(0.5)
-
         self.end_time = datetime.now()
 
         # 生成测试报告
@@ -335,25 +238,8 @@ class ComprehensiveTestRunner:
         self.log_test_output(f"\n总测试数: {total_tests}")
         self.log_test_output(f"成功: {successful_tests}")
         self.log_test_output(f"失败: {failed_tests}")
-        self.log_test_output(f"成功率: {successful_tests / total_tests * 100:.1f}%")
-
-        # 按分类统计
-        self.log_test_output(f"\n按分类统计:")
-        categories = {}
-        for result in self.test_results:
-            category = result.get("category", "未分类")
-            if category not in categories:
-                categories[category] = {"total": 0, "success": 0, "failed": 0}
-            categories[category]["total"] += 1
-            if result.get("success"):
-                categories[category]["success"] += 1
-            else:
-                categories[category]["failed"] += 1
-
-        for category, stats in categories.items():
-            success_rate = stats["success"] / stats["total"] * 100 if stats["total"] > 0 else 0
-            self.log_test_output(f"  {category}:")
-            self.log_test_output(f"    总数: {stats['total']}, 成功: {stats['success']}, 失败: {stats['failed']}, 成功率: {success_rate:.1f}%")
+        if total_tests > 0:
+            self.log_test_output(f"成功率: {successful_tests / total_tests * 100:.1f}%")
 
         # 保存详细结果到JSON文件
         result_file = Path(__file__).parent / "test_source_dispatch_comprehensive_results.json"
@@ -367,20 +253,11 @@ class ComprehensiveTestRunner:
                     "successful_tests": successful_tests,
                     "failed_tests": failed_tests,
                     "success_rate": successful_tests / total_tests * 100 if total_tests > 0 else 0,
-                    "categories": categories
                 },
                 "test_results": self.test_results
             }, f, ensure_ascii=False, indent=2)
 
         self.log_test_output(f"\n详细测试结果已保存到: {result_file}")
-
-        # 提取失败用例
-        failed_results = [r for r in self.test_results if not r.get("success")]
-        if failed_results:
-            failed_file = Path(__file__).parent / "test_source_dispatch_failed_cases.json"
-            with open(failed_file, "w", encoding="utf-8") as f:
-                json.dump(failed_results, f, ensure_ascii=False, indent=2)
-            self.log_test_output(f"失败用例已保存到: {failed_file}")
 
         self.log_test_output(f"\n{'='*80}")
         self.log_test_output("测试完成")

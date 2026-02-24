@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Union
 
-from log_decorator import logger
+from src.utils.log_manager_import import marker
 from src.config.settings import settings
 from src.utils.ragflow_client import RagflowClient
 
@@ -31,6 +31,7 @@ class IntentRecognizerSettings:
     similarity_threshold: float
     top_k: int
     default_type: int
+    priority_similarity_threshold: float = 0.7
 
 
 DatabaseResultsDict = Dict[str, List[Any]]
@@ -91,12 +92,21 @@ class BaseIntentService(ABC):
             payload.get("top_k_per_database", settings.intent.top_k_per_database),
         )
         default_type = payload.get("default_type", settings.intent.default_type)
+        priority_similarity_threshold = payload.get("priority_similarity_threshold", 0.7)
+
+        marker("加载意图识别配置", {
+            "similarity_threshold": float(similarity_threshold),
+            "priority_similarity_threshold": float(priority_similarity_threshold),
+            "top_k": int(top_k),
+            "default_type": int(default_type)
+        })
 
         return IntentRecognizerSettings(
             database_mapping=database_mapping,
             similarity_threshold=float(similarity_threshold),
             top_k=int(top_k),
             default_type=int(default_type),
+            priority_similarity_threshold=float(priority_similarity_threshold),
         )
 
     @staticmethod
@@ -218,6 +228,7 @@ class BaseIntentService(ABC):
         default_type: int,
         similarity_threshold: float,
         top_k: int,
+        priority_similarity_threshold: float = 0.7,
         judge_function: Optional[JudgeFunction] = None,
     ) -> IntentRecognitionResult:
         """通用意图识别入口（基于检索结果）"""
@@ -226,6 +237,7 @@ class BaseIntentService(ABC):
             similarity_threshold=similarity_threshold,
             top_k=top_k,
             default_type=default_type,
+            priority_similarity_threshold=priority_similarity_threshold,
         )
         if top_k <= 0:
             raise ValueError(f"top_k must be positive, got {top_k}")
@@ -266,7 +278,7 @@ class BaseIntentService(ABC):
             )
             return await self._post_process_result(intent_result)
         except Exception as e:
-            logger.error(f"处理查询异常: {str(e)}", exc_info=True)
+            marker("处理查询异常", {"error": str(e)}, level="ERROR")
             return self._build_process_error_result(e)
 
     @abstractmethod
@@ -289,9 +301,27 @@ class BaseIntentService(ABC):
     ) -> List[Any]:
         """步骤3：排序表结果"""
 
-    @abstractmethod
     async def _post_process_result(self, intent_result: IntentResult) -> dict:
-        """步骤4：后处理并返回结果"""
+        """步骤4：后处理并返回结果
+
+        默认实现包含 question 和 answer 字段抽取逻辑
+        子类可覆盖此方法以自定义返回格式
+        """
+        results = [
+            {"question": item.question, "similarity": item.similarity}
+            for item in intent_result.results
+        ]
+        first_question = results[0].get("question", "") if results else ""
+
+        return {
+            "type": intent_result.type,
+            "query": intent_result.query,
+            "question": first_question,
+            "answer": self._extract_answer_from_question_text(first_question),
+            "results": results,
+            "similarity": intent_result.similarity,
+            "database": intent_result.database,
+        }
 
     def _get_process_judge_function(self) -> Optional[JudgeFunction]:
         """可选步骤：提供自定义判断函数"""
@@ -330,11 +360,7 @@ class BaseIntentService(ABC):
         table_results: Dict[str, List[Any]] = {}
         for table_name, task_result in zip(table_names, task_results):
             if isinstance(task_result, Exception):
-                logger.warning(
-                    "查询表失败: table=%s, error=%s",
-                    table_name,
-                    str(task_result),
-                )
+                marker("查询表失败", {"table": table_name, "error": str(task_result)}, level="WARNING")
                 table_results[table_name] = []
                 continue
 
@@ -371,6 +397,24 @@ class BaseIntentService(ABC):
         except (TypeError, ValueError):
             return 0.0
 
+    @staticmethod
+    def _extract_answer_from_question_text(question_text: str) -> str:
+        """从问题文本中抽取答案部分
+
+        Args:
+            question_text: 问题文本，格式为 "问题\\tAnswer: 答案"
+
+        Returns:
+            抽取的答案文本，如果格式不符则返回空字符串
+        """
+        if not isinstance(question_text, str):
+            return ""
+
+        parts = question_text.split("\tAnswer:", 1)
+        if len(parts) != 2:
+            return ""
+        return parts[1].strip()
+
     def _build_intent_result(
         self,
         query: str,
@@ -386,14 +430,11 @@ class BaseIntentService(ABC):
             default_type=recognizer_settings.default_type,
             similarity_threshold=recognizer_settings.similarity_threshold,
             top_k=recognizer_settings.top_k,
+            priority_similarity_threshold=recognizer_settings.priority_similarity_threshold,
             judge_function=judge_function,
         )
 
-        logger.info(
-            "最高相似度=%.4f, 知识库=%s",
-            recognized.similarity,
-            recognized.database,
-        )
+        marker("最高相似度", {"similarity": recognized.similarity, "database": recognized.database})
 
         top_results = [
             QueryResult(
@@ -403,13 +444,12 @@ class BaseIntentService(ABC):
             for item in recognized.database_results
         ]
 
-        logger.info(
-            "意图判断完成: type=%s, 知识库=%s, 相似度=%.4f, 返回结果数=%s",
-            recognized.intent_type,
-            recognized.database,
-            recognized.similarity,
-            len(top_results),
-        )
+        marker("意图判断完成", {
+            "type": recognized.intent_type,
+            "database": recognized.database,
+            "similarity": recognized.similarity,
+            "result_count": len(top_results)
+        })
 
         return IntentResult(
             type=recognized.intent_type,

@@ -1,6 +1,34 @@
 {
   "activeContexts": [
     {
+      "contextId": "2026-02-24_intent-service-type3-integration",
+      "title": "IntentService Type3 集成测试构建",
+      "status": "in_progress",
+      "assignee": "Codex",
+      "updatedAt": "2026-02-24T05:59:05Z"
+    },
+    {
+      "contextId": "2026-02-24_daishansql-server-import-fix",
+      "title": "DaiShanSQL Server 导入链路修复",
+      "status": "in_progress",
+      "assignee": "Codex",
+      "updatedAt": "2026-02-24T05:30:53Z"
+    },
+    {
+      "contextId": "2026-02-24_intent-priority-threshold-routing",
+      "title": "Intent 优先阈值与降级判定调整",
+      "status": "in_progress",
+      "assignee": "Codex",
+      "updatedAt": "2026-02-24T00:00:00Z"
+    },
+    {
+      "contextId": "2026-02-24_chat-general-type3-routing",
+      "title": "RAG General Type3 固定问题分流",
+      "status": "in_progress",
+      "assignee": "Codex",
+      "updatedAt": "2026-02-24T00:00:00Z"
+    },
+    {
       "contextId": "2026-02-10_rag-stream-log-refactor",
       "title": "RAG Stream 日志链路降噪与业务打点优化",
       "status": "in_progress",
@@ -72,5 +100,5 @@
       "archivePath": "docs/archive/2026-02-10_chat-general-chain-optimization"
     }
   ],
-  "lastUpdated": "2026-02-11T05:36:19Z"
+  "lastUpdated": "2026-02-24T05:59:05Z"
 }

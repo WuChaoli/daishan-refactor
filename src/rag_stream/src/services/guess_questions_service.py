@@ -6,7 +6,7 @@
 import json
 import re
 from typing import Dict, List, Any
-from log_decorator import logger
+from src.utils.log_manager_import import entry_trace, trace, marker
 
 from src.utils.dify_client_factory import get_client
 from src.utils.prompts import GuessQuestionsPrompts
@@ -20,6 +20,7 @@ TYPE1_FIXED_QUESTIONS = [
 ]
 
 
+@entry_trace("guess-questions")
 async def handle_guess_questions(question: str, intent_service) -> List[Dict[str, str]]:
     """
     处理猜你想问请求的主函数
@@ -52,7 +53,7 @@ async def handle_guess_questions(question: str, intent_service) -> List[Dict[str
         return questions
 
     except Exception as e:
-        logger.error(f"猜你想问服务异常: {str(e)}", exc_info=True)
+        marker("猜你想问服务异常", {"error": str(e)}, level="ERROR")
         return []
 
 
@@ -88,7 +89,7 @@ async def _process_by_type(intent_dict: Dict[str, Any], original_question: str) 
 
     if intent_type == 1:
         return process_type1(intent_dict)
-    elif intent_type == 2:
+    elif intent_type in [2,3]:
         questions = process_type2(intent_dict)
         if questions:
             return questions
@@ -216,7 +217,7 @@ async def _generate_type2_fallback_questions(original_question: str) -> List[Dic
     try:
         general_client = get_client("GENRAL_CHAT")
     except Exception as error:
-        logger.error(f"获取 GENRAL_CHAT client 失败: {error}")
+        marker("获取GENRAL_CHAT client失败", {"error": str(error)}, level="ERROR")
         return []
 
     prompt = GuessQuestionsPrompts.get_type2_fallback_prompt(original_question)
@@ -229,7 +230,7 @@ async def _generate_type2_fallback_questions(original_question: str) -> List[Dic
             conversation_id="",
         )
     except Exception as error:
-        logger.error(f"调用 GENRAL_CHAT 生成猜你想问失败: {error}", exc_info=True)
+        marker("调用GENRAL_CHAT生成猜你想问失败", {"error": str(error)}, level="ERROR")
         return []
 
     answer_text = response.answer if hasattr(response, "answer") else str(response)

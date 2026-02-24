@@ -13,15 +13,15 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from src.models.schemas import SourceDispatchRequest
 from src.services.source_dispath_srvice import handle_source_dispatch
-from src.services.log_manager import LogManager
-from src.config.settings import settings
+# LogManager removed - using log-manager
+# settings import removed
 
 
 class TestSourceDispatch:
     """资源调度测试类"""
 
     def __init__(self):
-        self.log_manager = LogManager(settings.logging)
+        self.test_results = []
         self.test_results = []
 
     async def test_accident_id_query(self, accident_id: str):
@@ -110,7 +110,7 @@ class TestSourceDispatch:
 
         try:
             # 调用服务函数
-            result = await handle_source_dispatch(request, self.log_manager)
+            result = await handle_source_dispatch(request)
 
             print("\n处理结果:")
 

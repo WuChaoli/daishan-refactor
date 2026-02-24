@@ -1,0 +1,17 @@
+{
+  "contextId": "2026-02-24_intent-service-type3-integration",
+  "status": "in_progress",
+  "createdAt": "2026-02-24T05:59:05Z",
+  "updatedAt": "2026-02-24T05:59:05Z",
+  "completedAt": null,
+  "title": "IntentService Type3 集成测试构建",
+  "description": "为园区问句批量构建完整链路意图分类集成测试，期望类型统一为3",
+  "assignee": "Codex",
+  "gitBranch": "",
+  "documents": {
+    "requirement": "requirement.md",
+    "design": "design.md",
+    "implementation": "implementation.md"
+  },
+  "staticDocsUpdated": []
+}

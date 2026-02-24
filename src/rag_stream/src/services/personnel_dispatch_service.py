@@ -7,10 +7,10 @@ import json
 import asyncio
 from typing import Dict, Any, List, Optional
 
-from log_decorator import log, logger, logging
+from src.utils.log_manager_import import entry_trace, marker, trace
 
 
-@log()
+@entry_trace("personnel_dispatch")
 async def handle_personnel_dispatch(
     voice_text: str,
     user_id: Optional[str] = None
@@ -27,22 +27,18 @@ async def handle_personnel_dispatch(
     """
 
     try:
-        logger.info(f"处理人员调度请求，语音文本: {voice_text}")
-        logging.INFO(
-            f"人员调度请求接入: voice_len={len(voice_text)}, has_user_id={bool(user_id)}"
-        )
+        marker("personnel_dispatch.start", {"voice_len": len(voice_text), "has_user_id": bool(user_id)})
 
         # 获取 Dify clients
         general_client, personnel_client = _get_dify_clients()
-        logging.DEBUF("Dify 客户端已就绪: general + personnel")
+        marker("personnel_dispatch.clients_ready")
 
         # 步骤1: 实体提取
         entities = await _extract_entities(voice_text, general_client)
-        logger.info(f"提取到 {len(entities)} 个实体: {entities}")
-        logging.INFO(f"实体提取完成: entity_count={len(entities)}")
+        marker("personnel_dispatch.entities_extracted", {"entity_count": len(entities)})
 
         if not entities:
-            logger.warning("未提取到任何实体，返回空列表")
+            marker("personnel_dispatch.no_entities", {}, level="WARNING")
             return []
 
         # 步骤2: 循环调用人员调度 client，异步执行
@@ -50,18 +46,17 @@ async def handle_personnel_dispatch(
             entities, personnel_client, user_id
         )
 
-        logger.info(f"成功调用人员调度，返回 {len(result_ids)} 个 ID")
-        logging.INFO(f"人员调度完成: resolved_count={len(result_ids)}")
+        marker("personnel_dispatch.complete", {"result_count": len(result_ids)})
         return result_ids
 
     except ValueError as e:
-        logger.error(f"业务逻辑错误: {e}")
+        marker("personnel_dispatch.value_error", {"error": str(e)}, level="ERROR")
         return []
     except KeyError as e:
-        logger.error(f"数据字段缺失: {e}", exc_info=True)
+        marker("personnel_dispatch.key_error", {"error": str(e)}, level="ERROR")
         return []
     except Exception as e:
-        logger.error(f"处理人员调度请求时发生错误: {e}", exc_info=True)
+        marker("personnel_dispatch.exception", {"error": str(e)}, level="ERROR")
         return []
 
 
@@ -84,6 +79,7 @@ def _get_dify_clients() -> tuple:
     return general_client, personnel_client
 
 
+@trace
 async def _extract_entities(
     voice_text: str,
     general_client
@@ -102,8 +98,7 @@ async def _extract_entities(
 
     # 构建实体提取 prompt
     entity_query = SourceDispatchPrompts.get_entity_extraction_prompt(voice_text)
-    logger.debug(f"实体提取 prompt: {entity_query}")
-    logging.DEBUF(f"实体提取 prompt 构建完成: prompt_len={len(entity_query)}")
+    marker("extract_entities.prompt_built", {"prompt_len": len(entity_query)})
 
     # 调用 Dify 进行实体提取
     entity_response = await asyncio.to_thread(
@@ -116,14 +111,14 @@ async def _extract_entities(
 
     # 提取 answer 字段
     entity_answer = entity_response.answer if hasattr(entity_response, 'answer') else str(entity_response)
-    logger.debug(f"实体提取响应: {entity_answer}")
-    logging.DEBUF(f"实体提取响应长度: answer_len={len(entity_answer)}")
+    marker("extract_entities.response_received", {"answer_len": len(entity_answer)})
 
     # 解析实体列表
     entities = _parse_entity_list(entity_answer)
     return entities
 
 
+@trace
 def _parse_entity_list(answer: str) -> List[str]:
     """
     解析实体提取响应为字符串列表
@@ -135,10 +130,10 @@ def _parse_entity_list(answer: str) -> List[str]:
         List[str]: 解析后的实体列表
     """
     answer = answer.strip()
-    logger.debug(f"实体提取原始响应: {repr(answer[:200])}")
+    marker("parse_entity.start", {"preview": repr(answer[:200])})
 
     if not answer:
-        logger.warning("实体提取响应为空，返回空列表")
+        marker("parse_entity.empty", {}, level="WARNING")
         return []
 
     # 从文本中提取JSON
@@ -147,7 +142,7 @@ def _parse_entity_list(answer: str) -> List[str]:
     try:
         result = json.loads(json_str)
     except json.JSONDecodeError as e:
-        logger.error(f"JSON解析失败: {e}, 提取的JSON: {repr(json_str[:200])}")
+        marker("parse_entity.json_error", {"error": str(e), "json_preview": repr(json_str[:200])}, level="ERROR")
         raise ValueError(f"实体提取响应不是有效的JSON格式: {answer[:100]}")
 
     if not isinstance(result, list):
@@ -155,10 +150,11 @@ def _parse_entity_list(answer: str) -> List[str]:
 
     # 确保所有元素都是字符串
     str_list = [str(item) for item in result]
-    logger.info(f"成功解析实体列表，返回 {len(str_list)} 个实体")
+    marker("parse_entity.success", {"entity_count": len(str_list)})
     return str_list
 
 
+@trace
 def _extract_json_from_text(text: str) -> str:
     """
     从文本中提取JSON格式内容
@@ -177,7 +173,7 @@ def _extract_json_from_text(text: str) -> str:
         end = text.find("```", start)
         if end != -1:
             json_str = text[start:end].strip()
-            logger.debug(f"从markdown代码块中提取JSON: {json_str[:100]}")
+            marker("extract_json.markdown_json", {"preview": json_str[:100]})
             return _normalize_json_string(json_str)
 
     if "```" in text:
@@ -185,7 +181,7 @@ def _extract_json_from_text(text: str) -> str:
         end = text.find("```", start)
         if end != -1:
             json_str = text[start:end].strip()
-            logger.debug(f"从代码块中提取JSON: {json_str[:100]}")
+            marker("extract_json.markdown_code", {"preview": json_str[:100]})
             return _normalize_json_string(json_str)
 
     # 尝试找到JSON数组 [...]
@@ -193,14 +189,15 @@ def _extract_json_from_text(text: str) -> str:
         start = text.find("[")
         end = text.rfind("]") + 1
         json_str = text[start:end].strip()
-        logger.debug(f"提取JSON数组: {json_str[:100]}")
+        marker("extract_json.array", {"preview": json_str[:100]})
         return _normalize_json_string(json_str)
 
     # 如果没有找到JSON标记，返回原始文本
-    logger.debug("未找到JSON标记，返回原始文本")
+    marker("extract_json.fallback")
     return _normalize_json_string(text)
 
 
+@trace
 def _normalize_json_string(json_str: str) -> str:
     """
     标准化JSON字符串，将Python格式转换为JSON格式
@@ -218,24 +215,25 @@ def _normalize_json_string(json_str: str) -> str:
     # 首先尝试直接解析为JSON
     try:
         parsed = json.loads(json_str)
-        logger.debug("字符串已是有效的JSON格式")
+        marker("normalize_json.already_valid")
         return json_str
     except json.JSONDecodeError:
-        logger.debug("不是有效的JSON格式，尝试作为Python格式解析")
+        marker("normalize_json.try_python")
 
     # 尝试作为Python字面量解析（支持单引号）
     try:
         parsed = ast.literal_eval(json_str)
         # 转换为标准JSON格式
         normalized = json.dumps(parsed, ensure_ascii=False)
-        logger.debug(f"成功将Python格式转换为JSON格式: {normalized[:100]}")
+        marker("normalize_json.converted", {"preview": normalized[:100]})
         return normalized
     except (ValueError, SyntaxError) as e:
-        logger.warning(f"无法解析为Python格式: {e}")
+        marker("normalize_json.failed", {"error": str(e)}, level="WARNING")
         # 返回原始字符串，让调用方处理错误
         return json_str
 
 
+@trace
 async def _call_personnel_dispatch_for_entities(
     entities: List[str],
     personnel_client,
@@ -257,7 +255,6 @@ async def _call_personnel_dispatch_for_entities(
     # 创建所有异步任务
     tasks = []
     for entity_name in entities:
-        logger.debug(f"准备调用 Dify，实体名称: {entity_name}")
         task = asyncio.to_thread(
             personnel_client.run_chat,
             query=entity_name,
@@ -267,7 +264,7 @@ async def _call_personnel_dispatch_for_entities(
         )
         tasks.append((entity_name, task))
 
-    logging.INFO(f"人员调度并行调用开始: entity_count={len(tasks)}")
+    marker("personnel_dispatch.parallel_start", {"entity_count": len(tasks)})
 
     # 并行执行所有任务
     for entity_name, task in tasks:
@@ -281,13 +278,12 @@ async def _call_personnel_dispatch_for_entities(
             if answer:
                 # 将 ID 包装成 {"id": "xxx"} 格式
                 result_ids.append({"id": answer})
-                logger.debug(f"实体 {entity_name} 返回 ID: {answer}")
             else:
-                logger.warning(f"实体 {entity_name} 返回空 ID")
+                marker("personnel_dispatch.empty_id", {"entity": entity_name}, level="WARNING")
 
         except Exception as e:
-            logger.error(f"调用人员调度 client 失败，实体: {entity_name}, 错误: {e}", exc_info=True)
+            marker("personnel_dispatch.entity_error", {"entity": entity_name, "error": str(e)}, level="ERROR")
             continue
 
-    logging.INFO(f"人员调度并行调用完成: resolved_count={len(result_ids)}")
+    marker("personnel_dispatch.parallel_complete", {"resolved_count": len(result_ids)})
     return result_ids

@@ -21,7 +21,7 @@ from src.models.emergency_entities import (
 )
 from src.utils.prompts import SourceDispatchPrompts
 from src.config.settings import settings
-from log_decorator import log, logger, logging
+from src.utils.log_manager_import import trace, marker
 from DaiShanSQL import Server
 
 # 加载sourceType映射配置
@@ -30,7 +30,7 @@ with open(MAPPING_FILE, "r", encoding="utf-8") as f:
     SOURCE_TYPE_MAPPING = json.load(f)
 
 
-@log()
+@trace
 async def handle_source_dispatch(
     request: SourceDispatchRequest
 ) -> List[Dict[str, str]]:
@@ -46,55 +46,50 @@ async def handle_source_dispatch(
 
     try:
         accident_id = _validate_and_extract_accident_id(request)
-        logging.INFO(f"资源调度请求接入: accident_id={accident_id}, source_type={request.sourceType}")
-        logger.info(f"处理资源调度请求，事故ID: {accident_id}, 资源类型: {request.sourceType}")
+        marker("source_dispatch.start", {"accident_id": accident_id, "source_type": request.sourceType})
 
         sql = _build_accident_query_sql(accident_id)
-        logger.debug(f"执行 SQL 查询: {sql}")
 
         query_result = _query_accident_from_database(sql)
         accident_data = _parse_accident_query_result(query_result, accident_id)
-        logger.info(f"成功获取事故数据: {accident_data.accident_name}")
-        logging.DEBUF(f"事故概览长度: {len(accident_data.accident_overview or '')}")
+        marker("accident.loaded", {"name": accident_data.accident_name, "overview_len": len(accident_data.accident_overview or '')})
 
         general_client, solid_client = _get_dify_clients()
 
         intent_query, accident_type_query, entity_query = _build_parallel_dify_queries(request, accident_data)
-        logger.debug("准备并行调用 Dify: 意图分类 + 事故类型识别 + 实体提取")
+        marker("dify.parallel.start")
 
         intent_response, accident_type_response, entity_response = await _call_dify_parallel_analysis(
             general_client, intent_query, accident_type_query, entity_query
         )
-        logger.info("成功并行调用 Dify: 意图分类 + 事故类型识别 + 实体提取")
+        marker("dify.parallel.complete")
 
         intent, business_area, entities = _extract_analysis_results(
             intent_response, accident_type_response, entity_response
         )
-        logging.INFO(
-            f"并行分析完成: intent={intent.strip().lower()}, business_area={business_area}, entity_count={len(entities)}"
-        )
+        marker("analysis.complete", {"intent": intent.strip().lower(), "business_area": business_area, "entity_count": len(entities)})
 
         result = await _dispatch_by_intent(
             intent, request, solid_client, entities,
             accident_data, business_area, general_client
         )
 
-        logging.INFO(f"资源调度完成: source_type={request.sourceType}, result_count={len(result)}")
+        marker("source_dispatch.complete", {"source_type": request.sourceType, "result_count": len(result)})
 
         return result
 
     except ValueError as e:
-        logger.error(f"业务逻辑错误: {e}")
+        marker("source_dispatch.value_error", {"error": str(e)}, level="ERROR")
         return []
     except KeyError as e:
-        logger.error(f"数据字段缺失: {e}", exc_info=True)
+        marker("source_dispatch.key_error", {"error": str(e)}, level="ERROR")
         return []
     except Exception as e:
-        logger.error(f"处理资源调度请求时发生错误: {e}", exc_info=True)
+        marker("source_dispatch.exception", {"error": str(e)}, level="ERROR")
         return []
 
 
-@log()
+@trace
 def _parse_ai_response_to_list(answer: str) -> List[Dict[str, Any]]:
     """
     解析 AI 响应为列表格式
@@ -109,10 +104,10 @@ def _parse_ai_response_to_list(answer: str) -> List[Dict[str, Any]]:
         ValueError: 如果响应不是有效的 JSON 列表格式
     """
     answer = answer.strip()
-    logger.debug(f"AI响应原始内容: {repr(answer[:200])}")
+    marker("parse_ai_response.start", {"preview": repr(answer[:200])})
 
     if not answer:
-        logger.warning("AI响应为空，返回空列表")
+        marker("parse_ai_response.empty", {}, level="WARNING")
         return []
 
     # 从文本中提取JSON
@@ -121,17 +116,17 @@ def _parse_ai_response_to_list(answer: str) -> List[Dict[str, Any]]:
     try:
         result = json.loads(json_str)
     except json.JSONDecodeError as e:
-        logger.error(f"JSON解析失败: {e}, 提取的JSON: {repr(json_str[:200])}")
+        marker("parse_ai_response.json_error", {"error": str(e), "json_preview": repr(json_str[:200])}, level="ERROR")
         raise ValueError(f"AI响应不是有效的JSON格式: {answer[:100]}")
 
     if not isinstance(result, list):
         raise ValueError(f"AI 返回的不是列表格式: {answer[:100]}")
 
-    logger.info(f"成功解析 JSON，返回 {len(result)} 个项目")
+    marker("parse_ai_response.success", {"item_count": len(result)})
     return result
 
 
-@log()
+@trace
 def _extract_json_from_text(text: str) -> str:
     """
     从文本中提取JSON格式内容，并确保格式正确
@@ -153,7 +148,7 @@ def _extract_json_from_text(text: str) -> str:
         end = text.find("```", start)
         if end != -1:
             json_str = text[start:end].strip()
-            logger.debug(f"从markdown代码块中提取JSON: {json_str[:100]}")
+            marker("extract_json.markdown_json", {"preview": json_str[:100]})
             return _normalize_json_string(json_str)
 
     if "```" in text:
@@ -161,7 +156,7 @@ def _extract_json_from_text(text: str) -> str:
         end = text.find("```", start)
         if end != -1:
             json_str = text[start:end].strip()
-            logger.debug(f"从代码块中提取JSON: {json_str[:100]}")
+            marker("extract_json.markdown_code", {"preview": json_str[:100]})
             return _normalize_json_string(json_str)
 
     # 尝试找到JSON数组 [...]
@@ -169,7 +164,7 @@ def _extract_json_from_text(text: str) -> str:
         start = text.find("[")
         end = text.rfind("]") + 1
         json_str = text[start:end].strip()
-        logger.debug(f"提取JSON数组: {json_str[:100]}")
+        marker("extract_json.array", {"preview": json_str[:100]})
         return _normalize_json_string(json_str)
 
     # 尝试找到JSON对象 {...}
@@ -177,15 +172,15 @@ def _extract_json_from_text(text: str) -> str:
         start = text.find("{")
         end = text.rfind("}") + 1
         json_str = text[start:end].strip()
-        logger.debug(f"提取JSON对象: {json_str[:100]}")
+        marker("extract_json.object", {"preview": json_str[:100]})
         return _normalize_json_string(json_str)
 
     # 如果没有找到JSON标记，返回原始文本
-    logger.debug("未找到JSON标记，返回原始文本")
+    marker("extract_json.fallback")
     return _normalize_json_string(text)
 
 
-@log()
+@trace
 def _normalize_json_string(json_str: str) -> str:
     """
     标准化JSON字符串，将Python格式转换为JSON格式
@@ -206,25 +201,25 @@ def _normalize_json_string(json_str: str) -> str:
     # 首先尝试直接解析为JSON
     try:
         parsed = json.loads(json_str)
-        logger.debug("字符串已是有效的JSON格式")
+        marker("normalize_json.already_valid")
         return json_str
     except json.JSONDecodeError:
-        logger.debug("不是有效的JSON格式，尝试作为Python格式解析")
+        marker("normalize_json.try_python")
 
     # 尝试作为Python字面量解析（支持单引号）
     try:
         parsed = ast.literal_eval(json_str)
         # 转换为标准JSON格式
         normalized = json.dumps(parsed, ensure_ascii=False)
-        logger.debug(f"成功将Python格式转换为JSON格式: {normalized[:100]}")
+        marker("normalize_json.converted", {"preview": normalized[:100]})
         return normalized
     except (ValueError, SyntaxError) as e:
-        logger.warning(f"无法解析为Python格式: {e}")
+        marker("normalize_json.failed", {"error": str(e)}, level="WARNING")
         # 返回原始字符串，让调用方处理错误
         return json_str
 
 
-@log()
+@trace
 def _parse_entity_list(answer: str) -> List[str]:
     """
     解析实体提取响应为字符串列表
@@ -240,11 +235,11 @@ def _parse_entity_list(answer: str) -> List[str]:
     """
     # 去除首尾空格
     answer = answer.strip()
-    logger.debug(f"实体提取原始响应: {repr(answer[:200])}")
+    marker("parse_entity.start", {"preview": repr(answer[:200])})
 
     # 处理空响应
     if not answer:
-        logger.warning("实体提取响应为空，返回空列表")
+        marker("parse_entity.empty", {}, level="WARNING")
         return []
 
     # 从文本中提取JSON
@@ -253,7 +248,7 @@ def _parse_entity_list(answer: str) -> List[str]:
     try:
         result = json.loads(json_str)
     except json.JSONDecodeError as e:
-        logger.error(f"JSON解析失败: {e}, 提取的JSON: {repr(json_str[:200])}")
+        marker("parse_entity.json_error", {"error": str(e), "json_preview": repr(json_str[:200])}, level="ERROR")
         raise ValueError(f"实体提取响应不是有效的JSON格式: {answer[:100]}")
 
     if not isinstance(result, list):
@@ -261,7 +256,7 @@ def _parse_entity_list(answer: str) -> List[str]:
 
     # 确保所有元素都是字符串
     str_list = [str(item) for item in result]
-    logger.info(f"成功解析实体列表，返回 {len(str_list)} 个实体")
+    marker("parse_entity.success", {"entity_count": len(str_list)})
     return str_list
 
 
@@ -289,12 +284,11 @@ def _query_accident_from_database(sql: str) -> Any:
     """查询事故数据"""
     server = Server()
     query_result = server.QueryBySQL(sql)
-    logger.debug(f"数据库查询结果: {query_result}")
-    logger.debug(f"查询结果类型: {type(query_result)}")
+    marker("database.query_result", {"type": str(type(query_result).__name__)})
     return query_result
 
 
-@log()
+@trace
 def _parse_accident_query_result(query_result: Any, accident_id: int) -> AccidentEventData:
     """解析查询结果并创建事故实体"""
     if isinstance(query_result, dict):
@@ -332,7 +326,7 @@ def _get_dify_clients() -> tuple:
     try:
         solid_client = get_client("SOLID_RESOURCE_INSTRUCTION")
     except ValueError as e:
-        logger.warning(f"获取 Dify solid_resource_instruction client 失败: {e}")
+        marker("get_dify_clients.solid_missing", {"error": str(e)}, level="WARNING")
         solid_client = None
 
     return general_client, solid_client
@@ -387,16 +381,12 @@ def _extract_analysis_results(
     intent_answer = intent_response.answer if hasattr(intent_response, 'answer') else str(intent_response)
     if not intent_answer:
         raise ValueError("意图分类响应为空")
-    logger.debug(f"意图分类响应: {intent_answer}")
 
     business_area = accident_type_response.answer if hasattr(accident_type_response, 'answer') else str(accident_type_response)
     business_area = business_area.strip()
-    logger.info(f"获取到事故类型: {business_area}")
 
     entity_answer = entity_response.answer if hasattr(entity_response, 'answer') else str(entity_response)
     entities = _parse_entity_list(entity_answer)
-    logger.info(f"提取到 {len(entities)} 个实体: {entities}")
-    logging.DEBUF(f"实体提取示例: {entities[:3] if entities else []}")
 
     return intent_answer, business_area, entities
 
@@ -412,18 +402,14 @@ async def _dispatch_by_intent(
 ) -> Dict[str, Any]:
     """根据意图分类结果分发处理"""
     if intent.strip().lower() == "resource":
-        logger.info("意图分类为 'resource'，调用 get_solid_resource_instruction")
-        logging.INFO(f"按资源指令路径分发: entity_count={len(entities)}")
+        marker("dispatch.resource_intent", {"entity_count": len(entities)})
         return await _get_solid_resource_instruction(
             request,
             solid_client,
             entities
         )
     else:
-        logger.info(f"意图分类为 '{intent}'，根据资源类型调用对应的 handle 函数")
-        logging.INFO(
-            f"按资源筛选路径分发: source_type={request.sourceType}, business_area={business_area}"
-        )
+        marker("dispatch.filter_intent", {"source_type": request.sourceType, "business_area": business_area})
 
         # 资源类型到处理函数的映射
         handler_mapping = {
@@ -440,8 +426,6 @@ async def _dispatch_by_intent(
         handler = handler_mapping.get(request.sourceType)
         if not handler:
             raise ValueError(f"未找到资源类型 {request.sourceType} 的处理函数")
-
-        logging.DEBUF(f"命中处理函数: {handler.__name__}")
 
         # 根据资源类型调用相应的处理函数
         # 救援队伍和应急专家需要 business_area 参数
@@ -479,8 +463,7 @@ async def _get_solid_resource_instruction(
     Raises:
         ValueError: 如果 client 未配置
     """
-    logger.info(f"获取固体资源指令，资源类型: {request.sourceType}, 实体数量: {len(entities)}")
-    logging.INFO(f"固体资源指令开始: source_type={request.sourceType}, entity_count={len(entities)}")
+    marker("solid_resource.start", {"source_type": request.sourceType, "entity_count": len(entities)})
 
     # 验证 client 是否可用
     if client is None:
@@ -491,7 +474,7 @@ async def _get_solid_resource_instruction(
 
     # 循环遍历 entities，对每个实体名称调用 dify client
     for entity_name in entities:
-        logger.debug(f"调用 Dify，实体名称: {entity_name}, 资源类型: {request.sourceType}")
+        marker("solid_resource.call_dify", {"entity": entity_name, "resource_type": request.sourceType})
 
         # 调用 Dify run_chat
         dify_response = await asyncio.to_thread(
@@ -509,12 +492,10 @@ async def _get_solid_resource_instruction(
         if answer:
             # 将 ID 包装成 {"id": "xxx"} 格式
             result_ids.append({"id": answer})
-            logger.debug(f"实体 {entity_name} 返回 ID: {answer}")
         else:
-            logger.warning(f"实体 {entity_name} 返回空 ID")
+            marker("solid_resource.empty_id", {"entity": entity_name}, level="WARNING")
 
-    logger.info(f"成功调用 Dify solid_resource_instruction，返回 {len(result_ids)} 个 ID")
-    logging.INFO(f"固体资源指令完成: resolved_count={len(result_ids)}")
+    marker("solid_resource.complete", {"result_count": len(result_ids)})
     return result_ids
 
 
@@ -542,11 +523,11 @@ async def _execute_resource_query(
 ) -> List[Dict[str, Any]]:
     """执行资源查询并返回原始数据行"""
     sql = _get_sql_from_mapping(source_type, business_area, number)
-    logging.DEBUF(f"执行资源SQL: source_type={source_type}, has_business_area={bool(business_area)}, limit={number}")
+    marker("resource_query.execute", {"source_type": source_type, "has_business_area": bool(business_area), "limit": number})
     server = Server()
     query_result = server.QueryBySQL(sql)
     data_list = _extract_data_list_from_query_result(query_result)
-    logging.INFO(f"资源查询完成: source_type={source_type}, row_count={len(data_list)}")
+    marker("resource_query.complete", {"source_type": source_type, "row_count": len(data_list)})
     return data_list
 
 
@@ -596,9 +577,9 @@ async def _filter_with_ai(
     """使用AI进行智能筛选"""
     if general_client is None:
         raise ValueError("Dify general_chat client 未配置")
-    
+
     prompt = _build_ai_prompt(entities, request, accident_data, prompt_generator)
-    logging.DEBUF(f"AI筛选开始: source_type={request.sourceType}, candidate_count={len(entities)}")
+    marker("ai_filter.start", {"source_type": request.sourceType, "candidate_count": len(entities)})
     
     dify_response = await asyncio.to_thread(
         general_client.run_chat,
@@ -610,7 +591,7 @@ async def _filter_with_ai(
 
     answer = dify_response.answer if hasattr(dify_response, 'answer') else str(dify_response)
     filtered = _parse_ai_response_to_list(answer)
-    logging.INFO(f"AI筛选完成: source_type={request.sourceType}, selected_count={len(filtered)}")
+    marker("ai_filter.complete", {"source_type": request.sourceType, "selected_count": len(filtered)})
     return filtered
 
 
@@ -663,7 +644,7 @@ def _map_rows_to_entities(
                 entity = entity_class(**normalized_row)
                 entities.append(entity)
         except Exception as e:
-            logger.warning(f"加载实体失败: {e}, 数据: {row}")
+            marker("map_entities.failed", {"error": str(e)}, level="WARNING")
             continue
     return entities
 
@@ -689,7 +670,6 @@ async def handle_emergency_supplies(
     """处理应急物资资源调度"""
     rows = await _execute_resource_query(request.sourceType, number=5)
     entities = _map_to_entities(rows, EmergencySupply, None)
-    logging.INFO(f"应急物资候选加载: rows={len(rows)}, entities={len(entities)}")
     return await _filter_with_ai(
         entities, request, accident_data,
         SourceDispatchPrompts.get_emergency_supplies_prompt,
@@ -706,7 +686,6 @@ async def handle_rescue_team(
     """处理救援队伍资源调度"""
     rows = await _execute_resource_query(request.sourceType, business_area, 5)
     entities = _map_to_entities(rows, RescueTeam, None)
-    logging.INFO(f"救援队伍候选加载: business_area={business_area}, rows={len(rows)}, entities={len(entities)}")
     return await _filter_with_ai(
         entities, request, accident_data,
         SourceDispatchPrompts.get_rescue_team_prompt,
@@ -723,7 +702,6 @@ async def handle_emergency_expert(
     """处理应急专家资源调度"""
     rows = await _execute_resource_query(request.sourceType, business_area, 5)
     entities = _map_to_entities(rows, EmergencyExpert, None)
-    logging.INFO(f"应急专家候选加载: business_area={business_area}, rows={len(rows)}, entities={len(entities)}")
     return await _filter_with_ai(
         entities, request, accident_data,
         SourceDispatchPrompts.get_emergency_expert_prompt,
@@ -743,7 +721,6 @@ async def handle_fire_fighting_facilities(
         ("from_db_row", ["id", "name", "latitude_longitude"])
     )
     entities = _sort_by_distance(entities, accident_data)
-    logging.INFO(f"消防设施候选加载: rows={len(rows)}, entities={len(entities)}")
     return await _filter_with_ai(
         entities, request, accident_data,
         SourceDispatchPrompts.get_fire_fighting_facilities_prompt,
@@ -763,7 +740,6 @@ async def handle_shelter(
         ("from_db_row", ["id", "shelter_name", "lon_and_lat"])
     )
     entities = _sort_by_distance(entities, accident_data)
-    logging.INFO(f"避难场所候选加载: rows={len(rows)}, entities={len(entities)}")
     return await _filter_with_ai(
         entities, request, accident_data,
         SourceDispatchPrompts.get_shelter_prompt,
@@ -782,7 +758,6 @@ async def handle_medical_institution(
         rows, MedicalInstitution,
         ("from_db_row", ["id", "institution_name", "local_pos"])
     )
-    logging.INFO(f"医疗机构候选加载: rows={len(rows)}, entities={len(entities)}")
     return await _filter_with_ai(
         entities, request, accident_data,
         SourceDispatchPrompts.get_medical_institution_prompt,
@@ -802,7 +777,6 @@ async def handle_rescue_organization(
         ("from_db_row", ["id", "institution_name", "local_pos"])
     )
     entities = _sort_by_distance(entities, accident_data)
-    logging.INFO(f"救援机构候选加载: rows={len(rows)}, entities={len(entities)}")
     return await _filter_with_ai(
         entities, request, accident_data,
         SourceDispatchPrompts.get_rescue_organization_prompt,
@@ -822,7 +796,6 @@ async def handle_protection_target(
         ("from_db_row", ["id", "target_name", "local_pos"])
     )
     entities = _sort_by_distance(entities, accident_data)
-    logging.INFO(f"防护目标候选加载: rows={len(rows)}, entities={len(entities)}")
     return await _filter_with_ai(
         entities, request, accident_data,
         SourceDispatchPrompts.get_protection_target_prompt,

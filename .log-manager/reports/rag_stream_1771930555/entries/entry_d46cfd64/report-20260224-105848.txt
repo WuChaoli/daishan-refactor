@@ -1,0 +1,19 @@
+log-manager 增量报告
+会话ID: rag_stream_1771930555
+入口ID: entry_d46cfd64
+快照时间: 2026-02-24 18:58:48
+分析窗口: 累计事件 4 条
+模式: lite
+
+【错误摘要】
+无错误。
+
+【函数调用链】
+Trace: tr_b9cdaabe
+chat_general [状态=OK, 耗时=2460.7ms, 内存变化=+8704KB]
+
+【错误路径链】
+无错误路径。
+
+【调用链内存Top】
+1. chat_general 内存变化=+8704KB

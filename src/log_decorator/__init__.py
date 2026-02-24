@@ -7,9 +7,7 @@
 - 配置化日志行为
 
 使用示例:
-    from log_decorator import log
 
-    @log()
     def my_function(x, y):
         return x + y
 """
