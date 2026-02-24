@@ -1,9 +1,3 @@
-"""
-DaiShanSQL - 岱山 SQL 查询包
-
-提供基于自然语言的 SQL 查询功能
-"""
-
 import os
 from pathlib import Path
 from dotenv import load_dotenv

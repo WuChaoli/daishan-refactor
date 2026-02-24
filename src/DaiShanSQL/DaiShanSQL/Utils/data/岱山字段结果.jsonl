@@ -6,7 +6,7 @@
 {"table": "v_ai_ipark_safety_park_basic_info", "field_name": "TO_CHAR(manager_phone)", "file_Note": "园区负责人电话", "field_values": ["13868214869"]}
 {"table": "v_ai_ipark_safety_park_basic_info", "field_name": "TO_CHAR(safety_responsible_person)", "file_Note": "安全负责人", "field_values": ["刘天", "王娇"]}
 {"table": "v_ai_ipark_safety_park_basic_info", "field_name": "TO_CHAR(safety_responsible_mobile)", "file_Note": "安全负责人手机", "field_values": ["18272701992", "15805805331"]}
-{"table": "v_ai_ipark_safety_park_basic_info", "field_name": "TO_CHAR(park_level)", "file_Note": "园区级别（转换为中文描述，1 = 国家级、2 = 省级，其他保留原值）", "field_values": ["省级"]}
+{"table": "v_ai_ipark_safety_park_basic_info", "field_name": "TO_CHAR(park_level)", "file_Note": "园区级别（转换为中文描述，1 = 国家级、2 = 省级，其他保留原值）", "field_values": ["国家级","省级"]}
 {"table": "v_ai_ipark_safety_park_basic_info", "field_name": "TO_CHAR(planned_area)", "file_Note": "园区规划面积", "field_values": ["1.888", "0.91", "2.798"]}
 {"table": "v_ai_ipark_safety_park_basic_info", "field_name": "TO_CHAR(industrial_planning)", "file_Note": "园区产业规划", "field_values": ["（1）作为舟山绿色石化基地整合提升的产业空间，充分利用大项目带动的先发优势，加快招引下游产业项目和企业顺利落户，可减少浙石化多余原料外运的压力。同时，规划的“三剂 ”产品也可就近供应石化基地，降低成本。（2）整合提升是舟山绿色石化基地推动产业集群化、产品国际化。 2020 年，浙江省政府工作报告指出，加快培育发展绿色石化等一批具有国际竞争力的产业集群。通过整合提升岱山经济开发区产业园功能定位，通过产业链项目支撑、集群化推进、园区化承载的发展模式，将岱山经济开发 区产业园建设成为特色鲜明、效益显著、开放先进产业基地。 （3）促进高水平集聚发展，为园区化工产业结构调整和升级搭建发展平台。 坚决贯彻化工园区一体化发展理念，引导企业循环生产、产业间耦合发展，提升园区产业能级水平，践行绿色低碳高端发展新模式，实现集约集群高质量发展。以高质量发展为主线，以高附加值项目为载体，引导化工项目在园区内规范发展，形成资源配置合理、产业协同有序、产品多元高端的优势产业体系。优化产业布局，完善基础设施配套，打造专业化工园区，可持续发展的平台。"]}
 {"table": "v_ai_ipark_safety_park_basic_info", "field_name": "TO_CHAR(development_area)", "file_Note": "开发面积", "field_values": []}
@@ -50,22 +50,22 @@
 {"table": "v_ai_ipark_pue_pipe_gallery", "field_name": "TO_CHAR(use_date)", "file_Note": "投用日期", "field_values": ["2026-10-31 00:00:00.000000"]}
 {"table": "v_ai_ipark_platform_video_device_info", "field_name": "TO_CHAR(channel_name)", "file_Note": "通道名称", "field_values": ["VAR实训室2", "报告厅2", "报告厅门口", "指挥大厅南侧", "报告厅1"]}
 {"table": "v_ai_ipark_platform_video_device_info", "field_name": "TO_CHAR(enterprise_name)", "file_Note": "所属企业（企业名称）", "field_values": ["浙江世倍尔新材料有限公司", "浙江舟山市智德工业气体有限公司"]}
-{"table": "v_ai_ipark_platform_video_device_info", "field_name": "TO_CHAR(device_id)", "file_Note": "设备 ID", "field_values": ["8cb218e9e5a8478786ddfae39d9e96d0", "8be271dab0d443f281c4edd3dd9a3dbc", "34020000001320500000", "34020000001320500001", "34020000001320500002"]}
-{"table": "v_ai_ipark_platform_video_device_info", "field_name": "TO_CHAR(channel)", "file_Note": "通道 ID", "field_values": ["33", "37", "38", "39", "40"]}
+{"table": "v_ai_ipark_platform_video_device_info", "field_name": "TO_CHAR(device_id)", "file_Note": "设备ID", "field_values": ["8cb218e9e5a8478786ddfae39d9e96d0", "8be271dab0d443f281c4edd3dd9a3dbc", "34020000001320500000", "34020000001320500001", "34020000001320500002"]}
+{"table": "v_ai_ipark_platform_video_device_info", "field_name": "TO_CHAR(channel)", "file_Note": "通道ID", "field_values": ["33", "37", "38", "39", "40"]}
 {"table": "v_ai_ipark_platform_video_device_info", "field_name": "TO_CHAR(video_type)", "file_Note": "视频分类（中文）", "field_values": ["未知分类", "其他", "储罐区", "生产装置", "库房"]}
-{"table": "v_ai_ipark_platform_video_device_info", "field_name": "TO_CHAR(device_state)", "file_Note": "设备状态（中文：在线 / 离线）", "field_values": ["在线", "离线"]}
+{"table": "v_ai_ipark_platform_video_device_info", "field_name": "TO_CHAR(device_state)", "file_Note": "设备状态（中文：在线/离线）", "field_values": ["在线", "离线"]}
 {"table": "v_ai_ipark_safety_enterprise_info", "field_name": "TO_CHAR(park_name)", "file_Note": "所属园区：企业所属园区名称", "field_values": ["东区", "西区"]}
 {"table": "v_ai_ipark_safety_enterprise_info", "field_name": "TO_CHAR(enterprise_name)", "file_Note": "企业名称：企业完整工商注册名称", "field_values": ["浙江世倍尔新材料有限公司", "浙江岱山经开新材料科技发展有限公司", "润和催化材料（浙江）有限公司", "浙江鑫月新材料科技有限公司", "浙江舟山市智德工业气体有限公司"]}
-{"table": "v_ai_ipark_safety_enterprise_info", "field_name": "TO_CHAR(enterprise_type)", "file_Note": "企业类型（中文：生产 / 经营 / 使用等）", "field_values": ["生产", "使用", "经营"]}
-{"table": "v_ai_ipark_safety_enterprise_info", "field_name": "TO_CHAR(enterprise_label)", "file_Note": "企业标签（中文：单项冠军 / 绿色示范等）", "field_values": [",", ",专精特新\"小巨人\",高新技术企业"]}
+{"table": "v_ai_ipark_safety_enterprise_info", "field_name": "TO_CHAR(enterprise_type)", "file_Note": "企业类型（中文：生产/经营/使用等）", "field_values": ["生产", "使用", "经营"]}
+{"table": "v_ai_ipark_safety_enterprise_info", "field_name": "TO_CHAR(enterprise_label)", "file_Note": "企业标签（中文：单项冠军/绿色示范等）", "field_values": [",", ",专精特新\"小巨人\",高新技术企业"]}
 {"table": "v_ai_ipark_safety_enterprise_info", "field_name": "TO_CHAR(rules_on_corporate)", "file_Note": "是否规上企业", "field_values": ["否"]}
 {"table": "v_ai_ipark_safety_enterprise_info", "field_name": "TO_CHAR(abbreviatio)", "file_Note": "企业简称：企业对外简称", "field_values": ["世倍尔新材料", "中试基地", "润和催化材料", "鑫月新材料", "智德气体"]}
 {"table": "v_ai_ipark_safety_enterprise_info", "field_name": "TO_CHAR(social_credit_id)", "file_Note": "统一社会信用代码：企业唯一身份标识", "field_values": ["91330921MAC6X51L6E", "91330921MACKWHKA7X", "91330921MA2DMAWQ66", "91330921MA2DMK306G", "91330921MA7DDBB37B"]}
 {"table": "v_ai_ipark_safety_enterprise_info", "field_name": "TO_CHAR(is_hazard_source)", "file_Note": "是否重大危险源", "field_values": ["否"]}
 {"table": "v_ai_ipark_safety_enterprise_info", "field_name": "TO_CHAR(is_supervision_craft)", "file_Note": "是否重点监管危化工艺", "field_values": ["是", "否"]}
 {"table": "v_ai_ipark_safety_enterprise_info", "field_name": "TO_CHAR(is_supervision_chemical)", "file_Note": "是否重点监管危化品", "field_values": ["是", "否"]}
-{"table": "v_ai_ipark_safety_enterprise_info", "field_name": "TO_CHAR(enterprise_size)", "file_Note": "企业规模（中文：大 / 中 / 小 / 微）", "field_values": ["小"]}
-{"table": "v_ai_ipark_safety_enterprise_info", "field_name": "TO_CHAR(enterprise_status)", "file_Note": "生产状态（中文：正常生产 / 未投产等）", "field_values": ["正常生产", "试生产", "未投产"]}
+{"table": "v_ai_ipark_safety_enterprise_info", "field_name": "TO_CHAR(enterprise_size)", "file_Note": "企业规模（中文：大/中/小/微）", "field_values": ["小"]}
+{"table": "v_ai_ipark_safety_enterprise_info", "field_name": "TO_CHAR(enterprise_status)", "file_Note": "生产状态（中文：正常生产/未投产等）", "field_values": ["正常生产", "试生产", "未投产"]}
 {"table": "v_ai_ipark_safety_enterprise_info", "field_name": "TO_CHAR(industry_level_two)", "file_Note": "所属行业大类（中文）", "field_values": ["化学原料和化学制品制造业"]}
 {"table": "v_ai_ipark_safety_enterprise_info", "field_name": "TO_CHAR(establish_date)", "file_Note": "成立日期：企业工商注册成立的时间", "field_values": ["2022-12-27 00:00:00.000000", "2020-08-03 00:00:00.000000", "2021-04-25 00:00:00.000000"]}
 {"table": "v_ai_ipark_safety_enterprise_info", "field_name": "TO_CHAR(factory_area)", "file_Note": "厂区面积：企业厂区实际占地面积", "field_values": ["0.08", "0.0727", "0.153", "0.0325", "0.032"]}
@@ -73,7 +73,7 @@
 {"table": "v_ai_ipark_safety_enterprise_info", "field_name": "TO_CHAR(enterprise_leader_name)", "file_Note": "企业负责人：企业主要负责人姓名", "field_values": ["陈略", "王凯", "张明远", "王怡", "陆斌峰"]}
 {"table": "v_ai_ipark_safety_enterprise_info", "field_name": "TO_CHAR(en_leader_mobile_phone)", "file_Note": "企业负责人手机：企业负责人联系电话", "field_values": ["13968296575", "8768081382", "13419414959", "13901584715", "13906804445"]}
 {"table": "v_ai_ipark_safety_enterprise_info", "field_name": "TO_CHAR(practitioner_num)", "file_Note": "从业人员人数：企业实际在岗总人数", "field_values": ["76", "7", "180", "15", "35"]}
-{"table": "v_ai_ipark_safety_enterprise_info", "field_name": "TO_CHAR(control_type)", "file_Note": "分类监管类型（中文：一般监管 / 重点关注等）", "field_values": ["特别管控", "重点关注", "一般监管"]}
+{"table": "v_ai_ipark_safety_enterprise_info", "field_name": "TO_CHAR(control_type)", "file_Note": "分类监管类型（中文：一般监管/重点关注等）", "field_values": ["特别管控", "重点关注", "一般监管"]}
 {"table": "v_ai_ipark_ia_enterprise_output_value", "field_name": "TO_CHAR(park_name)", "file_Note": "园区名称", "field_values": []}
 {"table": "v_ai_ipark_ia_enterprise_output_value", "field_name": "TO_CHAR(enterprise_name)", "file_Note": "企业名称", "field_values": ["润和催化材料（浙江）有限公司", "岱山糖能新材料有限公司"]}
 {"table": "v_ai_ipark_ia_enterprise_output_value", "field_name": "TO_CHAR(rules_on_corporate)", "file_Note": "是否规上企业", "field_values": []}
@@ -88,8 +88,8 @@
 {"table": "v_ai_ipark_economic_operation", "field_name": "TO_CHAR(report_month)", "file_Note": "报告月份", "field_values": ["2025-01", "2025-03", "2025-04", "2025-05", "2025-06"]}
 {"table": "v_ai_ipark_economic_operation", "field_name": "TO_CHAR(park_added_value)", "file_Note": "园区增加值（单位：万元）", "field_values": ["0"]}
 {"table": "v_ai_ipark_economic_operation", "field_name": "TO_CHAR(park_export_value)", "file_Note": "园区出口总额（单位：万元）", "field_values": ["0"]}
-{"table": "v_ai_ipark_economic_operation", "field_name": "TO_CHAR(output_per_mu)", "file_Note": "单位面积产值（万元 / 亩）", "field_values": ["0", "255"]}
-{"table": "v_ai_ipark_economic_operation", "field_name": "TO_CHAR(tax_per_mu)", "file_Note": "单位面积税收（万元 / 亩）", "field_values": ["0", "13"]}
+{"table": "v_ai_ipark_economic_operation", "field_name": "TO_CHAR(output_per_mu)", "file_Note": "单位面积产值（万元/亩）", "field_values": ["0", "255"]}
+{"table": "v_ai_ipark_economic_operation", "field_name": "TO_CHAR(tax_per_mu)", "file_Note": "单位面积税收（万元/亩）", "field_values": ["0", "13"]}
 {"table": "v_ai_ipark_economic_operation", "field_name": "TO_CHAR(scale_ind_output)", "file_Note": "规模以上工业总产值（单位：万元）", "field_values": ["187616", "215981", "183027", "188686", "184936"]}
 {"table": "v_ai_ipark_economic_operation", "field_name": "TO_CHAR(employment_count)", "file_Note": "就业人数（人）", "field_values": ["300"]}
 {"table": "v_ai_ipark_economic_operation", "field_name": "TO_CHAR(enterprise_count)", "file_Note": "企业数量（家）", "field_values": ["59"]}
@@ -104,18 +104,18 @@
 {"table": "v_ai_ipark_hm_chemical_detail", "field_name": "TO_CHAR(enterprise_name)", "file_Note": "企业名称", "field_values": ["润和催化材料（浙江）有限公司", "佳瑶新材料科技（浙江）有限公司", "浙江世倍尔新材料有限公司", "浙江鑫月新材料科技有限公司", "岱山糖能新材料有限公司"]}
 {"table": "v_ai_ipark_hm_chemical_detail", "field_name": "TO_CHAR(chemical_name)", "file_Note": "危化品中文名", "field_values": ["氢气", "液化天然气", "天然气", "正丁醛", "天然气(富含甲烷)"]}
 {"table": "v_ai_ipark_hm_chemical_detail", "field_name": "TO_CHAR(chemical_type)", "file_Note": "化学品类型（中文）", "field_values": ["原料", "产品"]}
-{"table": "v_ai_ipark_hm_chemical_detail", "field_name": "TO_CHAR(cas)", "file_Note": "CAS 号", "field_values": ["1333-74-0", "68476-85-7", "8006-14-2", "123-72-8", "7446-09-5"]}
+{"table": "v_ai_ipark_hm_chemical_detail", "field_name": "TO_CHAR(cas)", "file_Note": "CAS号", "field_values": ["1333-74-0", "68476-85-7", "8006-14-2", "123-72-8", "7446-09-5"]}
 {"table": "v_ai_ipark_hm_chemical_detail", "field_name": "TO_CHAR(chemical_status)", "file_Note": "化学品状态（中文）", "field_values": ["气态", "液态"]}
 {"table": "v_ai_ipark_sys_person", "field_name": "TO_CHAR(park_name)", "file_Note": "所属园区", "field_values": ["东区", "西区", "领导机构", "岱山经济开发区"]}
 {"table": "v_ai_ipark_sys_person", "field_name": "TO_CHAR(enterprise_name)", "file_Note": "公司名称", "field_values": ["润和催化材料（浙江）有限公司", "浙江岱山经开新材料科技发展有限公司", "佳瑶新材料科技（浙江）有限公司", "浙江舟山市智德工业气体有限公司", "岱山糖能新材料有限公司"]}
 {"table": "v_ai_ipark_sys_person", "field_name": "TO_CHAR(company_code)", "file_Note": "公司_code", "field_values": ["316200022", "91330921MACKWHKA7X", "91330921MA2DN35T5P", "330980087", "91330921MA7G1J255H"]}
 {"table": "v_ai_ipark_sys_person", "field_name": "TO_CHAR(name)", "file_Note": "名称", "field_values": ["张明远", "张三", "庄思海", "沈泳", "王昊凯"]}
-{"table": "v_ai_ipark_sys_person", "field_name": "TO_CHAR(sex)", "file_Note": "性别（转换为：男 / 女）", "field_values": ["男", "女"]}
+{"table": "v_ai_ipark_sys_person", "field_name": "TO_CHAR(sex)", "file_Note": "性别（转换为：男/女）", "field_values": ["男", "女"]}
 {"table": "v_ai_ipark_sys_person", "field_name": "TO_CHAR(DEGREE)", "file_Note": "学历", "field_values": ["本科及以上", "大专", "高中以下", "本科", "高中及高职"]}
 {"table": "v_ai_ipark_sys_person", "field_name": "TO_CHAR(speciality)", "file_Note": "专业", "field_values": ["应用化学", "新材料", "石油化工技术", "化学工程", "化学工程与工艺"]}
 {"table": "v_ai_ipark_sys_person", "field_name": "TO_CHAR(chemical_education_flag)", "file_Note": "是否具备化工学历背景", "field_values": ["是", "0", "1"]}
-{"table": "v_ai_ipark_sys_person", "field_name": "TO_CHAR(person_id)", "file_Note": "人员 id", "field_values": ["5995325521753856", "6076823452775648", "5995325530306304", "5995325529978625", "5995325529618176"]}
-{"table": "v_ai_ipark_sys_person", "field_name": "TO_CHAR(personnel_type)", "file_Note": "人员类型（转换为中文：园区人员 / 企业人员）", "field_values": ["企业人员", "园区人员"]}
+{"table": "v_ai_ipark_sys_person", "field_name": "TO_CHAR(person_id)", "file_Note": "人员id", "field_values": ["5995325521753856", "6076823452775648", "5995325530306304", "5995325529978625", "5995325529618176"]}
+{"table": "v_ai_ipark_sys_person", "field_name": "TO_CHAR(personnel_type)", "file_Note": "人员类型（转换为中文：园区人员/企业人员）", "field_values": ["企业人员", "园区人员"]}
 {"table": "v_ai_ipark_sys_person", "field_name": "TO_CHAR(mobilePhone)", "file_Note": "电话", "field_values": ["13419414959", "13922222222", "13884315801", "15897841386", "18937235859"]}
 {"table": "v_ai_ipark_sys_person", "field_name": "TO_CHAR(jobNumber)", "file_Note": "工号", "field_values": ["00220001", "A121212     ", "00220017", "00220016", "00220015"]}
 {"table": "v_ai_ipark_sys_person", "field_name": "TO_CHAR(jobDesc)", "file_Note": "职务", "field_values": ["技术员", "外副操"]}
@@ -141,12 +141,12 @@
 {"table": "v_ai_ipark_safety_unit_base_info", "field_name": "TO_CHAR(unit_address)", "file_Note": "地址", "field_values": ["南充市顺庆区COCO香江4号楼二层208号", "浙江省宁波象保合作区航天大道99号12幢832B室", "浙江省宁波市北仑区柴桥街道同盟村施隘周A85-4", "肥城市汶阳镇汶河路061号", "上海市金山区亭林镇兴亭路55号2幢"]}
 {"table": "v_ai_ipark_hm_hazard_info", "field_name": "TO_CHAR(enterprise_name)", "file_Note": "企业名称", "field_values": []}
 {"table": "v_ai_ipark_hm_hazard_info", "field_name": "TO_CHAR(hazard_name)", "file_Note": "重大危险源名称", "field_values": []}
-{"table": "v_ai_ipark_hm_hazard_info", "field_name": "TO_CHAR(hazard_facility)", "file_Note": "重大危险源类型（中文：罐区 / 装置等）", "field_values": []}
-{"table": "v_ai_ipark_hm_hazard_info", "field_name": "TO_CHAR(hazard_rank)", "file_Note": "重大危险源等级（中文：一级 / 二级等）", "field_values": []}
+{"table": "v_ai_ipark_hm_hazard_info", "field_name": "TO_CHAR(hazard_facility)", "file_Note": "重大危险源类型（中文：罐区/装置等）", "field_values": []}
+{"table": "v_ai_ipark_hm_hazard_info", "field_name": "TO_CHAR(hazard_rank)", "file_Note": "重大危险源等级（中文：一级/二级等）", "field_values": []}
 {"table": "v_ai_ipark_hm_chemical", "field_name": "TO_CHAR(enterprise_name)", "file_Note": "企业名称", "field_values": []}
 {"table": "v_ai_ipark_hm_chemical", "field_name": "TO_CHAR(chemical_name)", "file_Note": "化学品中文名", "field_values": []}
 {"table": "v_ai_ipark_hm_chemical", "field_name": "TO_CHAR(chemical_alias)", "file_Note": "别名", "field_values": []}
-{"table": "v_ai_ipark_hm_chemical", "field_name": "TO_CHAR(cas)", "file_Note": "CAS 号", "field_values": []}
+{"table": "v_ai_ipark_hm_chemical", "field_name": "TO_CHAR(cas)", "file_Note": "CAS号", "field_values": []}
 {"table": "v_ai_ipark_hm_chemical", "field_name": "TO_CHAR(capacity)", "file_Note": "产品生产能力", "field_values": []}
 {"table": "v_ai_ipark_hm_chemical", "field_name": "TO_CHAR(reserve)", "file_Note": "产品最大储量", "field_values": []}
 {"table": "v_ai_ipark_hm_craft", "field_name": "TO_CHAR(enterprise_name)", "file_Note": "企业名称", "field_values": ["浙江世倍尔新材料有限公司"]}
@@ -154,7 +154,7 @@
 {"table": "v_ai_ipark_hm_craft", "field_name": "TO_CHAR(park_code)", "file_Note": "园区编码", "field_values": ["001"]}
 {"table": "v_ai_ipark_hm_craft", "field_name": "TO_CHAR(crafts_type)", "file_Note": "工艺名称", "field_values": ["氧化工艺", "重氮化工艺", "磺化工艺"]}
 {"table": "v_ai_ipark_hm_craft", "field_name": "TO_CHAR(control_measure)", "file_Note": "自动控制措施", "field_values": ["将加氢反应釜内温度、压力与釜内搅拌电流、氢气流量、加氢反应釜夹套冷却水进水阀形成联锁关系，设立紧急停车系统。加入急冷氮气或氢气的系统。当加氢反应釜内温度或压力超标或搅拌系统发生故障时自动停止加氢，泄压，并进入紧急状态。安全泄放系统。", "DCS", "dcs"]}
-{"table": "v_ai_ipark_hm_craft", "field_name": "TO_CHAR(crafts_code)", "file_Note": "典型工艺装置编码；关联 ipark_hm_craft_library 表 crafts_code 字段", "field_values": ["8", "7", "17", "5"]}
+{"table": "v_ai_ipark_hm_craft", "field_name": "TO_CHAR(crafts_code)", "file_Note": "典型工艺装置编码", "field_values": ["8", "7", "17", "5"]}
 {"table": "v_ai_ipark_hm_craft", "field_name": "TO_CHAR(crafts_parameters)", "file_Note": "重点监控工艺参数", "field_values": ["加氢反应釜或催化剂床层温度、压力；加氢反应釜内搅拌速率；氢气流量；反应物质的配料比；系统氧含量；冷却水流量；氢气压缩机运行参数、加氢反应尾气组成等。", "重点监测参数", "重点监管指标", "重点工艺指标监测"]}
 {"table": "v_ai_ipark_hm_craft", "field_name": "TO_CHAR(final_product)", "file_Note": "最终产品", "field_values": []}
 {"table": "v_ai_ipark_hm_craft", "field_name": "TO_CHAR(intermediate_product)", "file_Note": "中间产品", "field_values": []}
@@ -167,7 +167,7 @@
 {"table": "v_ai_ipark_hm_craft", "field_name": "TO_CHAR(local_pos)", "file_Note": "经纬度", "field_values": ["{\"type\":\"Point\",\"coordinates\":[122.119743,30.273493,0]}", "{\"type\":\"Point\",\"coordinates\":[122.119908,30.272804,0]}", "{\"type\":\"Point\",\"coordinates\":[122.119838,30.273567,0]}", "{\"type\":\"Point\",\"coordinates\":[122.119606,30.273252,0]}"]}
 {"table": "v_ai_ipark_hm_craft", "field_name": "TO_CHAR(address)", "file_Note": "地址", "field_values": []}
 {"table": "v_ai_ipark_hm_company_promise", "field_name": "TO_CHAR(enterprise_name)", "file_Note": "企业名称", "field_values": ["润和催化材料（浙江）有限公司", "浙江世倍尔新材料有限公司", "浙江舟山市智德工业气体有限公司", "浙江岱山经开新材料科技发展有限公司"]}
-{"table": "v_ai_ipark_hm_company_promise", "field_name": "TO_CHAR(risk_grade)", "file_Note": "风险级别（中文：高风险 / 较大风险等）", "field_values": ["一般风险", "低风险", "高风险", "较大风险"]}
+{"table": "v_ai_ipark_hm_company_promise", "field_name": "TO_CHAR(risk_grade)", "file_Note": "风险级别（中文：高风险/较大风险等）", "field_values": ["一般风险", "低风险", "高风险", "较大风险"]}
 {"table": "v_ai_ipark_hm_company_promise", "field_name": "TO_CHAR(commitment)", "file_Note": "承诺人", "field_values": ["cz", "陈略", "黎思锋", "陆斌峰", "许仲仲"]}
 {"table": "v_ai_ipark_hm_company_promise", "field_name": "TO_CHAR(commit_content)", "file_Note": "承诺内容", "field_values": ["测试一下1853001", "今天我公司已进行安全风险研判，各项安全风险防控措施已落实到位，我承诺所有生产装置处于安全运行状态，罐区、仓库等场所安全风险得到有效管控。", "今天我公司已进行安全风险研判，各项安全风险防控措施已落实到位，罐区、仓库等安全风险得到有效管控。", "今日承诺安全生产", "我司承诺今日特殊作业严守规程，全程筑牢安全防线，确保零事故、零风险。"]}
 {"table": "v_ai_ipark_hm_company_promise", "field_name": "TO_CHAR(commit_date)", "file_Note": "承诺时间", "field_values": ["2025-09-29 06:06:06.000000", "2025-12-25 09:04:06.000000", "2025-12-25 08:08:18.000000", "2025-12-24 09:09:13.000000", "2025-12-23 09:05:07.000000"]}
@@ -200,7 +200,7 @@
 {"table": "v_ai_ipark_hm_defend_statistics_company", "field_name": "TO_CHAR(operationCompletionRate)", "file_Note": "操作负责人完成率", "field_values": []}
 {"table": "v_ai_ipark_hm_hidden_danger", "field_name": "TO_CHAR(enterprise_name)", "file_Note": "企业名称", "field_values": []}
 {"table": "v_ai_ipark_hm_hidden_danger", "field_name": "TO_CHAR(trouble_content)", "file_Note": "隐患描述", "field_values": []}
-{"table": "v_ai_ipark_hm_hidden_danger", "field_name": "TO_CHAR(trouble_level)", "file_Note": "隐患级别（中文：一般隐患 / 重大隐患）", "field_values": []}
+{"table": "v_ai_ipark_hm_hidden_danger", "field_name": "TO_CHAR(trouble_level)", "file_Note": "隐患级别（中文：一般隐患/重大隐患）", "field_values": []}
 {"table": "v_ai_ipark_hm_hidden_danger", "field_name": "TO_CHAR(task_name)", "file_Note": "任务名称", "field_values": []}
 {"table": "v_ai_ipark_hm_hidden_danger", "field_name": "TO_CHAR(task_type)", "file_Note": "任务类型（中文）", "field_values": []}
 {"table": "v_ai_ipark_hm_hidden_danger", "field_name": "TO_CHAR(task_content)", "file_Note": "任务内容", "field_values": []}
@@ -208,7 +208,7 @@
 {"table": "v_ai_ipark_hm_hidden_danger", "field_name": "TO_CHAR(check_type)", "file_Note": "检查类型", "field_values": []}
 {"table": "v_ai_ipark_hm_hidden_danger", "field_name": "TO_CHAR(check_date)", "file_Note": "检查日期", "field_values": []}
 {"table": "v_ai_ipark_hm_hidden_danger", "field_name": "TO_CHAR(duty_limit_date)", "file_Note": "责令整改期限", "field_values": []}
-{"table": "v_ai_ipark_hm_hidden_danger", "field_name": "TO_CHAR(trouble_status)", "file_Note": "隐患状态（中文：整改中 / 未整改等）", "field_values": []}
+{"table": "v_ai_ipark_hm_hidden_danger", "field_name": "TO_CHAR(trouble_status)", "file_Note": "隐患状态（中文：整改中/未整改等）", "field_values": []}
 {"table": "v_ai_ipark_close_alarm_average_duration", "field_name": "TO_CHAR(companyCode)", "file_Note": "企业code", "field_values": ["330980087", "330980065"]}
 {"table": "v_ai_ipark_close_alarm_average_duration", "field_name": "TO_CHAR(companyName)", "file_Note": "企业名称", "field_values": ["浙江舟山市智德工业气体有限公司", "浙江世倍尔新材料有限公司"]}
 {"table": "v_ai_ipark_close_alarm_average_duration", "field_name": "TO_CHAR(closeAlarmAverageDuration)", "file_Note": "平均消警时间（min）", "field_values": ["1", "9"]}
@@ -217,18 +217,18 @@
 {"table": "v_ai_ipark_close_alarm_handle_rate", "field_name": "TO_CHAR(handleRate)", "file_Note": "销警及时处置率", "field_values": ["91.64", "100"]}
 {"table": "v_ai_ipark_alarm_ai_ledger", "field_name": "TO_CHAR(companyCode)", "file_Note": "企业编码", "field_values": ["park", "330980065"]}
 {"table": "v_ai_ipark_alarm_ai_ledger", "field_name": "TO_CHAR(companyName)", "file_Note": "企业名称", "field_values": ["浙江世倍尔新材料有限公司"]}
-{"table": "v_ai_ipark_alarm_ai_ledger", "field_name": "TO_CHAR(deviceId)", "file_Note": "关联设备 ID", "field_values": ["5f4bbdc13ffb45da81331ff0f4d310c1", "b96cb9826d934c429d10a9c9c6e67765", "525496666dbe453385d3f5aca3aa0c5b", "dfcea06cbf1d42abb2c7013c2be8c1aa", "fba73ec575aa4383904d54b4f1378ebf"]}
+{"table": "v_ai_ipark_alarm_ai_ledger", "field_name": "TO_CHAR(deviceId)", "file_Note": "关联设备ID", "field_values": ["5f4bbdc13ffb45da81331ff0f4d310c1", "b96cb9826d934c429d10a9c9c6e67765", "525496666dbe453385d3f5aca3aa0c5b", "dfcea06cbf1d42abb2c7013c2be8c1aa", "fba73ec575aa4383904d54b4f1378ebf"]}
 {"table": "v_ai_ipark_alarm_ai_ledger", "field_name": "TO_CHAR(channelName)", "file_Note": "通道名称", "field_values": ["西片区高空瞭望-热成像", "西片区高空瞭望-可见光", "东片区西侧高空瞭望-可见光", "东片区西侧高空瞭望-热成像", "东侧河边周界03-1683"]}
 {"table": "v_ai_ipark_alarm_ai_ledger", "field_name": "TO_CHAR(alarmType)", "file_Note": "报警类型名称", "field_values": ["火灾", "烟雾", "值班在离岗", "未佩戴安全帽", "热成像报警"]}
 {"table": "v_ai_ipark_alarm_ai_ledger", "field_name": "TO_CHAR(alarmStartTime)", "file_Note": "报警开始时间", "field_values": ["2026-01-07 15:22:47.000000", "2026-01-07 15:04:37.000000", "2026-01-07 15:04:13.000000", "2026-01-07 14:47:18.000000", "2026-01-07 13:56:27.000000"]}
-{"table": "v_ai_ipark_alarm_ai_ledger", "field_name": "TO_CHAR(handleStatus)", "file_Note": "处理状态（中文：待处理 / 处理中等）", "field_values": ["待处理", "已处理"]}
+{"table": "v_ai_ipark_alarm_ai_ledger", "field_name": "TO_CHAR(handleStatus)", "file_Note": "处理状态（中文：待处理/处理中等）", "field_values": ["待处理", "已处理"]}
 {"table": "v_ai_ipark_hm_warning_event", "field_name": "TO_CHAR(companyName)", "file_Note": "企业名称", "field_values": []}
 {"table": "v_ai_ipark_hm_warning_event", "field_name": "TO_CHAR(hazardName)", "file_Note": "重大危险源名称", "field_values": []}
 {"table": "v_ai_ipark_hm_warning_event", "field_name": "TO_CHAR(eventDesc)", "file_Note": "预警描述", "field_values": []}
-{"table": "v_ai_ipark_hm_warning_event", "field_name": "TO_CHAR(warningLevel)", "file_Note": "预警等级（中文：红色预警 / 橙色预警等）", "field_values": ["红色预警","黄色预警","橙色预警"]}
+{"table": "v_ai_ipark_hm_warning_event", "field_name": "TO_CHAR(warningLevel)", "file_Note": "预警等级（中文：红色预警/橙色预警等）", "field_values": ["红色预警","黄色预警","橙色预警"]}
 {"table": "v_ai_ipark_hm_warning_event", "field_name": "TO_CHAR(startWarningTime)", "file_Note": "预警起始时间", "field_values": ["2022-08-25 01:04:09.000000"]}
 {"table": "v_ai_ipark_hm_warning_event", "field_name": "TO_CHAR(endWarningTime)", "file_Note": "预警销警时间", "field_values": ["2022-08-25 01:04:09.000000"]}
-{"table": "v_ai_ipark_hm_warning_event", "field_name": "TO_CHAR(warningStatus)", "file_Note": "预警状态（中文：正在持续 / 已摘警等）", "field_values": []}
+{"table": "v_ai_ipark_hm_warning_event", "field_name": "TO_CHAR(warningStatus)", "file_Note": "预警状态（中文：正在持续/已摘警等）", "field_values": []}
 {"table": "v_ai_ipark_ra_latest_risk_snapshot", "field_name": "TO_CHAR(park_code)", "file_Note": "园区编码", "field_values": ["001", "002"]}
 {"table": "v_ai_ipark_ra_latest_risk_snapshot", "field_name": "TO_CHAR(park_name)", "file_Note": "园区名称", "field_values": ["东区", "西区"]}
 {"table": "v_ai_ipark_ra_latest_risk_snapshot", "field_name": "TO_CHAR(companyCode)", "file_Note": "企业编码", "field_values": ["316200022", "91330921MACKWHKA7X", "91330921MA2DN35T5P", "330980065", "91330921MA2DMK306G"]}
@@ -236,12 +236,12 @@
 {"table": "v_ai_ipark_ra_latest_risk_snapshot", "field_name": "TO_CHAR(riskValue)", "file_Note": "分险指数", "field_values": ["980", "779", "960"]}
 {"table": "v_ai_ipark_ra_latest_risk_snapshot", "field_name": "TO_CHAR(riskLevel)", "file_Note": "分险等级", "field_values": ["4", "3"]}
 {"table": "v_ai_ipark_ra_latest_risk_snapshot", "field_name": "TO_CHAR(riskTime)", "file_Note": "时间", "field_values": ["2026-01-07 15:00:00.000000"]}
-{"table": "v_ai_ipark_ipark_dp_risk_obj", "field_name": "TO_CHAR(company_type_name)", "file_Note": "企业类型名称（其他企业 / 重大危险源或重点场所企业）", "field_values": ["其他企业", "重大危险源或重点场所企业"]}
+{"table": "v_ai_ipark_ipark_dp_risk_obj", "field_name": "TO_CHAR(company_type_name)", "file_Note": "企业类型名称（其他企业/重大危险源或重点场所企业）", "field_values": ["其他企业", "重大危险源或重点场所企业"]}
 {"table": "v_ai_ipark_ipark_dp_risk_obj", "field_name": "TO_CHAR(riskObjCount)", "file_Note": "分线分享对象总数", "field_values": ["0", "8"]}
 {"table": "v_ai_ipark_ipark_dp_risk_obj", "field_name": "TO_CHAR(unitCount)", "file_Note": "风险分析单元总数", "field_values": ["0", "18"]}
 {"table": "v_ai_ipark_ipark_dp_risk_obj", "field_name": "TO_CHAR(eventCount)", "file_Note": "安全分险事件总数", "field_values": ["0", "18"]}
 {"table": "v_ai_ipark_ipark_dp_risk_obj", "field_name": "TO_CHAR(measureCount)", "file_Note": "管控措施总数", "field_values": ["0", "275"]}
-{"table": "v_ai_ipark_ipark_dp_supervision", "field_name": "TO_CHAR(period)", "file_Note": "统计周期（近 7 天 / 近 1 个月 / 近 3 个月）", "field_values": ["近7天", "近1个月", "近3个月"]}
+{"table": "v_ai_ipark_ipark_dp_supervision", "field_name": "TO_CHAR(period)", "file_Note": "统计周期（近7天/近1个月/近3个月）", "field_values": ["近7天", "近1个月", "近3个月"]}
 {"table": "v_ai_ipark_ipark_dp_supervision", "field_name": "TO_CHAR(majorDangerNum)", "file_Note": "重大隐患预警数", "field_values": ["0"]}
 {"table": "v_ai_ipark_ipark_dp_supervision", "field_name": "TO_CHAR(potentialDangerNum)", "file_Note": "隐患临期提醒数", "field_values": ["0"]}
 {"table": "v_ai_ipark_ipark_dp_supervision", "field_name": "TO_CHAR(overdueDangerNum)", "file_Note": "隐患超期提醒数", "field_values": ["0"]}
@@ -249,7 +249,7 @@
 {"table": "v_ai_ipark_dp_evaluation", "field_name": "TO_CHAR(cycle_number)", "file_Note": "周", "field_values": ["38", "1", "52", "51", "50"]}
 {"table": "v_ai_ipark_dp_evaluation", "field_name": "TO_CHAR(company_code)", "file_Note": "企业编码", "field_values": ["330980065"]}
 {"table": "v_ai_ipark_dp_evaluation", "field_name": "TO_CHAR(companyName)", "file_Note": "公司名称", "field_values": ["浙江世倍尔新材料有限公司"]}
-{"table": "v_ai_ipark_dp_evaluation", "field_name": "TO_CHAR(evaluation_level)", "file_Note": "运行效果（中文：优 / 良 / 中 / 差）", "field_values": ["优", "差", "中"]}
+{"table": "v_ai_ipark_dp_evaluation", "field_name": "TO_CHAR(evaluation_level)", "file_Note": "运行效果（中文：优/良/中/差）", "field_values": ["优", "差", "中"]}
 {"table": "v_ai_ipark_dp_evaluation", "field_name": "TO_CHAR(check_completion_rate)", "file_Note": "隐患排查完成率", "field_values": ["100", "0", "57.14"]}
 {"table": "v_ai_ipark_dp_evaluation", "field_name": "TO_CHAR(corrective_completion_rate)", "file_Note": "隐患整改完成率", "field_values": ["100", "0"]}
 {"table": "v_ai_ipark_dp_evaluation", "field_name": "TO_CHAR(enterprise_status)", "file_Note": "企业状态", "field_values": []}
@@ -384,7 +384,7 @@
 {"table": "v_ai_ipark_dp_danger_statistics", "field_name": "TO_CHAR(major_hazard_source_inspection_completion_rate)", "file_Note": "重大危险源或重大场所排查任务完成率", "field_values": []}
 {"table": "v_ai_ipark_dp_danger_statistics", "field_name": "TO_CHAR(major_hazard_source_rectification_completion_rate)", "file_Note": "重大危险源或重大场所隐患整改完成率", "field_values": []}
 {"table": "v_ai_ipark_hazard_statistics_by_period", "field_name": "TO_CHAR(park_code)", "file_Note": "园区编码", "field_values": []}
-{"table": "v_ai_ipark_hazard_statistics_by_period", "field_name": "TO_CHAR(total_general_hazard_7d)", "file_Note": "近 7 日一般隐患总数", "field_values": []}
+{"table": "v_ai_ipark_hazard_statistics_by_period", "field_name": "TO_CHAR(total_general_hazard_7d)", "file_Note": "近7日一般隐患总数", "field_values": []}
 {"table": "v_ai_ipark_hazard_statistics_by_period", "field_name": "TO_CHAR(accepted_general_hazard_7d)", "file_Note": "近 7 日已验收一般隐患数量", "field_values": []}
 {"table": "v_ai_ipark_hazard_statistics_by_period", "field_name": "TO_CHAR(rectifying_general_hazard_7d)", "file_Note": "近 7 日整改中一般隐患数量", "field_values": []}
 {"table": "v_ai_ipark_hazard_statistics_by_period", "field_name": "TO_CHAR(pending_accept_general_hazard_7d)", "file_Note": "近 7 日待验收一般隐患数量", "field_values": []}

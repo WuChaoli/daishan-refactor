@@ -10,7 +10,6 @@ from ..Utils.tools import Tool
 
 def find_most_frequent_table(data_list):
     # 提取所有待查询表
-    print(f"data_list: {data_list}")
     tables = [item['待查询表'] for item in data_list]
     # 统计每个表的出现次数
     seen = set()
@@ -27,7 +26,8 @@ def replace_economic_zone(query):
     replace_rules = [
         ("岱山经开区", "岱山经济开发区"),
         ("经开区", "岱山经济开发区"),
-        ("岱山经济开发区","岱山经济开发区")
+        ("岱山经济开发区","岱山经济开发区"),
+        ("园区","岱山经济开发区")
     ]
     result = query
     for old_str, new_str in replace_rules:
@@ -98,14 +98,11 @@ class SQLAgent:
                 sql_quer_result=[]
                 for item in new_sql:
                     sql=item["result"]
-                    result = self.sqlmanager.request_api_sql(sql)
-                    print(f"sql: {sql}")
                     sql_res=self.sqlmanager.request_api_sql(sql)['data']
                     if len(str(sql_res))>2000:
                         sql_res=sql_res[:20]
-                    print("修正后问题",item["origin_user_query"],"SQL:",sql,item["table"]['表名'])
                     sql_quer_result.append({"修正后问题":item["origin_user_query"],"数据库查询结果":sql_res,"sql语句":{sql},"针对的表":item["table"]['表名']})
-                print("sql_quer_result",sql_quer_result)
+                # print("sql_quer_result",sql_quer_result)
 
                 return sql_quer_result
             except Exception  as e:

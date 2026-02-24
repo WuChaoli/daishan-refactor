@@ -1,6 +1,6 @@
 from datetime import datetime
 
-
+today = datetime.now().date()
 class Prompt_Templete:
     def __init__(self):
         pass
@@ -73,11 +73,9 @@ class Prompt_Templete:
             输出（不额外输出思考内容）：
                 这里输出结合提供的表信息丰富后的用户查询输入信息，若无匹配内容则输出{query}
             """     
-        # print("AAAAAAAAAAAAAAAAAA",prompt)
         return prompt
 
     def gengerate_sql(self,query,table_info):
-            today = datetime.now().date()
             prompt = f"""
             你是一名Dameng DB专家，现在需要阅读并理解下面的【数据库schema】描述，以及可能用到的【参考信息】，并运用Dameng DB知识生成sql语句回答【用户问题】。
             注意：
@@ -94,6 +92,93 @@ class Prompt_Templete:
             2. 生成的SQL不应该包含时间计算公式，涉及时间的问题，需基于给出的当前时间手动推算出具体时间值，并严格符合字段的格式需求：
             - 时间推算规则：根据用户问题中的时间描述（如"近7天""本月""上一年"），以当前时间为基准计算出具体的时间范围/时间点，而非使用函数（如DATEADD、NOW()）；
             3.当用户需要的只是信息时，则返回符合条件的表的所有信息
+            4.当你觉得无法将问题与字段进行匹配时，请返回"None"
 """
 
             return prompt
+    def generat_FixFieldSQL(self,query, needField,table_info):
+        '''
+        用户需要返回固定字段的内容时使用该提示词
+        :param query: 用户问题
+        :param needField: 所需固定返回字段
+        :param table_info: 表字段说明
+        '''
+        prompt = f"""
+                    你是一名Dameng DB专家，现在需要阅读并理解下面的【数据库schema】描述，以及可能用到的【参考信息】，并运用Dameng DB知识生成sql语句回答【用户问题】。
+                    注意：1、用户问题可能涉及简称，因此在查询时多使用LIKE语法，生成的SQL需严格符合达梦数据库语法规范。
+
+                    【用户问题】
+                    {query}
+
+                    【数据库schema】
+                        {table_info}
+                    
+                    【SQL语句必须包含的字段信息】
+                        {needField}
+
+                    【参考信息】
+                    1. 当前时间：{today}
+                    2. 生成的SQL不应该包含时间计算公式，涉及时间的问题，需基于给出的当前时间手动推算出具体时间值，并严格符合字段的格式需求：
+                    - 时间推算规则：根据用户问题中的时间描述（如"近7天""本月""上一年"），以当前时间为基准计算出具体的时间范围/时间点，而非使用函数（如DATEADD、NOW()）；
+                    3.当用户需要的只是信息时，则返回符合条件的表的所有信息
+        """
+
+        return prompt
+    def extractTime(self,query):
+        prompt=f"""
+        给定用户问题‘{query}’.
+        抽取用户意图查询的数据库的时间日期。
+        当前用户提问时间是：{today}
+        
+        输出返回格式示例:
+        {{"year":2021,"month":1,"day":21}}
+        {{"year":2023,"month":3,"day":12}}
+        若用户给定问题无法完整抽取年月日，则将缺少项填null:
+        {{"year":2023,"month":null,"day":null}}
+        
+        现在抽取用户意图查询的日期，并按照返回格式返回
+        """
+        return prompt
+    def extractPark(self,query):
+        prompt=f"""
+        给定用户问题‘{query}’.
+        请判断用户问题中的园区为岱山经济开发区、东区、西区中的哪个园区。
+        输出返回格式示例:
+        {{"park":"岱山经济开发区"}}
+        {{"park":"东区"}}
+        {{"park":"西区"}}
+        若用户给定问题无法判断所属园区，则返回:
+        {{"park":"岱山经济开发区"}}
+        
+        现在抽取用户问题中的园区，并按照返回格式返回
+        """
+        return prompt
+    
+    def extractWeek(self,query):
+        prompt=f"""
+        给定用户问题‘{query}’.
+        当前用户提问时间是：{today}
+        请判断用户问题中涉及到的周数。
+        请注意：
+            1、如果用户涉及到上周、上个月，则需要根据当前时间推算对应的周数
+            2、如果用户问题直接问第34周的情况，则抽取34做为周数
+        输出返回格式示例:
+        {{"week":"44"}}
+        {{"week":"2"}}
+        
+        现在抽取用户问题中涉及到的周数，并按照返回格式返回
+        """
+        return prompt
+    def extractCompany(self,query):
+        prompt=f"""
+        给定用户问题‘{query}’.
+        请判断用户问题中提到的公司名称。
+        输出返回格式示例:
+        {{"company":"岱山糖能新材料有限公司"}}
+        {{"company":"浙江世倍尔新材料有限公司"}}
+        {{"company":"浙江鑫月新材料科技有限公司"}}
+
+        
+        现在抽取用户问题中的园区，并按照返回格式返回
+        """
+        return prompt

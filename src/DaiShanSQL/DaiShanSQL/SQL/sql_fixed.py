@@ -1,7 +1,28 @@
 from ..SQL.sql_utils import MySQLManager
+import json
+import os
 class SQLFixed:
     def __init__(self):
         self.sql_manager = MySQLManager()
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        Json_path = os.path.join(current_dir,"data/岱山固定查询.jsonl")
+        json_data= self.read_jsonl(Json_path)
+    def read_jsonl(self,JsonPath):
+        data_list = []
+        with open(JsonPath, 'r', encoding='utf-8') as f:
+            for line_num, line in enumerate(f, 1):
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    data = json.loads(line)
+                    data_list.append(data)
+                except json.JSONDecodeError as e:
+                    print(f"第 {line_num} 行 JSON 格式错误: {e}")
+                except Exception as e:
+                    # 捕获其他异常
+                    print(f"读取第 {line_num} 行时发生错误: {e}")
+        return data_list
     def sql_companyInfo(self):
         """
  `      1. 基础信息‌：企业总数【】家。
@@ -265,6 +286,10 @@ class SQLFixed:
                 "数据库查询状态": "error",
                 "数据库查询结果": "请稍后进行查询"
             }
+    def sql_FixedFieldQuery(self,question):
+        
+
+        return
 if __name__=="__main__":
     fix=SQLFixed()
     print(fix.sql_SecuritySituation())

@@ -1,7 +1,6 @@
 import os
 import json
 import os,sys
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from openai import OpenAI
 from dotenv import load_dotenv, find_dotenv
 

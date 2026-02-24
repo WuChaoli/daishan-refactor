@@ -36,22 +36,26 @@ class MySQLManager:
 if __name__ == "__main__":
     # main()
     db_manager = MySQLManager()
-    query = "SELECT TO_CHAR(park_added_value)111 AS added_value FROM v_ai_ipark_economic_operation WHERE TO_CHAR(report_month) = TO_CHAR(ADD_MONTHS(SYSDATE, -1), 'YYYY-MM');"
+    #query = "SELECT TO_CHAR(park_added_value)111 AS added_value FROM v_ai_ipark_economic_operation WHERE TO_CHAR(report_month) = TO_CHAR(ADD_MONTHS(SYSDATE, -1), 'YYYY-MM');"
+    params = {}
+    params["year"] = '2025'
+    params["month"] = '09'
+
     query = '''
-SELECT 
-    CURRENT_DATE AS 当前时间,
-    park_name AS 园区名称,
-    riskTime AS 风险统计时间,
-    riskValue AS 园区风险值,
-    riskLevel AS 园区风险等级
-FROM 
-    v_ai_ipark_ra_park_daily_risk_summary_park
--- 按风险统计时间降序排序，取最新的一条
-ORDER BY 
-    riskTime DESC
-LIMIT 1;
+SELECT
+  TO_CHAR(park_name) AS 园区名称,
+  TO_CHAR(riskTime) AS 统计月份,
+  TO_CHAR(riskLevel) AS 园区每日最高风险等级
+FROM
+  v_ai_ipark_ra_park_daily_risk_summary_park
+WHERE
+  park_name = '岱山经济开发区'
+  AND TO_CHAR(TO_DATE(riskTime, 'YYYY-MM-DD'), 'YYYY-MM') = '{year}-{month}'
+ORDER BY
+  TO_DATE(riskTime, 'YYYY-MM-DD');
 '''
-    
+    query = query.format_map(params)
+    #query='SELECT TO_CHAR(park_name) AS "园区 名称", TO_CHAR(park_code) AS 园区编码 FROM v_ai_ipark_safety_park_basic_info'
     res=db_manager.request_api_sql(query)
     print(res)
 
