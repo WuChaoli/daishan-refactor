@@ -21,7 +21,7 @@ from src.models.emergency_entities import (
 )
 from src.utils.prompts import SourceDispatchPrompts
 from src.config.settings import settings
-from log_decorator import log, logger
+from log_decorator import log, logger, logging
 from DaiShanSQL import Server
 
 # 加载sourceType映射配置
@@ -46,6 +46,7 @@ async def handle_source_dispatch(
 
     try:
         accident_id = _validate_and_extract_accident_id(request)
+        logging.INFO(f"资源调度请求接入: accident_id={accident_id}, source_type={request.sourceType}")
         logger.info(f"处理资源调度请求，事故ID: {accident_id}, 资源类型: {request.sourceType}")
 
         sql = _build_accident_query_sql(accident_id)
@@ -54,6 +55,7 @@ async def handle_source_dispatch(
         query_result = _query_accident_from_database(sql)
         accident_data = _parse_accident_query_result(query_result, accident_id)
         logger.info(f"成功获取事故数据: {accident_data.accident_name}")
+        logging.DEBUF(f"事故概览长度: {len(accident_data.accident_overview or '')}")
 
         general_client, solid_client = _get_dify_clients()
 
@@ -68,11 +70,16 @@ async def handle_source_dispatch(
         intent, business_area, entities = _extract_analysis_results(
             intent_response, accident_type_response, entity_response
         )
+        logging.INFO(
+            f"并行分析完成: intent={intent.strip().lower()}, business_area={business_area}, entity_count={len(entities)}"
+        )
 
         result = await _dispatch_by_intent(
             intent, request, solid_client, entities,
             accident_data, business_area, general_client
         )
+
+        logging.INFO(f"资源调度完成: source_type={request.sourceType}, result_count={len(result)}")
 
         return result
 
@@ -258,7 +265,6 @@ def _parse_entity_list(answer: str) -> List[str]:
     return str_list
 
 
-@log()
 def _validate_and_extract_accident_id(request: SourceDispatchRequest) -> int:
     """验证并提取事故ID"""
     if not request.accidentId:
@@ -270,7 +276,6 @@ def _validate_and_extract_accident_id(request: SourceDispatchRequest) -> int:
         raise ValueError(f"事故ID格式错误: {request.accidentId}")
 
 
-@log()
 def _build_accident_query_sql(accident_id: int) -> str:
     """构建事故查询SQL语句"""
     return f"""
@@ -280,7 +285,6 @@ def _build_accident_query_sql(accident_id: int) -> str:
     """
 
 
-@log()
 def _query_accident_from_database(sql: str) -> Any:
     """查询事故数据"""
     server = Server()
@@ -317,7 +321,6 @@ def _parse_accident_query_result(query_result: Any, accident_id: int) -> Acciden
     )
 
 
-@log()
 def _get_dify_clients() -> tuple:
     """获取Dify客户端实例"""
     from src.utils.dify_client_factory import get_client
@@ -335,7 +338,6 @@ def _get_dify_clients() -> tuple:
     return general_client, solid_client
 
 
-@log()
 def _build_parallel_dify_queries(request: SourceDispatchRequest, accident_data: AccidentEventData) -> tuple:
     """构建三个并行Dify查询文本"""
     intent_query = SourceDispatchPrompts.get_intent_classification_prompt(request.voiceText)
@@ -344,7 +346,6 @@ def _build_parallel_dify_queries(request: SourceDispatchRequest, accident_data: 
     return intent_query, accident_type_query, entity_query
 
 
-@log()
 async def _call_dify_parallel_analysis(
     general_client,
     intent_query: str,
@@ -377,7 +378,6 @@ async def _call_dify_parallel_analysis(
     )
 
 
-@log()
 def _extract_analysis_results(
     intent_response,
     accident_type_response,
@@ -396,11 +396,11 @@ def _extract_analysis_results(
     entity_answer = entity_response.answer if hasattr(entity_response, 'answer') else str(entity_response)
     entities = _parse_entity_list(entity_answer)
     logger.info(f"提取到 {len(entities)} 个实体: {entities}")
+    logging.DEBUF(f"实体提取示例: {entities[:3] if entities else []}")
 
     return intent_answer, business_area, entities
 
 
-@log()
 async def _dispatch_by_intent(
     intent: str,
     request: SourceDispatchRequest,
@@ -413,6 +413,7 @@ async def _dispatch_by_intent(
     """根据意图分类结果分发处理"""
     if intent.strip().lower() == "resource":
         logger.info("意图分类为 'resource'，调用 get_solid_resource_instruction")
+        logging.INFO(f"按资源指令路径分发: entity_count={len(entities)}")
         return await _get_solid_resource_instruction(
             request,
             solid_client,
@@ -420,6 +421,9 @@ async def _dispatch_by_intent(
         )
     else:
         logger.info(f"意图分类为 '{intent}'，根据资源类型调用对应的 handle 函数")
+        logging.INFO(
+            f"按资源筛选路径分发: source_type={request.sourceType}, business_area={business_area}"
+        )
 
         # 资源类型到处理函数的映射
         handler_mapping = {
@@ -436,6 +440,8 @@ async def _dispatch_by_intent(
         handler = handler_mapping.get(request.sourceType)
         if not handler:
             raise ValueError(f"未找到资源类型 {request.sourceType} 的处理函数")
+
+        logging.DEBUF(f"命中处理函数: {handler.__name__}")
 
         # 根据资源类型调用相应的处理函数
         # 救援队伍和应急专家需要 business_area 参数
@@ -454,7 +460,6 @@ async def _dispatch_by_intent(
             )
 
 
-@log()
 async def _get_solid_resource_instruction(
     request: SourceDispatchRequest,
     client,
@@ -475,6 +480,7 @@ async def _get_solid_resource_instruction(
         ValueError: 如果 client 未配置
     """
     logger.info(f"获取固体资源指令，资源类型: {request.sourceType}, 实体数量: {len(entities)}")
+    logging.INFO(f"固体资源指令开始: source_type={request.sourceType}, entity_count={len(entities)}")
 
     # 验证 client 是否可用
     if client is None:
@@ -508,10 +514,10 @@ async def _get_solid_resource_instruction(
             logger.warning(f"实体 {entity_name} 返回空 ID")
 
     logger.info(f"成功调用 Dify solid_resource_instruction，返回 {len(result_ids)} 个 ID")
+    logging.INFO(f"固体资源指令完成: resolved_count={len(result_ids)}")
     return result_ids
 
 
-@log()
 def _get_sql_from_mapping(
     source_type: str,
     business_area: Optional[str],
@@ -529,7 +535,6 @@ def _get_sql_from_mapping(
     )
 
 
-@log()
 async def _execute_resource_query(
     source_type: str,
     business_area: Optional[str] = None,
@@ -537,12 +542,14 @@ async def _execute_resource_query(
 ) -> List[Dict[str, Any]]:
     """执行资源查询并返回原始数据行"""
     sql = _get_sql_from_mapping(source_type, business_area, number)
+    logging.DEBUF(f"执行资源SQL: source_type={source_type}, has_business_area={bool(business_area)}, limit={number}")
     server = Server()
     query_result = server.QueryBySQL(sql)
-    return _extract_data_list_from_query_result(query_result)
+    data_list = _extract_data_list_from_query_result(query_result)
+    logging.INFO(f"资源查询完成: source_type={source_type}, row_count={len(data_list)}")
+    return data_list
 
 
-@log()
 def _map_to_entities(
     rows: List[Dict[str, Any]],
     entity_class: Type,
@@ -552,7 +559,6 @@ def _map_to_entities(
     return _map_rows_to_entities(rows, entity_class, entity_factory_config)
 
 
-@log()
 def _sort_by_distance(
     entities: List[Any],
     accident_data: AccidentEventData
@@ -562,7 +568,6 @@ def _sort_by_distance(
     return sort_entities_by_distance(accident_data, entities)
 
 
-@log()
 def _build_ai_prompt(
     entities: List[Any],
     request: SourceDispatchRequest,
@@ -581,7 +586,6 @@ def _build_ai_prompt(
     )
 
 
-@log()
 async def _filter_with_ai(
     entities: List[Any],
     request: SourceDispatchRequest,
@@ -594,6 +598,7 @@ async def _filter_with_ai(
         raise ValueError("Dify general_chat client 未配置")
     
     prompt = _build_ai_prompt(entities, request, accident_data, prompt_generator)
+    logging.DEBUF(f"AI筛选开始: source_type={request.sourceType}, candidate_count={len(entities)}")
     
     dify_response = await asyncio.to_thread(
         general_client.run_chat,
@@ -604,10 +609,11 @@ async def _filter_with_ai(
     )
 
     answer = dify_response.answer if hasattr(dify_response, 'answer') else str(dify_response)
-    return _parse_ai_response_to_list(answer)
+    filtered = _parse_ai_response_to_list(answer)
+    logging.INFO(f"AI筛选完成: source_type={request.sourceType}, selected_count={len(filtered)}")
+    return filtered
 
 
-@log()
 def _extract_data_list_from_query_result(query_result: Any) -> list:
     """从查询结果中提取数据列表"""
     if isinstance(query_result, dict):
@@ -622,7 +628,6 @@ def _extract_data_list_from_query_result(query_result: Any) -> list:
     return []
 
 
-@log()
 def _map_rows_to_entities(
     data_list: list,
     entity_class,
@@ -663,7 +668,6 @@ def _map_rows_to_entities(
     return entities
 
 
-@log()
 def _serialize_entities_to_json(entities: list) -> str:
     """将实体列表序列化为JSON字符串"""
     entity_list = []
@@ -677,7 +681,6 @@ def _serialize_entities_to_json(entities: list) -> str:
     return json.dumps(entity_list, ensure_ascii=False)
 
 
-@log()
 async def handle_emergency_supplies(
     request: SourceDispatchRequest,
     accident_data: AccidentEventData,
@@ -686,6 +689,7 @@ async def handle_emergency_supplies(
     """处理应急物资资源调度"""
     rows = await _execute_resource_query(request.sourceType, number=5)
     entities = _map_to_entities(rows, EmergencySupply, None)
+    logging.INFO(f"应急物资候选加载: rows={len(rows)}, entities={len(entities)}")
     return await _filter_with_ai(
         entities, request, accident_data,
         SourceDispatchPrompts.get_emergency_supplies_prompt,
@@ -693,7 +697,6 @@ async def handle_emergency_supplies(
     )
 
 
-@log()
 async def handle_rescue_team(
     request: SourceDispatchRequest,
     accident_data: AccidentEventData,
@@ -703,6 +706,7 @@ async def handle_rescue_team(
     """处理救援队伍资源调度"""
     rows = await _execute_resource_query(request.sourceType, business_area, 5)
     entities = _map_to_entities(rows, RescueTeam, None)
+    logging.INFO(f"救援队伍候选加载: business_area={business_area}, rows={len(rows)}, entities={len(entities)}")
     return await _filter_with_ai(
         entities, request, accident_data,
         SourceDispatchPrompts.get_rescue_team_prompt,
@@ -710,7 +714,6 @@ async def handle_rescue_team(
     )
 
 
-@log()
 async def handle_emergency_expert(
     request: SourceDispatchRequest,
     accident_data: AccidentEventData,
@@ -720,6 +723,7 @@ async def handle_emergency_expert(
     """处理应急专家资源调度"""
     rows = await _execute_resource_query(request.sourceType, business_area, 5)
     entities = _map_to_entities(rows, EmergencyExpert, None)
+    logging.INFO(f"应急专家候选加载: business_area={business_area}, rows={len(rows)}, entities={len(entities)}")
     return await _filter_with_ai(
         entities, request, accident_data,
         SourceDispatchPrompts.get_emergency_expert_prompt,
@@ -727,7 +731,6 @@ async def handle_emergency_expert(
     )
 
 
-@log()
 async def handle_fire_fighting_facilities(
     request: SourceDispatchRequest,
     accident_data: AccidentEventData,
@@ -740,6 +743,7 @@ async def handle_fire_fighting_facilities(
         ("from_db_row", ["id", "name", "latitude_longitude"])
     )
     entities = _sort_by_distance(entities, accident_data)
+    logging.INFO(f"消防设施候选加载: rows={len(rows)}, entities={len(entities)}")
     return await _filter_with_ai(
         entities, request, accident_data,
         SourceDispatchPrompts.get_fire_fighting_facilities_prompt,
@@ -747,7 +751,6 @@ async def handle_fire_fighting_facilities(
     )
 
 
-@log()
 async def handle_shelter(
     request: SourceDispatchRequest,
     accident_data: AccidentEventData,
@@ -760,6 +763,7 @@ async def handle_shelter(
         ("from_db_row", ["id", "shelter_name", "lon_and_lat"])
     )
     entities = _sort_by_distance(entities, accident_data)
+    logging.INFO(f"避难场所候选加载: rows={len(rows)}, entities={len(entities)}")
     return await _filter_with_ai(
         entities, request, accident_data,
         SourceDispatchPrompts.get_shelter_prompt,
@@ -767,7 +771,6 @@ async def handle_shelter(
     )
 
 
-@log()
 async def handle_medical_institution(
     request: SourceDispatchRequest,
     accident_data: AccidentEventData,
@@ -779,6 +782,7 @@ async def handle_medical_institution(
         rows, MedicalInstitution,
         ("from_db_row", ["id", "institution_name", "local_pos"])
     )
+    logging.INFO(f"医疗机构候选加载: rows={len(rows)}, entities={len(entities)}")
     return await _filter_with_ai(
         entities, request, accident_data,
         SourceDispatchPrompts.get_medical_institution_prompt,
@@ -786,7 +790,6 @@ async def handle_medical_institution(
     )
 
 
-@log()
 async def handle_rescue_organization(
     request: SourceDispatchRequest,
     accident_data: AccidentEventData,
@@ -799,6 +802,7 @@ async def handle_rescue_organization(
         ("from_db_row", ["id", "institution_name", "local_pos"])
     )
     entities = _sort_by_distance(entities, accident_data)
+    logging.INFO(f"救援机构候选加载: rows={len(rows)}, entities={len(entities)}")
     return await _filter_with_ai(
         entities, request, accident_data,
         SourceDispatchPrompts.get_rescue_organization_prompt,
@@ -806,7 +810,6 @@ async def handle_rescue_organization(
     )
 
 
-@log()
 async def handle_protection_target(
     request: SourceDispatchRequest,
     accident_data: AccidentEventData,
@@ -819,6 +822,7 @@ async def handle_protection_target(
         ("from_db_row", ["id", "target_name", "local_pos"])
     )
     entities = _sort_by_distance(entities, accident_data)
+    logging.INFO(f"防护目标候选加载: rows={len(rows)}, entities={len(entities)}")
     return await _filter_with_ai(
         entities, request, accident_data,
         SourceDispatchPrompts.get_protection_target_prompt,

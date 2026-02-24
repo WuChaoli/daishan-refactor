@@ -1,1 +1,0 @@
-../skills/comp-hire-employee/SKILL.md

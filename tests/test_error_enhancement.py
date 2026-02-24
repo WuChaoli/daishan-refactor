@@ -7,7 +7,7 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from log_decorator.decorator import log
+from log_decorator.decorator import log, log_entry
 
 
 class TestErrorEnhancement:
@@ -26,7 +26,7 @@ class TestErrorEnhancement:
                 def level2(payload):
                     raise ValueError("boom")
 
-                @log(is_entry=True)
+                @log_entry()
                 def level1(payload):
                     return level2(payload)
 
@@ -64,7 +64,7 @@ class TestErrorEnhancement:
             decorator_module._LOG_DIR = tmpdir
 
             try:
-                @log(is_entry=True)
+                @log_entry()
                 def raise_with_cause():
                     try:
                         raise RuntimeError("inner-error")
@@ -95,7 +95,7 @@ class TestErrorEnhancement:
             decorator_module._LOG_DIR = tmpdir
 
             try:
-                @log(is_entry=True, enable_mermaid=True)
+                @log_entry(enable_mermaid=True)
                 def raise_error():
                     raise KeyError("missing")
 
@@ -109,5 +109,33 @@ class TestErrorEnhancement:
                 assert "Mermaid文件" in content
                 assert ".md" in content
 
+            finally:
+                decorator_module._LOG_DIR = original_log_dir
+
+    def test_non_entry_exception_should_write_error_summary_and_location(self):
+        """非入口异常也应写入 error.log，包含摘要与代码位置"""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            import log_decorator.decorator as decorator_module
+
+            original_log_dir = decorator_module._LOG_DIR
+            decorator_module._LOG_DIR = tmpdir
+
+            try:
+                @log()
+                def only_log_error(payload):
+                    raise RuntimeError(f"bad-{payload}")
+
+                with pytest.raises(RuntimeError):
+                    only_log_error("data")
+
+                error_log = os.path.join(tmpdir, "error.log")
+                assert os.path.exists(error_log)
+
+                with open(error_log, "r", encoding="utf-8") as f:
+                    content = f.read()
+
+                assert "错误摘要: RuntimeError: bad-data" in content
+                assert "错误位置:" in content
+                assert "only_log_error" in content
             finally:
                 decorator_module._LOG_DIR = original_log_dir

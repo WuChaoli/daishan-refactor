@@ -12,16 +12,44 @@ import yaml
 
 # 默认配置
 DEFAULT_CONFIG: Dict[str, Any] = {
-    "format": "%(asctime)s - %(levelname)-5s - %(message)s",  # -5s 表示固定5个字符宽度，左对齐
+    "format": "%(asctime)s - %(levelname)-7s - %(message)s",  # -7s 表示固定7个字符宽度，左对齐
     "time_format": "%Y-%m-%d %H:%M:%S",
     "level": "INFO",
     "encoding": "utf-8",
     "log_dir": "logs",
+    "entry_log_dir": "entries",
     "global_log_file": "global.log",
     "console_enabled": True,
     "mermaid_enabled": False,
     "mermaid_dir": "mermaid",
-    "mermaid_max_size_mb": 10
+    "mermaid_max_size_mb": 10,
+    "args_max_len": 100,
+    "result_max_len": 100,
+    "icon_theme": "default",
+    "icon_themes": {
+        "default": {
+            "function": {
+                "log": "🔵",
+                "entry": "🟢",
+                "end": "🟣",
+            },
+            "section": {
+                "args": "🧩",
+                "returns": "🧪",
+            },
+        },
+        "minimal": {
+            "function": {
+                "log": "◽",
+                "entry": "◻",
+                "end": "◼",
+            },
+            "section": {
+                "args": "▫",
+                "returns": "▪",
+            },
+        },
+    },
 }
 
 # 有效日志级别
@@ -133,8 +161,35 @@ def validate_config(config: Dict[str, Any]) -> Dict[str, Any]:
         validated["console_enabled"] = DEFAULT_CONFIG["console_enabled"]
 
     # 验证字符串类型
-    for key in ["format", "time_format", "encoding", "log_dir", "global_log_file"]:
+    for key in [
+        "format",
+        "time_format",
+        "encoding",
+        "log_dir",
+        "entry_log_dir",
+        "global_log_file",
+        "icon_theme",
+    ]:
         if not isinstance(validated.get(key), str):
+            validated[key] = DEFAULT_CONFIG[key]
+
+    # 验证图标主题配置
+    icon_themes = validated.get("icon_themes")
+    if not isinstance(icon_themes, dict) or not icon_themes:
+        validated["icon_themes"] = DEFAULT_CONFIG["icon_themes"]
+        icon_themes = validated["icon_themes"]
+
+    if "default" not in icon_themes or not isinstance(icon_themes.get("default"), dict):
+        icon_themes["default"] = DEFAULT_CONFIG["icon_themes"]["default"]
+
+    selected_theme = validated.get("icon_theme")
+    if selected_theme not in icon_themes:
+        validated["icon_theme"] = "default"
+
+    # 验证长度配置
+    for key in ["args_max_len", "result_max_len"]:
+        value = validated.get(key)
+        if not isinstance(value, int) or value <= 0:
             validated[key] = DEFAULT_CONFIG[key]
 
     return validated

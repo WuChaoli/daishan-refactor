@@ -62,7 +62,6 @@ async def _post_process_type1(result_dict: dict) -> dict:
     return {"type": 1, "data": {"kb_name": kb_name, "sql_result": str(result)}}
 
 
-@log()
 async def _route_with_sql_result(
     request: ChatRequest,
     sql_result: Any,
@@ -86,7 +85,6 @@ async def _route_with_sql_result(
     return await chat_with_category(target_category, updated_request)
 
 
-@log()
 async def _post_process_and_route_type1(
     request: ChatRequest,
     result_dict: dict,
@@ -116,7 +114,6 @@ async def _post_process_type2(text_input: str, result_dict: dict) -> dict:
     return {"type": 2, "data": {"sql_result": sql_result}}
 
 
-@log()
 async def _post_process_and_route_type2(
     request: ChatRequest,
     result_dict: dict,
@@ -139,9 +136,37 @@ async def handle_chat_general(
     chat_with_category: Callable[[str, ChatRequest], Awaitable[Any]],
 ):
     """通用问答业务逻辑（从路由层下沉）"""
-    user_id = request.user_id or "anonymous"
+    def replace_economic_zone(query: str) -> str:
+        if not query:
+            return query
 
-    result_dict = await intent_service.process_query(request.question, user_id)
+        replace_rules = [
+            r"岱山\s*经开区\s*[（(]\s*岱山\s*经济\s*开发区\s*[）)]",
+            r"岱山\s*经济\s*开发区",
+            r"岱山\s*经开区",
+            r"经开区",
+            r"(?:东|西)\s*园区",
+            r"(?:东|西)\s*区",
+            r"经济\s*开发区",
+            r"开发区",
+        ]
+
+        result = query
+        for pattern in replace_rules:
+            result = re.sub(pattern, "园区", result)
+
+        return result
+
+    user_id = request.user_id or "anonymous"
+    original_question = request.question
+
+    if isinstance(request.question, str):
+        request.question = replace_economic_zone(request.question)
+
+    try:
+        result_dict = await intent_service.process_query(request.question, user_id)
+    finally:
+        request.question = original_question
 
     result_type = result_dict.get("type")
     has_error = bool(result_dict.get("data", {}).get("error"))

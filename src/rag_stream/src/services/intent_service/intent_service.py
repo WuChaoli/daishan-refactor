@@ -64,7 +64,7 @@ class IntentService(BaseIntentService):
     def _load_process_settings(self) -> IntentRecognizerSettings:
         return self._load_intent_recognizer_settings()
 
-    @log()
+    
     async def _query_process_table_results(
         self,
         text_input: str,
@@ -75,7 +75,7 @@ class IntentService(BaseIntentService):
             recognizer_settings=recognizer_settings,
         )
 
-    @log()
+    
     def _sort_process_table_results(
         self,
         table_results: Dict[str, List[Any]],
@@ -86,9 +86,9 @@ class IntentService(BaseIntentService):
             recognizer_settings=recognizer_settings,
         )
 
-    @log()
-    def _get_process_judge_function(self):
-        return self._judge_daishan_intent_priority
+    
+    # def _get_process_judge_function(self):
+    #     return self._judge_daishan_intent_priority
 
     @log()
     async def _post_process_result(self, intent_result: IntentResult) -> dict:

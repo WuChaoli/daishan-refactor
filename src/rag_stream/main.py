@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
-from log_decorator import log, logger
+from log_decorator import log, log_entry, logger
 
 # 加载 rag_stream 的 .env 文件（包含 DIFY 配置）
 rag_stream_env_path = Path(__file__).parent / ".env"
@@ -106,7 +106,7 @@ app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
 # 添加根路径重定向
 @app.get("/")
-@log(is_entry=True, enable_mermaid=True)
+@log_entry(enable_mermaid=True)
 async def root():
     return RedirectResponse(url="/static/chat-test.html")
 

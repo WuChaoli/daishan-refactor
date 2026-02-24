@@ -15,13 +15,12 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from src.intent_judgment import IntentResult, intent_judgment, instrcut_judgement
 from src.models import ErrorResponse, IntentRequest
 from dify_sdk import DaishanStreamingParser
-from log_decorator import log, logger
+from log_decorator import log, log_entry, logging
 
 # 创建路由器
 router = APIRouter()
 
 
-@log()
 async def create_dify_payload(text_input: str, user_id: str, instrction:str=None) -> Dict:
     """创建 Dify API 请求体"""
     if instrction:
@@ -47,7 +46,6 @@ async def create_dify_payload(text_input: str, user_id: str, instrction:str=None
     }
 
 
-@log()
 async def get_dify_headers(api_key: str) -> Dict:
     """获取 Dify API 请求头"""
     return {
@@ -183,7 +181,7 @@ def get_enterprise_statistics() -> str:
         return ""
 
 # 处理意图未识别的逻辑
-@log(is_entry=True, enable_mermaid=True)
+@log_entry(enable_mermaid=True, print_result=False)
 async def intent_handler_0(data: dict, user_id: str, http_request: Request):
     """
     Type 0 处理器 - 语义类意图
@@ -201,6 +199,9 @@ async def intent_handler_0(data: dict, user_id: str, http_request: Request):
     注意: 不再调用 Dify Chat API
     """
     query = data.get("query", "")
+    logging.INFO(
+        f"Type0 处理开始: user_id={user_id}, query_len={len(query)}"
+    )
 
     # 返回固定错误消息
     error_message = "无效指令#@#@#"
@@ -254,7 +255,7 @@ def extract_instruction(answer: str) -> str:
         return ""
 
 # 处理意图为【指令集】的逻辑
-@log(is_entry=True, enable_mermaid=True)
+@log_entry(enable_mermaid=True, print_result=False)
 async def intent_handler_1(data: dict, user_id: str, http_request: Request):
     """
     Type 1 处理器 - 明确指令类
@@ -287,11 +288,15 @@ async def intent_handler_1(data: dict, user_id: str, http_request: Request):
     park_kb_client = getattr(http_request.app.state, 'park_kb_client', None)
     enterprise_kb_client = getattr(http_request.app.state, 'enterprise_kb_client', None)
     safety_kb_client = getattr(http_request.app.state, 'safety_kb_client', None)
+    logging.INFO(
+        f"Type1 处理开始: user_id={user_id}, has_park_client={bool(park_kb_client)}, has_enterprise_client={bool(enterprise_kb_client)}, has_safety_client={bool(safety_kb_client)}"
+    )
 
     try:
         # 检查 results 数组
         results = data.get("results", [])
         if not results:
+            logging.WARNING(f"Type1 处理失败: user_id={user_id}, results 为空")
             return StreamingResponse(
                 content=convert_json_to_stream({"error": "No results found"}),
                 media_type="text/event-stream",
@@ -318,12 +323,14 @@ async def intent_handler_1(data: dict, user_id: str, http_request: Request):
 
         if not answer:
             answer = "无效指令#@#@#"
+            logging.WARNING(f"Type1 提取 answer 失败，使用默认兜底: user_id={user_id}")
 
         # 检查是否包含 [knowledgebase:表名] 标记
         kb_pattern = r"\[knowledgebase:([^\]]+)\]"
         kb_matches = re.findall(kb_pattern, answer)
 
         if not kb_matches:
+            logging.INFO(f"Type1 命中普通指令: user_id={user_id}, answer_len={len(answer)}")
             # 不包含知识库标记,直接返回 answer
             return StreamingResponse(
                 content=convert_json_to_stream({"result": answer}),
@@ -351,10 +358,14 @@ async def intent_handler_1(data: dict, user_id: str, http_request: Request):
         # 使用第一个知识库对应的 Dify Chat 客户端进行流式输出
         # 注意: 只使用第一个知识库的客户端,因为 Dify 会处理完整输入
         first_kb_name = kb_matches[0] if kb_matches else None
+        logging.INFO(f"Type1 命中知识库指令: user_id={user_id}, kb={first_kb_name}")
         if first_kb_name:
             client_info = KB_TO_CLIENT.get(first_kb_name)
             if client_info and client_info[1]:
                 client_name, client = client_info
+                logging.INFO(
+                    f"Type1 选择客户端: user_id={user_id}, client_name={client_name}"
+                )
 
                 # 获取用户查询
                 user_query = data.get("query", "")
@@ -370,6 +381,9 @@ async def intent_handler_1(data: dict, user_id: str, http_request: Request):
                         if first_kb_name == "企业知识库":
                             enterprise_stats = get_enterprise_statistics()
                             if enterprise_stats:
+                                logging.DEBUF(
+                                    f"Type1 企业知识库补充统计信息: user_id={user_id}, stats_len={len(enterprise_stats)}"
+                                )
                                 final_query = f"""用户问题：{user_query}
 
 以下是园区企业的统计信息供参考：
@@ -384,6 +398,7 @@ async def intent_handler_1(data: dict, user_id: str, http_request: Request):
 
                         # 空值检查
                         if client is None:
+                            logging.ERROR(f"Type1 客户端为空: user_id={user_id}, kb={first_kb_name}")
                             yield f"event: error\ndata: {json.dumps({'error': 'Client not initialized'}, ensure_ascii=False)}\n\n"
                             return
 
@@ -399,6 +414,7 @@ async def intent_handler_1(data: dict, user_id: str, http_request: Request):
                             yield event
 
                     except Exception as e:
+                        logging.ERROR(f"Type1 流式处理异常: user_id={user_id}, reason={str(e)}")
                         # 发送错误事件
                         yield f"event: error\ndata: {json.dumps({'error': str(e)}, ensure_ascii=False)}\n\n"
 
@@ -414,6 +430,9 @@ async def intent_handler_1(data: dict, user_id: str, http_request: Request):
                     },
                 )
             else:
+                logging.WARNING(
+                    f"Type1 知识库客户端未初始化: user_id={user_id}, kb={first_kb_name}"
+                )
                 # 客户端未初始化,使用降级方案
                 return StreamingResponse(
                     content=convert_json_to_stream({"error": "知识库客户端未初始化"}),
@@ -439,6 +458,7 @@ async def intent_handler_1(data: dict, user_id: str, http_request: Request):
             )
 
     except Exception as e:
+        logging.ERROR(f"Type1 处理失败: user_id={user_id}, reason={str(e)}")
         return StreamingResponse(
             content=convert_json_to_stream({"error": f"处理失败: {str(e)}"}),
             media_type="text/event-stream",
@@ -532,7 +552,7 @@ def format_sql_result_as_query(original_query: str, sql_result: dict) -> str:
     return prompt
 
 # 处理意图为【数据视图】的逻辑
-@log(is_entry=True, enable_mermaid=True)
+@log_entry(enable_mermaid=True, print_result=False)
 async def intent_handler_2(data: dict, user_id: str, http_request: Request):
     """
     Type 2 处理器 - 数据库查询类意图
@@ -555,6 +575,9 @@ async def intent_handler_2(data: dict, user_id: str, http_request: Request):
     """
     # 从 app.state 获取资源
     dify_chat_client = getattr(http_request.app.state, 'dify_chat_client', None)
+    logging.INFO(
+        f"Type2 处理开始: user_id={user_id}, has_dify_chat_client={bool(dify_chat_client)}"
+    )
 
     try:
         # 导入 DaiShanSQL 模块
@@ -591,6 +614,9 @@ async def intent_handler_2(data: dict, user_id: str, http_request: Request):
             # 从 results 中提取 question 列表
             # 注意：results 包含意图识别返回的相似问题列表
             results = data.get("results", [])
+            logging.DEBUF(
+                f"Type2 SQL准备: user_id={user_id}, query_len={len(query)}, result_candidates={len(results)}"
+            )
 
             # 提取 Question 部分（格式: "Question: xxx\tAnswer: yyy"）
             questions = []
@@ -618,6 +644,7 @@ async def intent_handler_2(data: dict, user_id: str, http_request: Request):
                     questions=questions,
                 ),
             )
+            logging.INFO(f"Type2 SQL查询完成: user_id={user_id}")
 
 
             # ======== DEBUG: 打印完整的 SQL 结果 ========
@@ -634,6 +661,9 @@ async def intent_handler_2(data: dict, user_id: str, http_request: Request):
                     formatted_query = format_sql_result_as_query(
                         original_query=query, sql_result=sql_result
                     )
+                    logging.DEBUF(
+                        f"Type2 Dify包装查询构建完成: user_id={user_id}, formatted_query_len={len(formatted_query)}"
+                    )
 
                     # 流式输出生成器
                     async def event_generator():
@@ -644,6 +674,7 @@ async def intent_handler_2(data: dict, user_id: str, http_request: Request):
 
                             # 空值检查
                             if dify_chat_client is None:
+                                logging.ERROR(f"Type2 Dify客户端为空: user_id={user_id}")
                                 yield f"event: error\ndata: {json.dumps({'error': 'Dify Chat client not initialized'}, ensure_ascii=False)}\n\n"
                                 return
 
@@ -655,6 +686,7 @@ async def intent_handler_2(data: dict, user_id: str, http_request: Request):
                                 # 直接透传（已经是统一格式）
                                 yield event
                         except Exception as e:
+                            logging.ERROR(f"Type2 Dify流式异常: user_id={user_id}, reason={str(e)}")
                             # 发送错误事件
                             error_data = {"event": "error", "message": str(e)}
                             yield f"data: {json.dumps(error_data)}\n\n"
@@ -670,6 +702,7 @@ async def intent_handler_2(data: dict, user_id: str, http_request: Request):
                     )
 
                 except Exception as e:
+                    logging.WARNING(f"Type2 Dify包装失败，降级原始SQL结果: user_id={user_id}, reason={str(e)}")
                     pass
             else:
                 pass
@@ -677,6 +710,7 @@ async def intent_handler_2(data: dict, user_id: str, http_request: Request):
             # ======== Step 3: 降级 - 返回原始 SQL 结果 ========
             # 将 SQL 结果转换为字符串并用流式返回
             result_str = json.dumps(sql_result, ensure_ascii=False)
+            logging.INFO(f"Type2 返回SQL降级结果: user_id={user_id}, result_len={len(result_str)}")
             return StreamingResponse(
                 content=convert_json_to_stream({"result": result_str}),
                 media_type="text/event-stream",
@@ -689,6 +723,7 @@ async def intent_handler_2(data: dict, user_id: str, http_request: Request):
             )
 
         except ImportError as ie:
+            logging.ERROR(f"Type2 DaiShanSQL导入失败: user_id={user_id}, reason={str(ie)}")
             return StreamingResponse(
                 content=convert_json_to_stream(
                     {"error": f"DaiShanSQL 模块未找到: {str(ie)}"}
@@ -703,6 +738,7 @@ async def intent_handler_2(data: dict, user_id: str, http_request: Request):
             )
 
     except Exception as e:
+        logging.ERROR(f"Type2 处理失败: user_id={user_id}, reason={str(e)}")
         return StreamingResponse(
             content=convert_json_to_stream({"error": f"处理失败: {str(e)}"}),
             media_type="text/event-stream",
@@ -739,6 +775,9 @@ async def dify_async_stream_generator(
         headers = await get_dify_headers(api_key)
         payload = await create_dify_payload(text_input, user_id, instruction_type)
         url = f"{base_url}{endpoint}"
+        logging.INFO(
+            f"Dify流式请求开始: user_id={user_id}, text_len={len(text_input)}, has_instruction={bool(instruction_type)}"
+        )
 
         start_time = time.time()
         first_output_sent = False
@@ -758,7 +797,7 @@ async def dify_async_stream_generator(
                         yield f"event: error\\ndata: {json.dumps({'error': error_msg}, ensure_ascii=False)}\\n\\n"
                         break
                     yield f"event: start\\ndata: {json.dumps({'message': '开始流式输出'}, ensure_ascii=False)}\\n\\n"
-                    print(f"response: {response}")
+                    logging.DEBUF(f"Dify流式连接建立: status_code={response.status_code}")
 
                     message_id = 0
                     async for line in response.aiter_lines():
@@ -846,8 +885,8 @@ async def dify_async_stream_generator(
                             break
 
                         elif event_type == "error":
-                            print(f"6.3")
                             error_msg = f"Dify API流式处理错误: {data.get('message', '未知错误')}"
+                            logging.ERROR(error_msg)
                             yield f"event: error\\ndata: {json.dumps({'error': error_msg}, ensure_ascii=False)}\\n\\n"
                             break
                         
@@ -858,28 +897,36 @@ async def dify_async_stream_generator(
                 retry_count += 1
                 if retry_count > max_retry:
                     error_msg = f"请求超时，已重试{max_retry}次仍失败"
+                    logging.ERROR(f"Dify流式请求超时终止: user_id={user_id}, retry_count={retry_count}")
                     yield f"event: error\\ndata: {json.dumps({'error': error_msg}, ensure_ascii=False)}\\n\\n"
                     break
+                logging.WARNING(
+                    f"Dify流式请求超时重试: user_id={user_id}, retry_count={retry_count}, retry_delay={retry_delay}"
+                )
                 await asyncio.sleep(retry_delay * retry_count)
 
             except httpx.RequestError as e:
                 error_msg = f"请求发生错误: {str(e)[:150]}"
+                logging.ERROR(f"Dify流式请求失败: user_id={user_id}, reason={str(e)}")
                 yield f"event: error\\ndata: {json.dumps({'error': error_msg}, ensure_ascii=False)}\\n\\n"
                 break
 
     except Exception as e:
         error_msg = f"处理请求时发生异常: {str(e)[:150]}"
+        logging.ERROR(f"Dify流式处理异常: user_id={user_id}, reason={str(e)}")
         yield f"event: error\\ndata: {json.dumps({'error': error_msg}, ensure_ascii=False)}\\n\\n"
 
 # 处理指令判断函数
-@log(is_entry=True, enable_mermaid=True)
+@log_entry(enable_mermaid=True, print_result=False)
 async def instruct_process(query:str, http_request: Request):
     # 从 app.state 获取资源
     ragflow_client = getattr(http_request.app.state, 'ragflow_client', None)
     config_manager = getattr(http_request.app.state, 'config_manager', None)
+    logging.INFO(f"指令预处理开始: query_len={len(query)}")
 
     # 空值检查
     if ragflow_client is None or config_manager is None:
+        logging.ERROR("指令预处理失败: 服务未完全初始化")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={
@@ -907,6 +954,7 @@ async def instruct_process(query:str, http_request: Request):
 
         # 根据路由到对应的处理器
         intent_type = result.type
+        logging.INFO(f"指令预处理意图结果: intent_type={intent_type}, result_count={len(result.results)}")
 
         # 构建完整的响应数据结构
         response_data = {
@@ -933,6 +981,7 @@ async def instruct_process(query:str, http_request: Request):
                 if len(parts) == 2:
                     answer = parts[1]
             if not answer:
+                logging.WARNING("指令预处理未提取到answer，返回兜底结果")
                 return {
                     "answer": "无效指令#@#@#",
                     "chat_type": "normal_instruct"
@@ -944,6 +993,7 @@ async def instruct_process(query:str, http_request: Request):
 
             if not kb_matches:
                 # 不包含知识库标记,直接返回 answer
+                logging.INFO("指令预处理命中普通指令")
                 return {
                     "answer": answer,
                     "chat_type": "normal_instruct"
@@ -955,12 +1005,14 @@ async def instruct_process(query:str, http_request: Request):
             # 提取 instruction (知识库标记之前的内容)
             instruction = extract_instruction(answer)
         else:
+            logging.INFO("指令预处理非Type1，返回默认结果")
             return {
                 "answer": instruction,
                 "chat_type": first_kb_name,
             }
 
     except HTTPException:
+        logging.WARNING("指令预处理触发HTTPException，返回兜底结果")
         return {
             "answer": "无效指令#@#@#",
             "chat_type": "normal_instruct"
@@ -972,26 +1024,29 @@ async def instruct_process(query:str, http_request: Request):
 # ============================================================
 
 @router.get("/", tags=["根路径"])
-@log(is_entry=True, enable_mermaid=True)
+@log_entry(enable_mermaid=True, print_result=False)
 async def root(request: Request):
     """根路径"""
     app_start_time = getattr(request.app.state, 'start_time', time.time())
+    uptime_seconds = time.time() - app_start_time
+    logging.INFO(f"根路径访问: uptime_seconds={uptime_seconds:.2f}")
     return {
         "service": "岱山意图识别服务",
         "version": "1.0.0",
         "status": "running",
-        "uptime_seconds": time.time() - app_start_time,
+        "uptime_seconds": uptime_seconds,
     }
 
 
 @router.get("/health", tags=["健康检查"])
-@log(is_entry=True, enable_mermaid=True)
+@log_entry(enable_mermaid=True, print_result=False)
 async def health_check(request: Request):
     """健康检查接口"""
     ragflow_client = getattr(request.app.state, 'ragflow_client', None)
 
     # 空值检查
     if ragflow_client is None:
+        logging.WARNING("健康检查失败: ragflow_client 未初始化")
         return JSONResponse(
             status_code=503,
             content={
@@ -1016,12 +1071,14 @@ async def health_check(request: Request):
         }
         if not ragflow_ok:
             health_status["status"] = "degraded"
+            logging.WARNING("健康检查降级: ragflow 连接失败")
     except Exception as e:
         health_status["checks"]["ragflow"] = {
             "status": "fail",
             "description": f"RAGFlow connection error: {str(e)}",
         }
         health_status["status"] = "unhealthy"
+        logging.ERROR(f"健康检查异常: {str(e)}")
 
     # 返回适当的 HTTP 状态码
     status_code = 200
@@ -1030,6 +1087,9 @@ async def health_check(request: Request):
     elif health_status["status"] == "unhealthy":
         status_code = 503
 
+    logging.INFO(
+        f"健康检查完成: status={health_status['status']}, status_code={status_code}"
+    )
     return JSONResponse(content=health_status, status_code=status_code)
 
 
@@ -1039,7 +1099,7 @@ async def health_check(request: Request):
     responses={400: {"model": ErrorResponse}, 200: {"model": ErrorResponse}},
     tags=["意图识别"],
 )
-@log(is_entry=True, enable_mermaid=True)
+@log_entry(enable_mermaid=True, print_result=False)
 async def intent_recognition(request: IntentRequest, http_request: Request):
     """
     意图识别接口 - 路由分发器
@@ -1059,9 +1119,13 @@ async def intent_recognition(request: IntentRequest, http_request: Request):
     # 从 app.state 获取资源
     ragflow_client = getattr(http_request.app.state, 'ragflow_client', None)
     config_manager = getattr(http_request.app.state, 'config_manager', None)
+    logging.INFO(
+        f"意图识别入口: user_id={request.user_id or 'anonymous'}, text_len={len(request.text_input)}"
+    )
 
     # 空值检查
     if ragflow_client is None or config_manager is None:
+        logging.ERROR("意图识别失败: 服务未完全初始化")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={
@@ -1089,6 +1153,7 @@ async def intent_recognition(request: IntentRequest, http_request: Request):
 
         # 根据路由到对应的处理器
         intent_type = result.type
+        logging.INFO(f"意图识别完成: intent_type={intent_type}, result_count={len(result.results)}")
 
         # 构建完整的响应数据结构
         response_data = {
@@ -1111,14 +1176,17 @@ async def intent_recognition(request: IntentRequest, http_request: Request):
             response = await intent_handler_2(response_data, user_id, http_request)
         else:
             # 未知的 type,直接返回原始数据
+            logging.WARNING(f"意图识别命中未知类型: intent_type={intent_type}")
             response = JSONResponse(content=response_data)
 
         return response
 
     except HTTPException:
+        logging.WARNING("意图识别返回HTTPException")
         raise
 
     except Exception as e:
+        logging.ERROR(f"意图识别异常: reason={str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={
@@ -1135,7 +1203,7 @@ async def intent_recognition(request: IntentRequest, http_request: Request):
     description="接收text_input，返回标准SSE格式的流式输出",
     response_class=StreamingResponse
 )
-@log(is_entry=True, enable_mermaid=True)
+@log_entry(enable_mermaid=True, print_result=False)
 async def instrcution_command(input_data: IntentRequest, request: Request):
     """
     示例请求体：
@@ -1154,7 +1222,11 @@ async def instrcution_command(input_data: IntentRequest, request: Request):
     """
     # 校验输入
     if not input_data.text_input.strip():
+        logging.WARNING("流式聊天请求拒绝: text_input 为空")
         raise HTTPException(status_code=400, detail="text_input 字段不能为空")
+    logging.INFO(
+        f"流式聊天入口: user_id={input_data.user_id or 'fastapi_client_user'}, text_len={len(input_data.text_input.strip())}"
+    )
     
     # 从应用状态获取HTTP客户端
     http_client = request.app.state.http_client
@@ -1165,6 +1237,7 @@ async def instrcution_command(input_data: IntentRequest, request: Request):
 
     # 空值检查
     if ragflow_client is None or config_manager is None:
+        logging.ERROR("流式聊天失败: 服务未完全初始化")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={
@@ -1185,7 +1258,7 @@ async def instrcution_command(input_data: IntentRequest, request: Request):
     answer = "无效指令#@#@#"
     if len(result.results) > 0:
         best_result = result.results[0]
-        print(f"指令最大相似度为：{result.similarity}\n指令为：{best_result.question}")
+        logging.DEBUF(f"流式聊天意图匹配: similarity={result.similarity}, question={best_result.question}")
         if result.similarity >= config.similarity_threshold:
             # 提取 answer 字段
             question = best_result.question
@@ -1194,8 +1267,11 @@ async def instrcution_command(input_data: IntentRequest, request: Request):
                 parts = question.split("\tAnswer: ", 1)
                 if len(parts) == 2:
                     answer = parts[1]
+    logging.INFO(
+        f"流式聊天开始转发: user_id={input_data.user_id or 'fastapi_client_user'}, instruction_type={answer[:40]}"
+    )
 
-    
+
     # 返回流式响应
     return StreamingResponse(
         content=dify_async_stream_generator(

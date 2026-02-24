@@ -1,12 +1,13 @@
 """对象解析模块
 
-提供智能对象解析功能，支持：
+提供智能对象解析与日志值渲染功能，支持：
 - 基础类型直接返回
 - 紧凑模式：类对象显示为 <ClassName: N attrs>，字典显示为 <dict: N keys>
 - 完整模式：容器类型递归解析，类实例展开为字典
+- 日志模式：优先输出参数真实值，类对象优先调用 ``to_json``
 - 深度控制：防止过深的递归
 """
-from typing import Any
+from typing import Any, Dict
 
 
 def parse_obj(obj: Any, compact: bool = True, max_depth: int = 3, _current_depth: int = 0) -> Any:
@@ -89,7 +90,58 @@ def parse_obj(obj: Any, compact: bool = True, max_depth: int = 3, _current_depth
     return str(obj)
 
 
-def format_args_multiline(args: tuple, kwargs: dict) -> str:
+def render_log_value(obj: Any, max_depth: int = 5, _current_depth: int = 0) -> Any:
+    """渲染日志值。
+
+    规则：
+    - ``int/float/str/bool/None``：原样输出
+    - ``list/tuple/dict``：递归展开，尽量打印完整值
+    - 类对象：优先调用 ``to_json``，失败或不存在时回退 ``str(obj)``
+    """
+    if obj is None or isinstance(obj, (int, float, str, bool)):
+        return obj
+
+    if _current_depth >= max_depth:
+        return str(obj)
+
+    if isinstance(obj, list):
+        return [
+            render_log_value(item, max_depth=max_depth, _current_depth=_current_depth + 1)
+            for item in obj
+        ]
+
+    if isinstance(obj, tuple):
+        return tuple(
+            render_log_value(item, max_depth=max_depth, _current_depth=_current_depth + 1)
+            for item in obj
+        )
+
+    if isinstance(obj, dict):
+        rendered: Dict[Any, Any] = {}
+        for key, value in obj.items():
+            rendered[key] = render_log_value(
+                value,
+                max_depth=max_depth,
+                _current_depth=_current_depth + 1,
+            )
+        return rendered
+
+    to_json = getattr(obj, "to_json", None)
+    if callable(to_json):
+        try:
+            json_obj = to_json()
+            return render_log_value(
+                json_obj,
+                max_depth=max_depth,
+                _current_depth=_current_depth + 1,
+            )
+        except Exception:
+            return str(obj)
+
+    return str(obj)
+
+
+def format_args_multiline(args: tuple, kwargs: dict, named_args: dict | None = None) -> str:
     """格式化参数为多行缩进格式
 
     Args:
@@ -105,15 +157,18 @@ def format_args_multiline(args: tuple, kwargs: dict) -> str:
     """
     lines = ["【入参】"]
 
-    # 格式化位置参数
-    for i, arg in enumerate(args):
-        parsed = parse_obj(arg, compact=True)
-        lines.append(f"  - args[{i}]: {parsed}")
+    if named_args is not None:
+        for key, value in named_args.items():
+            parsed = render_log_value(value)
+            lines.append(f"  - {key}: {parsed}")
+    else:
+        for i, arg in enumerate(args):
+            parsed = render_log_value(arg)
+            lines.append(f"  - args[{i}]: {parsed}")
 
-    # 格式化关键字参数
-    for key, value in kwargs.items():
-        parsed = parse_obj(value, compact=True)
-        lines.append(f"  - kwargs.{key}: {parsed}")
+        for key, value in kwargs.items():
+            parsed = render_log_value(value)
+            lines.append(f"  - kwargs.{key}: {parsed}")
 
     return "\n".join(lines)
 
@@ -135,7 +190,7 @@ def format_result_multiline(result: Any, duration_ms: float = None) -> str:
     lines = ["【出参】"]
 
     # 格式化返回值
-    parsed = parse_obj(result, compact=True)
+    parsed = render_log_value(result)
     lines.append(f"  - result: {parsed}")
 
     # 添加执行时间（如果提供）
@@ -241,7 +296,12 @@ def sanitize_sensitive_data(data: Any) -> Any:
 
 
 # 导出
-__all__ = ["parse_obj", "format_args_multiline", "format_result_multiline", "sanitize_sensitive_data"]
-
+__all__ = [
+    "parse_obj",
+    "render_log_value",
+    "format_args_multiline",
+    "format_result_multiline",
+    "sanitize_sensitive_data",
+]
 
 

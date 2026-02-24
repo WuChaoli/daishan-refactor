@@ -13,9 +13,9 @@
     def my_function(x, y):
         return x + y
 """
-from .decorator import log, logger
+from .decorator import log, log_entry, log_end, logger, logging
 from .parser import parse_obj
 from .config import load_config
 
 __version__ = "1.0.0"
-__all__ = ["log", "logger", "parse_obj", "load_config"]
+__all__ = ["log", "log_entry", "log_end", "logger", "logging", "parse_obj", "load_config"]

@@ -50,6 +50,7 @@ class AsynchronousCall:
                 model=os.getenv("Qwen2.5_7B_model"),
                 messages=query_conversation,
                 max_tokens=100,
+                temperature=0.1,
                 extra_body={"enable_thinking": False}
             )
             result_content = new_prompt_response.choices[0].message.content
@@ -68,6 +69,7 @@ class AsynchronousCall:
             # 异步调用 SQL 生成 API
             new_prompt_response = await self.sql_client.chat.completions.create(
                 model=os.getenv("TextToSQL_model"),
+                temperature=0.1,
                 messages=query_conversation
             )
             result_content = new_prompt_response.choices[0].message.content
@@ -194,13 +196,27 @@ class AsynchronousCall:
         )
         return new_prompt_result
 
+    def replace_sql_asterisk(self, sql_list):
+        processed_list = []
+        for item in sql_list:
+            new_item = item.copy()
+            sql_content = new_item['result']
+            if 'count' not in sql_content.lower():
+                tableInfo = item["table"]['列名信息']
+                field = ",".join(str(i) for i in tableInfo)
+                new_item['result'] = sql_content.replace('*', field)
+            
+            processed_list.append(new_item)
+        return processed_list
+    
     def ProcessSQL(self, query, prompts):
         """处理 SQL 生成，同步接口"""
         new_sql_prompt = []
         for new_prompt in prompts:
             new_user_query = new_prompt["result"]
-            # if new_user_query == query:
-            #     continue
+            # 刚用户初始问题与修正后问题一致，则表明chat模型无法对其进行补充，因此判定该问题无效，需要跳过
+            if str(new_user_query)==str(query):
+                continue
             table = new_prompt["table"]
             sql_query = self.prompt_utils.gengerate_sql(new_user_query, table)
             new_sql_prompt.append({
@@ -213,7 +229,8 @@ class AsynchronousCall:
         new_sql_result = self._run_async_safely(
             self.Agent_eval_async(new_sql_prompt, mode="response_sql")
         )
-        return new_sql_result
+        result_list = self.replace_sql_asterisk(new_sql_result)
+        return result_list
 
 
 # ========== 测试示例（可选） ==========

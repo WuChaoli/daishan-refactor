@@ -7,7 +7,7 @@ from typing import Any, Dict, List
 
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
-from log_decorator import log, logger
+from log_decorator import log, log_entry, logger, logging
 
 from src.config.settings import settings
 from src.models.schemas import (
@@ -29,7 +29,7 @@ from src.utils.session_manager import session_manager
 router = APIRouter()
 
 
-@log(is_entry=True, enable_mermaid=True)
+@log_entry(enable_mermaid=True, print_result=False)
 @router.post("/api/chat/{category}", response_model=ChatResponse)
 async def chat_with_category(
     category: str,
@@ -37,14 +37,22 @@ async def chat_with_category(
 ):
     """通用聊天接口，根据类别选择对应的chat_id"""
     user_id = request.user_id or None
+    logging.INFO(
+        f"分类聊天请求: category={category}, has_user_id={bool(user_id)}, question_len={len(request.question)}"
+    )
     if category not in settings.ragflow.chat_ids:
+        logging.WARNING(f"分类聊天请求拒绝: unsupported_category={category}")
         raise HTTPException(status_code=400, detail=f"不支持的类别: {category}")
 
     chat_id = settings.ragflow.chat_ids[category]
     logger.debug("chat_id: %s", chat_id)
+    logging.DEBUF(f"命中 chat_id={chat_id}")
 
     session_id = await get_or_create_session(chat_id, category, user_id)
     logger.debug("session_id: %s", session_id)
+    logging.INFO(f"会话就绪: category={category}, chat_id={chat_id}, session_id={session_id}")
+
+    logging.INFO(f"分类聊天流式响应启动: category={category}, session_id={session_id}")
 
     return StreamingResponse(
         stream_chat_response(chat_id, request.question, session_id, user_id),
@@ -58,9 +66,9 @@ async def chat_with_category(
     )
 
 
-@log()
 async def chat_with_dify(request: ChatRequest):
     user_id = request.user_id or None
+    logging.INFO(f"Dify 流式会话开始: has_user_id={bool(user_id)}")
     return StreamingResponse(
         stream_dify_chatflow_response(
             query=request.question,
@@ -77,37 +85,31 @@ async def chat_with_dify(request: ChatRequest):
     )
 
 
-@log()
 @router.post("/api/laws", response_model=ChatResponse)
 async def chat_laws(request: ChatRequest):
     return await chat_with_category("法律法规", request)
 
 
-@log()
 @router.post("/api/standards", response_model=ChatResponse)
 async def chat_standards(request: ChatRequest):
     return await chat_with_category("标准规范", request)
 
 
-@log()
 @router.post("/api/emergency", response_model=ChatResponse)
 async def chat_emergency(request: ChatRequest):
     return await chat_with_category("应急知识", request)
 
 
-@log()
 @router.post("/api/accidents", response_model=ChatResponse)
 async def chat_accidents(request: ChatRequest):
     return await chat_with_category("事故案例", request)
 
 
-@log()
 @router.post("/api/msds", response_model=ChatResponse)
 async def chat_msds(request: ChatRequest):
     return await chat_with_category("MSDS", request)
 
 
-@log()
 @router.post("/api/policies", response_model=ChatResponse)
 async def chat_policies(request: ChatRequest):
     return await chat_with_category("标准政策", request)
@@ -147,7 +149,7 @@ async def dict_to_stream_generator(result_dict: dict):
     yield f"event: end\ndata: [DONE]\n\n"
 
 
-@log(is_entry=True, enable_mermaid=True)
+@log_entry(enable_mermaid=True, print_result=False)
 @router.post("/api/general", response_model=ChatResponse)
 async def chat_general(request: ChatRequest, http_request: Request):
     """
@@ -155,46 +157,47 @@ async def chat_general(request: ChatRequest, http_request: Request):
     """
     intent_service = getattr(http_request.app.state, "intent_service", None)
     if intent_service is None:
+        logging.ERROR("通用问答路由失败: intent_service 未初始化")
         raise HTTPException(status_code=500, detail="intent_service 未初始化")
 
-    return await handle_chat_general(
+    logging.INFO(
+        f"通用问答路由开始: question_len={len(request.question)}, has_user_id={bool(request.user_id)}"
+    )
+
+    response = await handle_chat_general(
         request=request,
         intent_service=intent_service,
         chat_with_category=chat_with_category,
     )
+    logging.INFO("通用问答路由完成分发")
+    return response
 
 
-@log()
 @router.post("/api/warn", response_model=ChatResponse)
 async def chat_warn(request: ChatRequest):
     return await chat_with_category("重大危险源预警", request)
 
 
-@log()
 @router.post("/api/safesituation", response_model=ChatResponse)
 async def chat_safesituation(request: ChatRequest):
     return await chat_with_category("当日安全态势", request)
 
 
-@log()
 @router.post("/api/prevent", response_model=ChatResponse)
 async def chat_prevent(request: ChatRequest):
     return await chat_with_category("双重预防机制效果", request)
 
 
-@log()
 @router.post("/api/park", response_model=ChatResponse)
 async def chat_park(request: ChatRequest):
     return await chat_with_category("园区开停车", request)
 
 
-@log()
 @router.post("/api/special", response_model=ChatResponse)
 async def chat_special(request: ChatRequest):
     return await chat_with_category("园区特殊作业态势", request)
 
 
-@log()
 @router.post("/api/firmsituation", response_model=ChatResponse)
 async def chat_firmsituation(request: ChatRequest):
     return await chat_with_category("园区企业态势", request)
@@ -203,6 +206,7 @@ async def chat_firmsituation(request: ChatRequest):
 @router.post("/api/stop", status_code=200)
 async def stop_session(request: ChatDeleteRequest):
     """暂停/删除会话"""
+    logging.INFO(f"会话停止请求: has_session_id={bool(request.session_id)}, has_user_id={bool(request.user_id)}")
     if request.session_id:
         # 按 session_id 删除
         if request.session_id not in session_manager.sessions:
@@ -225,6 +229,7 @@ async def create_category_session(category: str, request: SessionRequest):
 
     chat_id = settings.ragflow.chat_ids[category]
     session_id = await get_or_create_session(chat_id, category, request.user_id)
+    logging.INFO(f"创建会话成功: category={category}, session_id={session_id}")
 
     return SessionResponse(
         code=0,
@@ -243,6 +248,7 @@ async def create_category_session(category: str, request: SessionRequest):
 async def get_user_sessions(user_id: str) -> Dict[str, Any]:
     session_manager.cleanup_all_expired_sessions()
     user_sessions = session_manager.get_user_sessions_info(user_id)
+    logging.INFO(f"用户会话查询: user_id={user_id}, session_count={len(user_sessions)}")
 
     return {
         "code": 0,
@@ -258,6 +264,8 @@ async def get_session_info(session_id: str) -> Dict[str, Any]:
     if session_id not in session_manager.sessions:
         raise HTTPException(status_code=404, detail="会话不存在")
 
+    logging.DEBUF(f"会话详情查询: session_id={session_id}")
+
     return {"code": 0, "message": "获取成功", "data": session_manager.sessions[session_id]}
 
 
@@ -265,6 +273,7 @@ async def get_session_info(session_id: str) -> Dict[str, Any]:
 @router.get("/api/sessions")
 async def get_all_sessions() -> Dict[str, Any]:
     session_manager.cleanup_all_expired_sessions()
+    logging.INFO(f"全量会话查询: total={len(session_manager.sessions)}")
     return {
         "code": 0,
         "message": "获取成功",
@@ -278,10 +287,11 @@ async def delete_session(session_id: str) -> Dict[str, Any]:
     if session_id not in session_manager.sessions:
         raise HTTPException(status_code=404, detail="会话不存在")
     session_manager.cleanup_expired_session(session_id)
+    logging.INFO(f"删除会话成功: session_id={session_id}")
     return {"code": 0, "message": "会话删除成功", "data": None}
 
 
-@log(is_entry=True, enable_mermaid=True)
+@log_entry(enable_mermaid=True, print_result=False)
 @router.post("/ipark-ae/personnel-dispatch")
 async def people_dispatch(request: PeopleDispatchRequest) -> Dict[str, Any]:
     """
@@ -300,7 +310,12 @@ async def people_dispatch(request: PeopleDispatchRequest) -> Dict[str, Any]:
         HTTPException: 当 voiceText 为空时
     """
     if not request.voiceText:
+        logging.WARNING(f"人员调度请求拒绝: accident_id={request.accidentId}, voice_text 为空")
         raise HTTPException(status_code=400, detail="voiceText 不能为空")
+
+    logging.INFO(
+        f"人员调度开始: accident_id={request.accidentId}, voice_len={len(request.voiceText)}"
+    )
 
     user_id = None  # 可以从请求头或其他地方获取
 
@@ -309,9 +324,18 @@ async def people_dispatch(request: PeopleDispatchRequest) -> Dict[str, Any]:
         user_id=user_id
     )
 
+    if isinstance(result, dict):
+        data = result.get("data")
+        data_count = len(data) if isinstance(data, list) else 0
+        logging.INFO(
+            f"人员调度完成: accident_id={request.accidentId}, code={result.get('code')}, data_count={data_count}"
+        )
+    else:
+        logging.INFO(f"人员调度完成: accident_id={request.accidentId}, result_type={type(result).__name__}")
+
     return result
 
-@log(is_entry=True, enable_mermaid=True)
+@log_entry(enable_mermaid=True, print_result=False)
 @router.post("/ipark-ae/source-dispatch")
 async def source_dispatch(request: SourceDispatchRequest):
     """
@@ -325,22 +349,30 @@ async def source_dispatch(request: SourceDispatchRequest):
     Returns:
         List[Dict[str, str]]: 资源列表
     """
+    logging.INFO(
+        f"资源调度开始: accident_id={request.accidentId}, source_type={request.sourceType}, has_voice_text={bool(request.voiceText)}"
+    )
     result = await handle_source_dispatch(request)
+    logging.INFO(
+        f"资源调度完成: accident_id={request.accidentId}, source_type={request.sourceType}, result_count={len(result)}"
+    )
     return result
 
-@log(is_entry=True, enable_mermaid=True)
+@log_entry(enable_mermaid=True, print_result=False)
 @router.get("/health")
 async def health_check() -> Dict[str, Any]:
     session_manager.cleanup_all_expired_sessions()
+    active_sessions = len(session_manager.sessions)
+    active_users = len(session_manager.user_sessions)
+    logging.INFO(f"健康检查: active_sessions={active_sessions}, active_users={active_users}")
     return {
         "status": "healthy",
         "timestamp": datetime.now().isoformat(),
-        "active_sessions": len(session_manager.sessions),
-        "active_users": len(session_manager.user_sessions),
+        "active_sessions": active_sessions,
+        "active_users": active_users,
     }
 
 
-@log()
 @router.get("/api/categories")
 async def get_categories() -> Dict[str, Any]:
     return {
@@ -369,5 +401,7 @@ async def guess_questions(request: GuessQuestionsRequest, http_request: Request)
     intent_service = getattr(http_request.app.state, "intent_service", None)
     if intent_service is None:
         raise HTTPException(status_code=500, detail="intent_service 未初始化")
+
+    logging.INFO(f"猜你想问开始: question_len={len(request.question)}")
 
     return await handle_guess_questions(request.question, intent_service)

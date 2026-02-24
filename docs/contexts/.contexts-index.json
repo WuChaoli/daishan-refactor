@@ -1,5 +1,27 @@
 {
-  "activeContexts": [],
+  "activeContexts": [
+    {
+      "contextId": "2026-02-10_rag-stream-log-refactor",
+      "title": "RAG Stream 日志链路降噪与业务打点优化",
+      "status": "in_progress",
+      "assignee": "罗辑",
+      "updatedAt": "2026-02-10T13:36:03Z"
+    },
+    {
+      "contextId": "2026-02-10_log-decorator-entry-end-decorators",
+      "title": "log-decorator-entry-end-decorators",
+      "status": "in_progress",
+      "assignee": "context-manager",
+      "updatedAt": "2026-02-10T22:24:31.394269Z"
+    },
+    {
+      "contextId": "2026-02-11_logtracer-init",
+      "title": "LogTracer 独立项目初始化",
+      "status": "in_progress",
+      "assignee": "罗辑",
+      "updatedAt": "2026-02-11T05:36:19Z"
+    }
+  ],
   "archivedContexts": [
     {
       "contextId": "2026-02-04_project-architecture",
@@ -50,5 +72,5 @@
       "archivePath": "docs/archive/2026-02-10_chat-general-chain-optimization"
     }
   ],
-  "lastUpdated": "2026-02-10T11:10:00Z"
+  "lastUpdated": "2026-02-11T05:36:19Z"
 }

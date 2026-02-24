@@ -7,7 +7,7 @@ import json
 import asyncio
 from typing import Dict, Any, List, Optional
 
-from log_decorator import log, logger
+from log_decorator import log, logger, logging
 
 
 @log()
@@ -28,13 +28,18 @@ async def handle_personnel_dispatch(
 
     try:
         logger.info(f"处理人员调度请求，语音文本: {voice_text}")
+        logging.INFO(
+            f"人员调度请求接入: voice_len={len(voice_text)}, has_user_id={bool(user_id)}"
+        )
 
         # 获取 Dify clients
         general_client, personnel_client = _get_dify_clients()
+        logging.DEBUF("Dify 客户端已就绪: general + personnel")
 
         # 步骤1: 实体提取
         entities = await _extract_entities(voice_text, general_client)
         logger.info(f"提取到 {len(entities)} 个实体: {entities}")
+        logging.INFO(f"实体提取完成: entity_count={len(entities)}")
 
         if not entities:
             logger.warning("未提取到任何实体，返回空列表")
@@ -46,6 +51,7 @@ async def handle_personnel_dispatch(
         )
 
         logger.info(f"成功调用人员调度，返回 {len(result_ids)} 个 ID")
+        logging.INFO(f"人员调度完成: resolved_count={len(result_ids)}")
         return result_ids
 
     except ValueError as e:
@@ -59,7 +65,6 @@ async def handle_personnel_dispatch(
         return []
 
 
-@log()
 def _get_dify_clients() -> tuple:
     """获取Dify客户端实例"""
     from src.utils.dify_client_factory import get_client
@@ -79,7 +84,6 @@ def _get_dify_clients() -> tuple:
     return general_client, personnel_client
 
 
-@log()
 async def _extract_entities(
     voice_text: str,
     general_client
@@ -99,6 +103,7 @@ async def _extract_entities(
     # 构建实体提取 prompt
     entity_query = SourceDispatchPrompts.get_entity_extraction_prompt(voice_text)
     logger.debug(f"实体提取 prompt: {entity_query}")
+    logging.DEBUF(f"实体提取 prompt 构建完成: prompt_len={len(entity_query)}")
 
     # 调用 Dify 进行实体提取
     entity_response = await asyncio.to_thread(
@@ -112,13 +117,13 @@ async def _extract_entities(
     # 提取 answer 字段
     entity_answer = entity_response.answer if hasattr(entity_response, 'answer') else str(entity_response)
     logger.debug(f"实体提取响应: {entity_answer}")
+    logging.DEBUF(f"实体提取响应长度: answer_len={len(entity_answer)}")
 
     # 解析实体列表
     entities = _parse_entity_list(entity_answer)
     return entities
 
 
-@log()
 def _parse_entity_list(answer: str) -> List[str]:
     """
     解析实体提取响应为字符串列表
@@ -154,7 +159,6 @@ def _parse_entity_list(answer: str) -> List[str]:
     return str_list
 
 
-@log()
 def _extract_json_from_text(text: str) -> str:
     """
     从文本中提取JSON格式内容
@@ -197,7 +201,6 @@ def _extract_json_from_text(text: str) -> str:
     return _normalize_json_string(text)
 
 
-@log()
 def _normalize_json_string(json_str: str) -> str:
     """
     标准化JSON字符串，将Python格式转换为JSON格式
@@ -233,7 +236,6 @@ def _normalize_json_string(json_str: str) -> str:
         return json_str
 
 
-@log()
 async def _call_personnel_dispatch_for_entities(
     entities: List[str],
     personnel_client,
@@ -265,6 +267,8 @@ async def _call_personnel_dispatch_for_entities(
         )
         tasks.append((entity_name, task))
 
+    logging.INFO(f"人员调度并行调用开始: entity_count={len(tasks)}")
+
     # 并行执行所有任务
     for entity_name, task in tasks:
         try:
@@ -285,4 +289,5 @@ async def _call_personnel_dispatch_for_entities(
             logger.error(f"调用人员调度 client 失败，实体: {entity_name}, 错误: {e}", exc_info=True)
             continue
 
+    logging.INFO(f"人员调度并行调用完成: resolved_count={len(result_ids)}")
     return result_ids

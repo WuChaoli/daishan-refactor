@@ -9,7 +9,7 @@ import asyncio
 from dataclasses import dataclass
 from typing import Dict, List
 
-from log_decorator import log, logger
+from log_decorator import log, logger, logging
 from src.config.settings import IntentConfig, RAGFlowConfig
 from ragflow_sdk import RAGFlowClient
 from ragflow_sdk.models import RetrievalRequest
@@ -71,6 +71,9 @@ class RagflowClient:
         try:
             all_datasets = self.client.list_datasets(page=1, page_size=100)
             configured_databases = list(self.ragflow_config.database_mapping.keys())
+            logging.INFO(
+                f"知识库列表获取成功: configured_count={len(configured_databases)}"
+            )
 
             found_datasets = []
             found_names = []
@@ -88,10 +91,14 @@ class RagflowClient:
             if missing_names:
                 logger.warning(f"未找到以下知识库: {', '.join(missing_names)}")
 
+            logging.INFO(
+                f"知识库映射完成: found_count={len(found_datasets)}, missing_count={len(missing_names)}"
+            )
             return found_datasets
 
         except Exception as e:
             logger.error(f"获取知识库列表失败: {str(e)}", exc_info=True)
+            logging.ERROR(f"知识库列表获取失败: {str(e)}")
             raise
 
     @log()
@@ -106,6 +113,8 @@ class RagflowClient:
             按相似度降序排序的检索结果列表
         """
         logger.info(f"开始查询所有知识库,query='{query[:50]}...'")
+        database_count = len(self.ragflow_config.database_mapping.keys())
+        logging.INFO(f"并行查询开始: database_count={database_count}, query_len={len(query)}")
 
         # 并发查询所有知识库
         tasks = [
@@ -117,14 +126,19 @@ class RagflowClient:
 
         # 合并所有结果
         all_results = []
+        exception_count = 0
         for result in results:
             if isinstance(result, Exception):
                 logger.error(f"查询异常: {str(result)}")
+                exception_count += 1
                 continue
             if isinstance(result, list):
                 all_results.extend(result)
 
         logger.info(f"查询完成,共获得 {len(all_results)} 条结果")
+        logging.INFO(
+            f"并行查询完成: database_count={database_count}, result_count={len(all_results)}, exception_count={exception_count}"
+        )
 
         # 按相似度降序排序
         all_results.sort(key=lambda x: x.total_similarity, reverse=True)
@@ -153,10 +167,12 @@ class RagflowClient:
             检索结果列表
         """
         logger.info(f"查询知识库: {database}")
+        logging.DEBUF(f"单库查询开始: database={database}, query_len={len(query)}")
 
         # 检查知识库是否存在
         if database not in self.dataset_map:
             logger.error(f"知识库 '{database}' 不存在")
+            logging.WARNING(f"单库查询跳过: database={database} 不存在")
             return []
 
         dataset = self.dataset_map[database]
@@ -170,14 +186,17 @@ class RagflowClient:
             logger.info(
                 f"知识库 '{database}' 查询成功,返回 {len(results)} 条结果"
             )
+            logging.INFO(f"单库查询完成: database={database}, result_count={len(results)}")
             return results
 
         except asyncio.TimeoutError:
             logger.warning(f"知识库 '{database}' 查询超时 (5秒)")
+            logging.WARNING(f"单库查询超时: database={database}, timeout=5s")
             return []
 
         except Exception as e:
             logger.error(f"知识库 '{database}' 查询失败: {str(e)}")
+            logging.ERROR(f"单库查询失败: database={database}, reason={str(e)}")
             return []
 
     @log()
@@ -208,6 +227,8 @@ class RagflowClient:
         chunks = await loop.run_in_executor(
             None, lambda: self.client.retrieve(retrieval)
         )
+        chunk_count = len(chunks) if chunks else 0
+        logging.DEBUF(f"SDK 检索返回: database={dataset.name}, chunk_count={chunk_count}")
 
         results = []
         if chunks:
@@ -223,7 +244,6 @@ class RagflowClient:
 
         return results
 
-    @log()
     def _parse_similarity(self, chunk, similarity_type: str) -> float:
         """
         解析 RAGFlow 返回的相似度分数
@@ -254,7 +274,6 @@ class RagflowClient:
 
         return 0.0
 
-    @log()
     def test_connection(self) -> bool:
         """
         测试 RAGFlow 服务连接状态
@@ -265,7 +284,9 @@ class RagflowClient:
         try:
             datasets = self.client.list_datasets(page=1, page_size=1)
             logger.info(f"连接测试成功")
+            logging.INFO("RAGFlow 连接测试成功")
             return True
         except Exception as e:
             logger.error(f"连接测试失败: {str(e)}")
+            logging.ERROR(f"RAGFlow 连接测试失败: {str(e)}")
             return False

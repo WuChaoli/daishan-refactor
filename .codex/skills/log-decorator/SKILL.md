@@ -1,69 +1,66 @@
 ---
 name: log-decorator
-description: 面向本项目 log_decorator 模块的接入、参数设计、日志排障与调用链分析指南。用于新增或修改 @log 装饰器、设计 args_handler 或 result_handler、排查 logs/global.log 与 logs/error.log、分析 logs/mermaid 产物、处理日志级别与脱敏规则异常；当用户提到“log_decorator”“函数日志装饰器”“调用链日志”“Mermaid 调用图”“入口函数日志”“敏感字段脱敏”时使用。
+description: 面向本项目 log_decorator 模块的接入、参数设计、日志排障与调用链分析指南。用于新增或修改 @log/@log_entry/@log_end 装饰器、设计 args_handler 或 result_handler、排查 logs/global.log 与 logs/error.log、分析 logs/mermaid 产物、处理日志级别/树状对齐/敏感字段脱敏异常；当用户提到“log_decorator”“函数日志装饰器”“调用链日志”“Mermaid 调用图”“入口函数日志”“敏感字段脱敏”“logging.DEBUF”时使用。
 ---
 
 # Log Decorator
 
-在本项目中为函数调用提供统一日志、入口链路追踪和 Mermaid 调用图输出。
-优先使用本技能快速完成接入、参数选型、日志验证与故障定位。
+用于快速完成 `log_decorator` 的接入、调参与排障。
+先对齐当前实现，再做最小变更并验证。
 
-## 执行流程
+## 当前基线（2026-02）
 
-### 1) 读取基线与目标
+- 默认参数：`@log(print_args=True, print_result=True, print_duration=False)`。
+- 入口函数使用 `@log_entry(...)`，不再使用 `is_entry` 参数。
+- 边界截止使用 `@log_end(...)`：截止当前分支，外层可继续，下游默认新分支。
+- 树状样式：`├─ / │ / └─`，入参分组 `🟦 [ args ]`，出参分组 `🟦 [ returns ]`。
+- 运行时日志：`from log_decorator import logging`，支持 `logging.DEBUF/INFO/WARNING/ERROR`。
+- 多行日志续行对齐依赖 `AlignedMultilineFormatter` 与 `%(levelname)-7s`。
 
-- 先读取 `src/log_decorator/README.md`，确认当前实现行为。
-- 明确任务类型：
-  - 新增函数日志接入
-  - 调整 `@log(...)` 参数
-  - 排查日志或 Mermaid 未按预期生成
-  - 处理敏感字段脱敏或日志级别问题
+## 快速决策
 
-### 2) 选择最小参数方案
+1. 普通函数日志：使用 `@log(...)`。
+2. 请求/任务入口：使用 `@log_entry(...)`。
+3. 流程边界清理：使用 `@log_end(...)`。
+4. 仅在需要时开启 `enable_mermaid` / `force_mermaid`。
+5. 高频路径按需关闭 `print_args` 或 `print_result`。
 
-- 仅在需要时开启功能：
-  - 默认记录：`print_args=True`、`print_result=True`、`print_duration=True`
-  - 入口链路：仅在入口函数设置 `is_entry=True`
-  - Mermaid：设置 `enable_mermaid=True`；需要稳定落盘时加 `force_mermaid=True`
-  - 高并发或高频函数：按需关闭 `print_args` 或 `print_result`
-- 优先使用 `references/log-decorator-playbook.md` 的参数速查与模板。
+## 执行步骤
 
-### 3) 处理入参与出参可读性
+### 1) 对齐实现
 
-- 需要业务可读日志时，实现 `args_handler(args, kwargs)` 和 `result_handler(result)`。
-- 保持 handler 幂等、轻量、无副作用，避免阻塞业务。
-- handler 抛错时允许降级，不影响业务函数返回。
+- 先读 `src/log_decorator/README.md` 与 `src/log_decorator/decorator.py`。
+- 确认是否涉及：参数变化、日志样式、Mermaid、错误增强、脱敏。
 
-### 4) 验证日志与产物
+### 2) 最小实现
 
-- 验证全局日志：`logs/global.log`。
-- 若入口函数启用，验证入口日志：`logs/{entry_func}.log`。
-- 入口异常时，验证增强错误日志：`logs/error.log`。
-- 启用 Mermaid 时，验证 `logs/mermaid/{entry_func}/` 是否生成 `.md` 文件。
+- 优先复用现有参数与工具函数，避免新增抽象。
+- 需要业务可读性时才加 `args_handler` / `result_handler`。
+- 处理 handler 异常时必须降级，不能影响业务返回。
 
-### 5) 定位常见问题
+### 3) 验证产物
 
-- Mermaid 未生成时，按顺序检查：
-  1. 是否为入口函数 `is_entry=True`
-  2. 是否启用 `enable_mermaid=True`
-  3. 是否满足触发条件之一（`force_mermaid=True`、有效级别 `DEBUG`、入口链路异常）
-- 日志级别异常时，检查 `log_level` 是否为有效级别或可执行 lambda。
-- 参数泄露风险时，优先自定义 `args_handler`，并确认脱敏规则覆盖字段。
+- `logs/global.log`：基本日志是否正确。
+- `logs/{entry_func}.log`：入口日志是否落盘。
+- `logs/error.log`：异常链、调用链、脱敏、Mermaid 路径。
+- `logs/mermaid/{entry_func}/`：是否生成 `.md` 文件。
 
-## 产出要求
+### 4) 常见排障
 
-- 给出具体改动文件与改动理由。
+- Mermaid 未生成：检查 `@log_entry(enable_mermaid=True)` 与触发条件（`force_mermaid` / DEBUG / 异常）。
+- 树状错位：检查 formatter 与日志格式是否匹配。
+- 日志级别异常：检查 `log_level` 是否有效或 lambda 是否抛错。
+- 参数泄露风险：优先审查 `args_handler` 与脱敏规则覆盖面。
+
+## 交付要求
+
+- 说明改动文件与改动理由。
 - 给出最小验证命令与结果。
-- 若行为不符预期，给出根因、修复点和回归验证。
+- 若有未完成项，明确阻塞点与下一步。
 
-## 参考资料
+## 参考
 
-- 关键规则与参数速查：`references/log-decorator-playbook.md`
-- 源实现与完整说明：`src/log_decorator/README.md`
-
-## 交付检查清单
-
-- [ ] `SKILL.md` frontmatter 仅包含 `name` 与 `description`
-- [ ] `description` 明确“做什么 + 何时使用 + 触发词”
-- [ ] 提供最小实施流程与排障步骤
-- [ ] 参考资料与代码实现路径可直接定位
+- `src/log_decorator/README.md`
+- `src/log_decorator/decorator.py`
+- `src/log_decorator/mermaid.py`
+- `src/log_decorator/parser.py`

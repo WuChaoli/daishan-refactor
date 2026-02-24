@@ -32,24 +32,39 @@ add(1, 2)
 典型日志（示意）：
 
 ```text
-2026-02-09 18:40:00 - INFO  - add - 【开始执行】
-2026-02-09 18:40:00 - INFO  - add - 【入参】
-  - args[0]: 1
-  - args[1]: 2
-2026-02-09 18:40:00 - INFO  - add - 【出参】3
-2026-02-09 18:40:00 - INFO  - add - 【执行完成】耗时：0.08ms
+2026-02-09 18:40:00 - INFO    - 🔵 add
+2026-02-09 18:40:00 - INFO    -   ├─ 🧩 [ args ]
+2026-02-09 18:40:00 - INFO    -   │  ├─ x: 1
+2026-02-09 18:40:00 - INFO    -   │  └─ y: 2
+2026-02-09 18:40:00 - INFO    -   └─ 🧪 [ returns ]
+2026-02-09 18:40:00 - INFO    -      └─ result: 3
 ```
 
-## `@log()` 参数
+## 装饰器说明
 
-当前签名：
+三种装饰器定位：
+
+- `@log(...)`：普通函数日志记录。
+- `@log_entry(...)`：入口函数（创建 `{entry_func}.log`，可启用 Mermaid）。
+- `@log_end(...)`：截止当前嵌套分支，下游 `@log(...)` 作为新分支继续。
+
+> `@log()` 不再支持 `is_entry` 参数。
+
+函数头标识（同形状不同颜色）：
+
+- `🔵`：`@log(...)`
+- `🟢`：`@log_entry(...)`
+- `🟣`：`@log_end(...)`
+
+## 通用参数
+
+`@log()` 当前签名：
 
 ```python
 def log(
     print_args: bool = True,
     print_result: bool = True,
-    print_duration: bool = True,
-    is_entry: bool = False,
+    print_duration: bool = False,
     message: Optional[str] = None,
     args_handler: Optional[Callable[[tuple, dict], Any]] = None,
     result_handler: Optional[Callable[[Any], str]] = None,
@@ -59,14 +74,15 @@ def log(
 ) -> Callable
 ```
 
+`@log_entry()` 与 `@log_end()` 与 `@log()` 使用同一组参数。
+
 参数说明：
 
 | 参数 | 默认值 | 说明 |
 |---|---|---|
 | `print_args` | `True` | 是否记录入参 |
 | `print_result` | `True` | 是否记录出参 |
-| `print_duration` | `True` | 是否记录耗时 |
-| `is_entry` | `False` | 是否作为“入口函数”，会增加 `{entry}.log` |
+| `print_duration` | `False` | 是否记录耗时（默认关闭，可手动开启） |
 | `message` | `None` | 自定义开始日志文案，如 `【用户登录】开始执行` |
 | `args_handler` | `None` | 自定义入参展示，接收 `(args, kwargs)` |
 | `result_handler` | `None` | 自定义出参展示，接收函数返回值 |
@@ -90,6 +106,33 @@ def do_action(user_id: int, action: str):
 - `handler` 抛异常不会影响业务函数返回
 - 处理失败时会降级并写入 warning
 
+## 运行时插入日志
+
+可从 `log_decorator` 导入 `logging`，在函数中间插入日志：
+
+```python
+from log_decorator import log, logging
+
+@log()
+def process_order(order_id: int):
+    logging.DEBUF(f"准备处理订单 {order_id}")
+    logging.INFO("执行库存校验")
+    return True
+```
+
+- 支持 `logging.DEBUF/INFO/WARNING/ERROR`
+- 在 `@log` 上下文内会继承树状结构（`├─/│/└─`）
+- 在 `@log` 上下文外调用会输出警告，并按根节点记录
+
+说明：运行日志内容保持原样；仅 warning/error 行增加形状标识（`⚠` / `✖`）。
+
+## 入参/出参渲染规则
+
+- 入参优先使用函数签名中的参数名（如 `count`、`payload`），不再默认显示 `args[0]`
+- `int/str/list/dict` 等基础类型与容器会尽量打印完整值
+- 类对象优先调用 `to_json()` 输出；若不存在或调用失败，则回退 `str(obj)`
+- 对实例方法会自动忽略 `self/cls`，仅保留业务参数
+
 ## 关键行为说明
 
 ### 1) 树形缩进与调用栈
@@ -100,12 +143,13 @@ def do_action(user_id: int, action: str):
 ### 2) 入口函数与双日志
 
 - 始终写入全局日志：`logs/global.log`
-- 当 `is_entry=True` 且当前没有活跃入口时，额外写入 `logs/{entry_func}.log`
-- 同时只允许一个活跃入口，内层 `is_entry=True` 不会抢占外层入口
+- `@log_entry(...)` 且当前没有活跃入口时，额外写入 `logs/entries/{module_file}.{entry_func}.log`
+- 同时只允许一个活跃入口，内层 `@log_entry(...)` 不会抢占外层入口
+- `@log_end(...)` 会截止当前嵌套分支；外层可继续；下游 `@log(...)` 默认从新分支开始
 
 ### 3) Mermaid 输出触发条件
 
-必须满足 `is_entry=True` 且 `enable_mermaid=True`，并且满足以下任一条件才会落盘：
+必须满足 `@log_entry(enable_mermaid=True)`，并且满足以下任一条件才会落盘：
 
 1. `force_mermaid=True`
 2. 装饰器有效级别是 `DEBUG`
@@ -121,8 +165,10 @@ def do_action(user_id: int, action: str):
 
 ### 4) 错误增强日志
 
-入口调用链发生异常时，会追加写入 `logs/error.log`，包含：
+任意 `@log/@log_entry/@log_end` 函数发生异常时，都会追加写入 `logs/error.log`，包含：
 
+- 错误摘要（`错误摘要: <异常类型>: <异常信息>`）
+- 错误位置（`错误位置: <文件>:<行号> in <函数>`）
 - 入口函数名
 - 调用链路（例如 `level1 -> level2`）
 - 错误类型与信息
@@ -137,6 +183,13 @@ def do_action(user_id: int, action: str):
 - `api_key` / `key`：保留前缀并打码
 - `token`：保留前后片段
 - `password` / `secret`：直接替换为 `***`
+
+### 6) 图标约定
+
+- 函数头：`🔵/🟢/🟣`（按 `@log/@log_entry/@log_end` 区分）
+- 入参与出参分组：`🧩 [ args ]`、`🧪 [ returns ]`
+- warning 与 error：`⚠`、`✖`
+- 运行日志正文：保持原样（不额外加图标）
 
 ## 对象解析规则（`parse_obj`）
 
@@ -191,11 +244,33 @@ logging:
   level: INFO
   encoding: utf-8
   log_dir: logs
+  entry_log_dir: entries
   global_log_file: global.log
   console_enabled: true
   mermaid_enabled: false
   mermaid_dir: mermaid
   mermaid_max_size_mb: 10
+
+  # 图标主题（仅作用于函数头与分组）
+  icon_theme: default
+
+  icon_themes:
+    default:
+      function:
+        log: "🔵"
+        entry: "🟢"
+        end: "🟣"
+      section:
+        args: "🧩"
+        returns: "🧪"
+    minimal:
+      function:
+        log: "◽"
+        entry: "◻"
+        end: "◼"
+      section:
+        args: "▫"
+        returns: "▪"
 ```
 
 > 注意：当前实现中 Mermaid 是否启用以装饰器参数 `enable_mermaid` 为准；`mermaid_enabled` 目前仅作为配置项保留。
@@ -218,7 +293,8 @@ log_decorator/
 ```text
 logs/
 ├── global.log
-├── {entry_func}.log
+├── entries/
+│   └── {module_file}.{entry_func}.log
 ├── error.log
 └── mermaid/
     └── {entry_func}/
@@ -228,12 +304,32 @@ logs/
 ## 导出 API
 
 ```python
-from log_decorator import log, logger, parse_obj, load_config
+from log_decorator import log, log_entry, log_end, logger, logging, parse_obj, load_config
 ```
 
 ## 使用建议
 
-- 入口层函数加 `is_entry=True`，业务内部函数按需加 `@log()`
+- 入口层函数优先使用 `@log_entry(...)`，业务内部函数按需加 `@log()`
+- 在流程边界函数使用 `@log_end(...)` 显式截止当前分支
 - 高频函数可关闭 `print_args` / `print_result` 降低日志体积
 - 涉及密钥、密码、token 的接口优先自定义 `args_handler`
 - 若要稳定留存调用图，建议 `force_mermaid=True`
+
+## 迁移指南（`is_entry` -> `@log_entry`）
+
+```python
+# 旧写法（不再支持）
+@log(is_entry=True, enable_mermaid=True)
+def handler():
+    ...
+
+# 新写法
+@log_entry(enable_mermaid=True)
+def handler():
+    ...
+
+# 在流程边界截止当前分支
+@log_end()
+def finalize_step():
+    ...
+```

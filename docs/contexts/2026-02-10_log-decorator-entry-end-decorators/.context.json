@@ -1,0 +1,18 @@
+{
+  "contextId": "2026-02-10_log-decorator-entry-end-decorators",
+  "status": "in_progress",
+  "createdAt": "2026-02-10T22:24:31.394269Z",
+  "updatedAt": "2026-02-11T00:00:00Z",
+  "completedAt": null,
+  "title": "log-decorator-entry-end-decorators",
+  "description": "实现log-decorator-entry-end-decorators功能",
+  "assignee": "context-manager",
+  "gitBranch": "feature/log-decorator-entry-end",
+  "documents": {
+    "requirements": "requirement.md",
+    "acceptance": "acceptance.md",
+    "userStory": "user-story.md",
+    "flow": "flow.md"
+  },
+  "staticDocsUpdated": []
+}

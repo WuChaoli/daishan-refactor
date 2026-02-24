@@ -10,6 +10,7 @@ from ..Utils.tools import Tool
 
 def find_most_frequent_table(data_list):
     # 提取所有待查询表
+    print(f"data_list: {data_list}")
     tables = [item['待查询表'] for item in data_list]
     # 统计每个表的出现次数
     seen = set()
@@ -97,6 +98,8 @@ class SQLAgent:
                 sql_quer_result=[]
                 for item in new_sql:
                     sql=item["result"]
+                    result = self.sqlmanager.request_api_sql(sql)
+                    print(f"sql: {sql}")
                     sql_res=self.sqlmanager.request_api_sql(sql)['data']
                     if len(str(sql_res))>2000:
                         sql_res=sql_res[:20]

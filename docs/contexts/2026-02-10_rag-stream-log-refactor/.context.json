@@ -1,0 +1,15 @@
+{
+  "contextId": "2026-02-10_rag-stream-log-refactor",
+  "status": "in_progress",
+  "createdAt": "2026-02-10T13:36:03Z",
+  "updatedAt": "2026-02-10T13:36:03Z",
+  "completedAt": null,
+  "title": "RAG Stream 日志链路降噪与业务打点优化",
+  "description": "在 rag_stream 中按分批策略减少过渡函数 @log，保留关键链路并补充 logging.* 业务日志，降低日志噪音同时提升业务可观测性。",
+  "assignee": "罗辑",
+  "gitBranch": "main",
+  "documents": {
+    "plan": "plan.md"
+  },
+  "staticDocsUpdated": []
+}

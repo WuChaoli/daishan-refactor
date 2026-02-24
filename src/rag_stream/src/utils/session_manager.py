@@ -4,12 +4,10 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 
-from src.config.settings import settings
-from log_decorator import log, logger
+from log_decorator import log, logging
 
 
 class SessionManager:
-    @log()
     def __init__(self):
         self.sessions: Dict[str, Dict[str, Any]] = {}
         self.user_sessions: Dict[str, Dict[str, str]] = {}
@@ -41,6 +39,10 @@ class SessionManager:
                 self.user_sessions[user_id] = {}
             self.user_sessions[user_id][category] = session_id
 
+        logging.INFO(
+            f"会话创建成功: session_id={session_id}, category={category}, has_user_id={bool(user_id)}"
+        )
+
         return session_id
 
     @log()
@@ -48,18 +50,29 @@ class SessionManager:
         if user_id in self.user_sessions and category in self.user_sessions[user_id]:
             session_id = self.user_sessions[user_id][category]
             if session_id in self.session_expires and self.session_expires[session_id] > datetime.now():
+                logging.DEBUF(
+                    f"会话命中: user_id={user_id}, category={category}, session_id={session_id}"
+                )
                 return session_id
+            logging.INFO(
+                f"会话过期清理触发: user_id={user_id}, category={category}, session_id={session_id}"
+            )
             self.cleanup_expired_session(session_id)
+        else:
+            logging.DEBUF(f"会话未命中: user_id={user_id}, category={category}")
         return None
 
-    @log()
     def update_session_activity(self, session_id: str):
         if session_id in self.sessions:
             self.sessions[session_id]["last_activity"] = datetime.now().isoformat()
             self.sessions[session_id]["message_count"] += 1
             self.session_expires[session_id] = datetime.now() + timedelta(hours=24)  # 默认24小时过期
+            logging.DEBUF(
+                f"会话活跃度更新: session_id={session_id}, message_count={self.sessions[session_id]['message_count']}"
+            )
+        else:
+            logging.WARNING(f"会话活跃度更新失败: session_id={session_id} 不存在")
 
-    @log()
     def cleanup_expired_session(self, session_id: str):
         if session_id in self.sessions:
             user_id = self.sessions[session_id].get("user_id")
@@ -75,19 +88,25 @@ class SessionManager:
             if session_id in self.session_expires:
                 del self.session_expires[session_id]
 
-    @log()
+            logging.INFO(
+                f"会话清理完成: session_id={session_id}, user_id={user_id}, category={category}"
+            )
+        else:
+            logging.DEBUF(f"跳过会话清理: session_id={session_id} 不存在")
+
     def cleanup_all_expired_sessions(self):
         expired_sessions = []
         for session_id, expire_time in self.session_expires.items():
             if expire_time <= datetime.now():
                 expired_sessions.append(session_id)
 
+        logging.DEBUF(f"会话批量清理扫描: expired_count={len(expired_sessions)}")
         for session_id in expired_sessions:
             self.cleanup_expired_session(session_id)
 
-    @log()
     def get_user_sessions_info(self, user_id: str) -> Dict[str, Any]:
         if user_id not in self.user_sessions:
+            logging.DEBUF(f"用户会话查询为空: user_id={user_id}")
             return {}
 
         user_sessions_info = {}
@@ -101,6 +120,9 @@ class SessionManager:
                     "message_count": self.sessions[session_id]["message_count"],
                 }
 
+        logging.INFO(
+            f"用户会话查询完成: user_id={user_id}, session_count={len(user_sessions_info)}"
+        )
         return user_sessions_info
 
     @log()
@@ -116,8 +138,9 @@ class SessionManager:
                 self.cleanup_expired_session(session_id)
                 count += 1
 
+        logging.INFO(f"用户会话批量清理完成: user_id={user_id}, cleaned_count={count}")
+
         return count
 
 
 session_manager = SessionManager()
-
