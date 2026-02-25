@@ -22,6 +22,7 @@ from src.models.emergency_entities import (
 from src.utils.prompts import SourceDispatchPrompts
 from src.config.settings import settings
 from src.utils.log_manager_import import trace, marker
+from src.utils.daishan_sql_logging import format_daishan_log_text
 from DaiShanSQL import Server
 
 # 加载sourceType映射配置
@@ -283,9 +284,14 @@ def _build_accident_query_sql(accident_id: int) -> str:
 def _query_accident_from_database(sql: str) -> Any:
     """查询事故数据"""
     server = Server()
-    query_result = server.QueryBySQL(sql)
-    marker("database.query_result", {"type": str(type(query_result).__name__)})
-    return query_result
+    marker("DaiShanSQL入参", {"入参": format_daishan_log_text(sql)})
+    try:
+        query_result = server.QueryBySQL(sql)
+        marker("DaiShanSQL出参", {"出参": format_daishan_log_text(query_result)})
+        return query_result
+    except Exception as error:
+        marker("DaiShanSQL出参", {"出参": format_daishan_log_text(f"ERROR: {error}")}, level="ERROR")
+        raise
 
 
 @trace
@@ -525,7 +531,13 @@ async def _execute_resource_query(
     sql = _get_sql_from_mapping(source_type, business_area, number)
     marker("resource_query.execute", {"source_type": source_type, "has_business_area": bool(business_area), "limit": number})
     server = Server()
-    query_result = server.QueryBySQL(sql)
+    marker("DaiShanSQL入参", {"入参": format_daishan_log_text(sql)})
+    try:
+        query_result = server.QueryBySQL(sql)
+        marker("DaiShanSQL出参", {"出参": format_daishan_log_text(query_result)})
+    except Exception as error:
+        marker("DaiShanSQL出参", {"出参": format_daishan_log_text(f"ERROR: {error}")}, level="ERROR")
+        raise
     data_list = _extract_data_list_from_query_result(query_result)
     marker("resource_query.complete", {"source_type": source_type, "row_count": len(data_list)})
     return data_list

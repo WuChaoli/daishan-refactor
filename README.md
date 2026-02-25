@@ -55,3 +55,11 @@ User server81port 22<br>
 
 9.岱山模型服务器（61服务器）：<br>
 启动命令：(vllm) server01@server01:~/data/model$ nohup sh qwen.sh > output.log 2>&1 &<br>
+
+#### 最近更新（2026-02-25）
+
+1. `rag_stream` 中已补充 `DaiShanSQL` 调用的终端日志输出，统一输出入参/出参提示并控制为单行展示。<br>
+2. 已新增与调整相关测试，覆盖关键成功/异常路径，确保日志改造不改变原有业务行为。<br>
+3. OpenSpec 变更已完成归档，并同步新增主规范：<br>
+   - `openspec/specs/daishansql-terminal-io-logging/spec.md`<br>
+   - `openspec/specs/report-function-call-chain/spec.md`<br>

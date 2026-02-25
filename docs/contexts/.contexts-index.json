@@ -1,6 +1,20 @@
 {
   "activeContexts": [
     {
+      "contextId": "2026-02-25_rag-stream-vector-weight-config",
+      "title": "RAG Stream 向量权重配置化",
+      "status": "in_progress",
+      "assignee": "Codex",
+      "updatedAt": "2026-02-25T02:22:46Z"
+    },
+    {
+      "contextId": "2026-02-25_ragflow-sdk-retrieval-params",
+      "title": "RAGFlow SDK 检索参数补全",
+      "status": "in_progress",
+      "assignee": "Codex",
+      "updatedAt": "2026-02-25T01:56:28Z"
+    },
+    {
       "contextId": "2026-02-24_intent-service-type3-integration",
       "title": "IntentService Type3 集成测试构建",
       "status": "in_progress",
@@ -100,5 +114,5 @@
       "archivePath": "docs/archive/2026-02-10_chat-general-chain-optimization"
     }
   ],
-  "lastUpdated": "2026-02-24T05:59:05Z"
+  "lastUpdated": "2026-02-25T02:22:46Z"
 }

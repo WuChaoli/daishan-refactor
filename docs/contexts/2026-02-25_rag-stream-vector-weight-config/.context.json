@@ -1,0 +1,17 @@
+{
+  "contextId": "2026-02-25_rag-stream-vector-weight-config",
+  "status": "in_progress",
+  "createdAt": "2026-02-25T02:22:46Z",
+  "updatedAt": "2026-02-25T02:22:46Z",
+  "completedAt": null,
+  "title": "RAG Stream 向量权重配置化",
+  "description": "将 ragflow 检索的 vector_similarity_weight 配置化为 ragflow 基础配置，并支持 intent 用例覆盖",
+  "assignee": "Codex",
+  "gitBranch": "",
+  "documents": {
+    "requirement": "requirement.md",
+    "design": "design.md",
+    "implementation": "implementation.md"
+  },
+  "staticDocsUpdated": []
+}

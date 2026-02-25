@@ -7,6 +7,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+import yaml
+
 from .config import LogManagerConfig
 from .storage import EventStorage
 
@@ -128,77 +130,112 @@ class ReportGenerator:
                 if span.parent_span_id and span.parent_span_id in trace_spans:
                     trace_spans[span.parent_span_id].children.append(span.span_id)
 
-        lines: list[str] = []
-        lines.append("log-manager 增量报告")
-        lines.append(f"会话ID: {session_id}")
-        lines.append(f"入口ID: {entry_id}")
-        lines.append(f"快照时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        lines.append(f"分析窗口: 累计事件 {len(events)} 条")
-        lines.append(f"模式: {self.config.mode}")
-        lines.append("")
+        payload = self._build_entry_report_payload(
+            session_id=session_id,
+            entry_id=entry_id,
+            events=events,
+            traces=traces,
+            markers_by_trace=markers_by_trace,
+            errors=errors,
+            mem_nodes=mem_nodes,
+        )
+        report_text = yaml.safe_dump(payload, allow_unicode=True, sort_keys=False)
 
-        lines.append("【错误摘要】")
-        if not errors:
-            lines.append("无错误。")
-        else:
-            for idx, err in enumerate(errors[:5], start=1):
-                func = _func_name(err.get("class_name", ""), err.get("func_name", "unknown"))
-                lines.append(
-                    f"{idx}. {err.get('error_type', 'UnknownError')} - {func}: {err.get('error_msg', '')}".strip()
-                )
-        lines.append("")
+        report_dir = self.storage.session_report_dir(session_id) / "entries" / entry_id
+        self._write_report(report_dir, report_text)
 
-        lines.append("【函数调用链】")
+    def _build_entry_report_payload(
+        self,
+        *,
+        session_id: str,
+        entry_id: str,
+        events: list[dict[str, Any]],
+        traces: dict[str, dict[str, SpanNode]],
+        markers_by_trace: dict[str, list[str]],
+        errors: list[dict[str, Any]],
+        mem_nodes: list[tuple[str, int]],
+    ) -> dict[str, Any]:
+        return {
+            "metadata": {
+                "session_id": session_id,
+                "entry_id": entry_id,
+                "snapshot_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "event_count": len(events),
+                "mode": self.config.mode,
+            },
+            "error_summary": self._build_error_summary(errors),
+            "call_chain": self._build_call_chain(traces),
+            "error_path": self._build_error_path_payload(traces, markers_by_trace),
+            "chain_memory_top": self._build_chain_memory_top(mem_nodes),
+        }
+
+    def _build_error_summary(self, errors: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        summary: list[dict[str, Any]] = []
+        for err in errors[:5]:
+            summary.append(
+                {
+                    "type": err.get("error_type", "UnknownError"),
+                    "function_name": _func_name(err.get("class_name", ""), err.get("func_name", "unknown")),
+                    "message": err.get("error_msg", "") or "",
+                }
+            )
+        return summary
+
+    def _build_call_chain(self, traces: dict[str, dict[str, SpanNode]]) -> list[dict[str, Any]]:
+        chains: list[dict[str, Any]] = []
         for trace_id, trace_spans in traces.items():
             roots = [s for s in trace_spans.values() if not s.parent_span_id or s.parent_span_id not in trace_spans]
             if not roots:
                 continue
-            lines.append(f"Trace: {trace_id}")
-            for root in roots:
-                self._append_tree(lines, trace_spans, root, prefix="")
-            lines.append("")
+            chains.append(
+                {
+                    "trace_id": trace_id,
+                    "roots": [self._node_to_payload(trace_spans, root) for root in roots],
+                }
+            )
+        return chains
 
-        lines.append("【错误路径链】")
-        error_path_emitted = False
+    def _node_to_payload(self, span_map: dict[str, SpanNode], node: SpanNode) -> dict[str, Any]:
+        payload: dict[str, Any] = {
+            "function_name": node.func,
+            "duration_ms": float(node.duration_ms) if isinstance(node.duration_ms, (float, int)) else None,
+            "exception": (
+                {
+                    "type": node.error_type,
+                    "message": node.error_msg or "",
+                }
+                if node.error_type
+                else None
+            ),
+        }
+        if node.children:
+            payload["children"] = [self._node_to_payload(span_map, span_map[child_id]) for child_id in node.children]
+        return payload
+
+    def _build_error_path_payload(
+        self, traces: dict[str, dict[str, SpanNode]], markers_by_trace: dict[str, list[str]]
+    ) -> dict[str, Any] | None:
         for trace_id, trace_spans in traces.items():
             for node in trace_spans.values():
-                if node.error_type:
-                    path = self._error_path(trace_spans, node)
-                    lines.append(" -> ".join(path))
-                    lines.append(f"异常: {node.error_type}({node.error_msg or ''})")
-                    markers = markers_by_trace.get(trace_id, [])
-                    if markers:
-                        lines.append(f"上下文: 最近关键点={markers[-1]}")
-                    error_path_emitted = True
-                    break
-            if error_path_emitted:
-                break
-        if not error_path_emitted:
-            lines.append("无错误路径。")
-        lines.append("")
+                if not node.error_type:
+                    continue
+                markers = markers_by_trace.get(trace_id, [])
+                return {
+                    "trace_id": trace_id,
+                    "functions": self._error_path(trace_spans, node),
+                    "exception": {
+                        "type": node.error_type,
+                        "message": node.error_msg or "",
+                    },
+                    "latest_marker": markers[-1] if markers else None,
+                }
+        return None
 
-        lines.append("【调用链内存Top】")
-        if self.config.report.chain_memory_enabled and mem_nodes:
-            top = sorted(mem_nodes, key=lambda item: item[1], reverse=True)[:5]
-            for idx, (func, delta) in enumerate(top, start=1):
-                lines.append(f"{idx}. {func} 内存变化={delta:+}KB")
-        else:
-            lines.append("未启用或无数据。")
-
-        report_dir = self.storage.session_report_dir(session_id) / "entries" / entry_id
-        self._write_report(report_dir, lines)
-
-    def _append_tree(self, lines: list[str], span_map: dict[str, SpanNode], node: SpanNode, prefix: str) -> None:
-        status = node.status.upper()
-        duration = f"{node.duration_ms:.1f}ms" if isinstance(node.duration_ms, (float, int)) else "N/A"
-        mem = ""
-        if self.config.report.chain_memory_enabled and isinstance(node.mem_delta_rss_kb, int):
-            mem = f", 内存变化={node.mem_delta_rss_kb:+}KB"
-        err = f", ERROR: {node.error_type}" if node.error_type else ""
-        lines.append(f"{prefix}{node.func} [状态={status}, 耗时={duration}{mem}{err}]")
-        for child_id in node.children:
-            child = span_map[child_id]
-            self._append_tree(lines, span_map, child, prefix + "  ")
+    def _build_chain_memory_top(self, mem_nodes: list[tuple[str, int]]) -> list[dict[str, Any]]:
+        if not self.config.report.chain_memory_enabled or not mem_nodes:
+            return []
+        top = sorted(mem_nodes, key=lambda item: item[1], reverse=True)[:5]
+        return [{"function_name": func, "mem_delta_rss_kb": delta} for func, delta in top]
 
     def _error_path(self, span_map: dict[str, SpanNode], error_node: SpanNode) -> list[str]:
         path = [error_node.func]
@@ -250,12 +287,12 @@ class ReportGenerator:
                 lines.append(f"PID {pid}: 当前RSS={samples[-1]}KB 峰值RSS={max(samples)}KB 窗口变化={samples[-1]-samples[0]:+}KB")
 
         report_dir = self.storage.session_report_dir(session_id) / "global-error-summary"
-        self._write_report(report_dir, lines)
+        self._write_report(report_dir, "\n".join(lines).rstrip() + "\n")
 
-    def _write_report(self, report_dir: Path, lines: list[str]) -> None:
+    def _write_report(self, report_dir: Path, content: str) -> None:
         report_dir.mkdir(parents=True, exist_ok=True)
         report_file = report_dir / f"report-{_now_stamp()}.txt"
         with open(report_file, "w", encoding="utf-8") as fp:
-            fp.write("\n".join(lines).rstrip() + "\n")
+            fp.write(content.rstrip() + "\n")
         shutil.copyfile(report_file, report_dir / "latest.txt")
         _retain_reports(report_dir, self.config.report.retention)

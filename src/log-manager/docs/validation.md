@@ -18,7 +18,8 @@
 
 - 可看到每个入口独立报告文件。
 - 全局错误汇总按错误签名聚合并持续刷新。
-- 报告包含调用链树与错误路径链。
+- 入口报告为 YAML，且包含 `metadata/error_summary/call_chain/error_path/chain_memory_top`。
+- 调用链节点包含 `function_name`、`duration_ms`、`exception`，错误节点包含 `exception.type` 与 `exception.message`。
 - 报告包含进程内存与调用链内存信息（启用时）。
 
 ## 本次验证结果（2026-02-24）

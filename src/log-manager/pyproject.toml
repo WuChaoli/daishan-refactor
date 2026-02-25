@@ -7,7 +7,7 @@ name = "log-manager"
 version = "0.1.0"
 description = "Low-overhead runtime observability with incremental local reporting."
 requires-python = ">=3.10"
-dependencies = []
+dependencies = ["PyYAML>=6.0"]
 
 [tool.setuptools.packages.find]
 include = ["log_manager*"]

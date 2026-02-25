@@ -57,7 +57,26 @@ class RagflowClient:
         self.datasets = self._get_datasets()
         self.dataset_map = {ds.name: ds for ds in self.datasets}
 
-        marker("ragflow.init", {"dataset_count": len(self.datasets), "names": list(self.dataset_map.keys())})
+        marker(
+            "ragflow.init",
+            {
+                "dataset_count": len(self.datasets),
+                "names": list(self.dataset_map.keys()),
+                "vector_similarity_weight": self._get_effective_vector_similarity_weight(),
+            },
+        )
+
+    def _get_effective_vector_similarity_weight(self) -> float:
+        """
+        获取生效的向量权重配置。
+
+        规则：
+        - 若 intent 配置了 vector_similarity_weight，则使用 intent 值
+        - 否则继承 ragflow 的基础配置值
+        """
+        if self.intent_config.vector_similarity_weight is not None:
+            return float(self.intent_config.vector_similarity_weight)
+        return float(self.ragflow_config.vector_similarity_weight)
 
     def _get_datasets(self) -> List:
         """获取知识库对象列表"""
@@ -190,15 +209,7 @@ class RagflowClient:
         # 在线程池中执行同步的 SDK 调用
         loop = asyncio.get_event_loop()
 
-        # 构建检索请求
-        retrieval = RetrievalRequest(
-            question=query,
-            dataset_ids=[dataset.id],
-            page=1,
-            page_size=self.intent_config.top_k_per_database,
-            similarity_threshold=0.0,  # 不过滤,获取所有结果
-            top_k=1024,
-        )
+        retrieval = self._build_retrieval_request(query=query, dataset_id=dataset.id)
 
         chunks = await loop.run_in_executor(
             None, lambda: self.client.retrieve(retrieval)
@@ -219,6 +230,18 @@ class RagflowClient:
                 results.append(result)
 
         return results
+
+    def _build_retrieval_request(self, query: str, dataset_id: str) -> RetrievalRequest:
+        """构建检索请求参数。"""
+        return RetrievalRequest(
+            question=query,
+            dataset_ids=[dataset_id],
+            page=1,
+            page_size=self.intent_config.top_k_per_database,
+            similarity_threshold=0.0,  # 不过滤,获取所有结果
+            vector_similarity_weight=self._get_effective_vector_similarity_weight(),
+            top_k=1024,
+        )
 
     def _parse_similarity(self, chunk, similarity_type: str) -> float:
         """

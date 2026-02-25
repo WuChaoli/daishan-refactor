@@ -1,0 +1,4 @@
+interface:
+  display_name: "AGENTS MD Manager"
+  short_description: "Manage AGENTS.md dynamic governance blocks"
+  default_prompt: "Use $agents-md-manager to initialize, sync, diff, and validate AGENTS.md dynamic governance blocks in this repository."

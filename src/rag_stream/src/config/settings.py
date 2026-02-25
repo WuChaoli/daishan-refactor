@@ -11,7 +11,7 @@
 
 import os
 from pathlib import Path
-from typing import Any, Dict, Union
+from typing import Any, Dict, Optional, Union
 
 import yaml
 from dotenv import load_dotenv
@@ -72,6 +72,9 @@ class RAGFlowConfig(BaseConfig):
     base_url: str = Field(default="", description="RAGFlow API Base URL")
     timeout: int = Field(default=30, description="HTTP 请求超时时间(秒)")
     max_retries: int = Field(default=3, description="网络错误最大重试次数")
+    vector_similarity_weight: float = Field(
+        default=0.3, description="向量相似度权重（基础配置）"
+    )
 
     # 动态配置：Chat IDs（意图名称 -> Chat ID 映射）
     chat_ids: Dict[str, str] = Field(
@@ -98,6 +101,15 @@ class RAGFlowConfig(BaseConfig):
     def validate_max_retries(cls, v: int) -> int:
         if v < 0:
             raise ValueError(f"max_retries 不能为负数，当前值: {v}")
+        return v
+
+    @field_validator("vector_similarity_weight")
+    @classmethod
+    def validate_vector_similarity_weight(cls, v: float) -> float:
+        if not 0 <= v <= 1:
+            raise ValueError(
+                f"vector_similarity_weight 必须在 0-1 之间，当前值: {v}"
+            )
         return v
 
     def get_chat_id(self, intent_name: str) -> str:
@@ -160,6 +172,9 @@ class IntentConfig(BaseConfig):
     top_k_per_database: int = Field(
         default=10, description="每个知识库返回的 Top K 候选"
     )
+    vector_similarity_weight: Optional[float] = Field(
+        default=None, description="向量相似度权重（可选，未设置则继承 ragflow）"
+    )
     default_type: int = Field(default=0, description="默认意图类型")
 
     @field_validator("similarity_threshold")
@@ -174,6 +189,19 @@ class IntentConfig(BaseConfig):
     def validate_top_k(cls, v: int) -> int:
         if v <= 0:
             raise ValueError(f"top_k_per_database 必须大于 0，当前值: {v}")
+        return v
+
+    @field_validator("vector_similarity_weight")
+    @classmethod
+    def validate_intent_vector_similarity_weight(
+        cls, v: Optional[float]
+    ) -> Optional[float]:
+        if v is None:
+            return v
+        if not 0 <= v <= 1:
+            raise ValueError(
+                f"intent.vector_similarity_weight 必须在 0-1 之间，当前值: {v}"
+            )
         return v
 
 

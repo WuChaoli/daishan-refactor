@@ -11,8 +11,13 @@ from typing import Dict, List, Any
 project_root = Path(__file__).parent.parent.parent.parent
 daishan_sql_path = project_root / "DaiShanSQL"
 sys.path.insert(0, str(daishan_sql_path))
+src_root = project_root / "src"
+if str(src_root) not in sys.path:
+    sys.path.insert(0, str(src_root))
 
 from DaiShanSQL import Server
+from src.utils.log_manager_import import marker
+from src.utils.daishan_sql_logging import format_daishan_log_text
 
 
 def query_table_structure(server: Server, table_name: str) -> List[Dict[str, Any]]:
@@ -34,10 +39,11 @@ def query_table_structure(server: Server, table_name: str) -> List[Dict[str, Any
     ORDER BY COLUMN_ID
     """
 
-    print(f"查询表 {table_name} 的结构...")
+    marker("DaiShanSQL入参", {"入参": format_daishan_log_text(sql)})
 
     try:
         result = server.QueryBySQL(sql)
+        marker("DaiShanSQL出参", {"出参": format_daishan_log_text(result)})
 
         columns = []
         if isinstance(result, dict) and result.get('data'):
@@ -57,11 +63,10 @@ def query_table_structure(server: Server, table_name: str) -> List[Dict[str, Any
                         'nullable': row[3]
                     })
 
-        print(f"  ✓ 成功获取 {len(columns)} 个字段")
         return columns
 
     except Exception as e:
-        print(f"  ✗ 查询失败: {e}")
+        marker("DaiShanSQL出参", {"出参": format_daishan_log_text(f"ERROR: {e}")}, level="ERROR")
         return []
 
 

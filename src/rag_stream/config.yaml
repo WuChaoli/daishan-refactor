@@ -12,6 +12,7 @@ ragflow:
   base_url: "http://172.16.11.60:8081/api/v1"
   timeout: 30
   max_retries: 3
+  vector_similarity_weight: 0.7
 
   # Chat IDs
   chat_ids:
@@ -44,6 +45,8 @@ ragflow:
 intent:
   similarity_threshold: 0.5
   top_k_per_database: 10
+  # 可选覆盖项：不设置则继承 ragflow.vector_similarity_weight
+  # vector_similarity_weight: 0.7
   default_type: 0
 
 # ============================================================

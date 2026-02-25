@@ -25,6 +25,21 @@
   - `reports/<session>/entries/<entry_id>/latest.txt`
   - `reports/<session>/global-error-summary/latest.txt`
 
+## 报告内容格式
+
+- 入口报告（`entries/*/latest.txt`）内容为 YAML。
+- 入口报告顶层字段：
+  - `metadata`
+  - `error_summary`
+  - `call_chain`
+  - `error_path`
+  - `chain_memory_top`
+- 调用链节点关键字段：
+  - `function_name`
+  - `duration_ms`
+  - `exception`（无异常为 `null`，有异常时包含 `type` 与 `message`）
+- 全局错误汇总（`global-error-summary/latest.txt`）仍为文本格式。
+
 ## 报告触发策略
 
 - 定时触发：`T`

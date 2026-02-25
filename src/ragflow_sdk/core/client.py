@@ -380,7 +380,12 @@ class RAGFlowClient:
         Raises:
             RAGFlowSDKError: API 调用失败时抛出
         """
-        response = self.http.post("/retrieval", json=retrieval.dict())
+        payload = (
+            retrieval.model_dump(exclude_none=True)
+            if hasattr(retrieval, "model_dump")
+            else retrieval.dict(exclude_none=True)
+        )
+        response = self.http.post("/retrieval", json=payload)
         return self.parser.parse_list(response, Chunk)
 
     # ==================== 聊天管理 ====================

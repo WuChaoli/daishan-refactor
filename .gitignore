@@ -36,6 +36,8 @@ wheels/
 *.log
 logs/
 *.log.*
+.log-manager/runs/
+.log-manager/reports/
 
 # IDE
 .vscode/
