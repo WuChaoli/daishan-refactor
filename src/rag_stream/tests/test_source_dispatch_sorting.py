@@ -1,9 +1,9 @@
 """测试资源调度中的距离排序功能"""
 import pytest
 from unittest.mock import Mock, patch, AsyncMock
-from src.models.schemas import SourceDispatchRequest, AccidentEventData
-from src.models.emergency_entities import FireFightingFacility, Shelter
-from src.services.source_dispath_srvice import _query_resource_by_type
+from rag_stream.models.schemas import SourceDispatchRequest, AccidentEventData
+from rag_stream.models.emergency_entities import FireFightingFacility, Shelter
+from rag_stream.services.source_dispath_srvice import _query_resource_by_type
 
 
 @pytest.mark.asyncio
@@ -51,11 +51,11 @@ async def test_distance_sorting_for_fire_facilities():
     mock_log_manager.get_function_logger.return_value = mock_logger
 
     # Mock SQL 查询结果
-    with patch('src.services.source_dispath_srvice.execute_sql_query', new_callable=AsyncMock) as mock_sql:
+    with patch('rag_stream.services.source_dispath_srvice.execute_sql_query', new_callable=AsyncMock) as mock_sql:
         mock_sql.return_value = {"data": mock_db_data}
 
         # Mock Dify client
-        with patch('src.services.source_dispath_srvice.get_client') as mock_get_client:
+        with patch('rag_stream.services.source_dispath_srvice.get_client') as mock_get_client:
             mock_client = Mock()
             mock_response = Mock()
             mock_response.answer = '[{"id":"1"},{"id":"2"},{"id":"3"}]'
@@ -122,11 +122,11 @@ async def test_no_sorting_for_medical_institution():
     mock_log_manager.get_function_logger.return_value = mock_logger
 
     # Mock SQL 查询结果
-    with patch('src.services.source_dispath_srvice.execute_sql_query', new_callable=AsyncMock) as mock_sql:
+    with patch('rag_stream.services.source_dispath_srvice.execute_sql_query', new_callable=AsyncMock) as mock_sql:
         mock_sql.return_value = {"data": mock_db_data}
 
         # Mock Dify client
-        with patch('src.services.source_dispath_srvice.get_client') as mock_get_client:
+        with patch('rag_stream.services.source_dispath_srvice.get_client') as mock_get_client:
             mock_client = Mock()
             mock_response = Mock()
             mock_response.answer = '[{"id":"1"},{"id":"2"}]'
@@ -183,11 +183,11 @@ async def test_no_sorting_for_entities_without_coords():
     mock_log_manager.get_function_logger.return_value = mock_logger
 
     # Mock SQL 查询结果
-    with patch('src.services.source_dispath_srvice.execute_sql_query', new_callable=AsyncMock) as mock_sql:
+    with patch('rag_stream.services.source_dispath_srvice.execute_sql_query', new_callable=AsyncMock) as mock_sql:
         mock_sql.return_value = {"data": mock_db_data}
 
         # Mock Dify client
-        with patch('src.services.source_dispath_srvice.get_client') as mock_get_client:
+        with patch('rag_stream.services.source_dispath_srvice.get_client') as mock_get_client:
             mock_client = Mock()
             mock_response = Mock()
             mock_response.answer = '[{"id":"1"},{"id":"2"},{"id":"3"}]'

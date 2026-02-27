@@ -7,10 +7,10 @@ from typing import Optional
 
 import aiohttp
 from fastapi import HTTPException
-from src.utils.log_manager_import import trace, marker
+from rag_stream.utils.log_manager_import import trace, marker
 
-from src.config.settings import settings
-from src.utils.session_manager import session_manager
+from rag_stream.config.settings import settings
+from rag_stream.utils.session_manager import session_manager
 
 @trace
 async def get_rag_client():

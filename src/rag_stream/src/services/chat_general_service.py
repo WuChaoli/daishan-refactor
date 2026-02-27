@@ -4,16 +4,23 @@ import asyncio
 import re
 from typing import Any, Awaitable, Callable
 
-from src.utils.log_manager_import import entry_trace, marker, trace
-from src.utils.daishan_sql_logging import format_daishan_log_text
+from rag_stream.utils.log_manager_import import entry_trace, marker, trace
+from rag_stream.utils.daishan_sql_logging import format_daishan_log_text
 try:
     from DaiShanSQL.DaiShanSQL.api_server import Server
 except ModuleNotFoundError:
     from DaiShanSQL import Server
 
-from src.models.schemas import ChatRequest
+from rag_stream.models.schemas import ChatRequest
 
-server = Server()
+_server: Server | None = None
+
+
+def _get_server() -> Server:
+    global _server
+    if _server is None:
+        _server = Server()
+    return _server
 
 
 def _skip_intent_error_result(result_dict: dict) -> None:
@@ -76,7 +83,7 @@ async def _post_process_type1(result_dict: dict) -> dict:
     elif kb_name == "企业知识库":
         marker("DaiShanSQL入参", {"入参": format_daishan_log_text("sql_ChemicalCompanyInfo()")})
         try:
-            result = server.sqlFixed.sql_ChemicalCompanyInfo()
+            result = _get_server().sqlFixed.sql_ChemicalCompanyInfo()
             marker("DaiShanSQL出参", {"出参": format_daishan_log_text(result)})
         except Exception as error:
             marker("DaiShanSQL出参", {"出参": format_daishan_log_text(f"ERROR: {error}")}, level="ERROR")
@@ -84,7 +91,7 @@ async def _post_process_type1(result_dict: dict) -> dict:
     elif kb_name == "安全信息知识库":
         marker("DaiShanSQL入参", {"入参": format_daishan_log_text("sql_SecuritySituation()")})
         try:
-            result = server.sqlFixed.sql_SecuritySituation()
+            result = _get_server().sqlFixed.sql_SecuritySituation()
             marker("DaiShanSQL出参", {"出参": format_daishan_log_text(result)})
         except Exception as error:
             marker("DaiShanSQL出参", {"出参": format_daishan_log_text(f"ERROR: {error}")}, level="ERROR")
@@ -149,7 +156,7 @@ async def _post_process_type2(text_input: str, result_dict: dict) -> dict:
     )
     try:
         sql_result = await asyncio.to_thread(
-            server.get_sql_result,
+            _get_server().get_sql_result,
             query=text_input,
             history=[],
             questions=questions,
@@ -205,7 +212,7 @@ async def _post_process_and_route_type3(
             },
         )
         judge_result = await asyncio.to_thread(
-            server.judgeQuery,
+            _get_server().judgeQuery,
             request.question,
             return_question,
         )

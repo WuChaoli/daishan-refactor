@@ -12,14 +12,13 @@ from typing import Dict, List, Any
 from dotenv import load_dotenv
 
 # 添加项目路径到 sys.path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 # 加载环境变量
 env_path = Path(__file__).parent.parent / '.env'
 load_dotenv(env_path)
 
-from src.utils.prompts import SourceDispatchPrompts
-from src.utils.dify_client_factory import get_client
+from rag_stream.utils.prompts import SourceDispatchPrompts
+from rag_stream.utils.dify_client_factory import get_client
 
 
 class IntentClassificationTester:

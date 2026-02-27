@@ -1,15 +1,9 @@
 import json
-import sys
-from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 
-# 添加 rag_stream 目录到 Python 路径，确保可以 import src.*
-rag_stream_path = Path(__file__).parent.parent
-sys.path.insert(0, str(rag_stream_path))
-
-from src.services.rag_service import stream_chat_response
+from rag_stream.services.rag_service import stream_chat_response
 
 
 class _FakeContent:
@@ -69,7 +63,7 @@ async def test_stream_chat_response_end_chunk_only_once():
     )
     fake_response = _FakeResponse([upstream], status=200)
 
-    with patch("src.services.rag_service.aiohttp.ClientSession", return_value=_FakeClientSession(fake_response)):
+    with patch("rag_stream.services.rag_service.aiohttp.ClientSession", return_value=_FakeClientSession(fake_response)):
         events = []
         async for sse in stream_chat_response("chat_id", "question", "session_id"):
             assert sse.startswith("data: ")
@@ -96,7 +90,7 @@ async def test_stream_chat_response_ignores_non_prefix_update_to_avoid_duplicate
     )
     fake_response = _FakeResponse([upstream], status=200)
 
-    with patch("src.services.rag_service.aiohttp.ClientSession", return_value=_FakeClientSession(fake_response)):
+    with patch("rag_stream.services.rag_service.aiohttp.ClientSession", return_value=_FakeClientSession(fake_response)):
         answers = []
         async for sse in stream_chat_response("chat_id", "question", "session_id"):
             payload = json.loads(sse.split("data: ", 1)[1])
@@ -118,7 +112,7 @@ async def test_stream_chat_response_ignores_final_full_rewrite_with_inserted_mar
     )
     fake_response = _FakeResponse([upstream], status=200)
 
-    with patch("src.services.rag_service.aiohttp.ClientSession", return_value=_FakeClientSession(fake_response)):
+    with patch("rag_stream.services.rag_service.aiohttp.ClientSession", return_value=_FakeClientSession(fake_response)):
         answers = []
         async for sse in stream_chat_response("chat_id", "question", "session_id"):
             payload = json.loads(sse.split("data: ", 1)[1])

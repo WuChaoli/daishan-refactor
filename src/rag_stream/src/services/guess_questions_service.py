@@ -6,10 +6,10 @@
 import json
 import re
 from typing import Dict, List, Any
-from src.utils.log_manager_import import entry_trace, trace, marker
+from rag_stream.utils.log_manager_import import entry_trace, trace, marker
 
-from src.utils.dify_client_factory import get_client
-from src.utils.prompts import GuessQuestionsPrompts
+from rag_stream.utils.dify_client_factory import get_client
+from rag_stream.utils.prompts import GuessQuestionsPrompts
 
 
 # 类别1的固定问题模板

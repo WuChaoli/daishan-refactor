@@ -7,10 +7,9 @@ import sys
 import os
 
 # 添加项目路径到 sys.path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from src.models.schemas import SourceDispatchRequest
-from src.services.source_dispath_srvice import handle_source_dispatch
+from rag_stream.models.schemas import SourceDispatchRequest
+from rag_stream.services.source_dispath_srvice import handle_source_dispatch
 
 
 # 测试用例配置

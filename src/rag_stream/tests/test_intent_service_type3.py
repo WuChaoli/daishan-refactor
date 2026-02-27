@@ -1,8 +1,8 @@
 import asyncio
 from dataclasses import dataclass
 
-from src.services.intent_service import IntentService
-from src.services.intent_service.base_intent_service import IntentResult, QueryResult
+from rag_stream.services.intent_service import IntentService
+from rag_stream.services.intent_service.base_intent_service import IntentResult, QueryResult
 
 
 @dataclass

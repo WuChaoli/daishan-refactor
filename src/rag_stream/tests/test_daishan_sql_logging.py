@@ -36,10 +36,10 @@ if "DaiShanSQL" not in sys.modules:
     daishan_sql_stub.Server = _StubServer
     sys.modules["DaiShanSQL"] = daishan_sql_stub
 
-from src.services import chat_general_service
-from src.services import source_dispath_srvice
-from src.utils import fetch_table_structures
-from src.utils.daishan_sql_logging import format_daishan_log_text
+from rag_stream.services import chat_general_service
+from rag_stream.services import source_dispath_srvice
+from rag_stream.utils import fetch_table_structures
+from rag_stream.utils.daishan_sql_logging import format_daishan_log_text
 
 
 def test_format_daishan_log_text_should_be_single_line_and_truncated():

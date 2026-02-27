@@ -4,7 +4,7 @@ import asyncio
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock, patch
 
-from src.services.guess_questions_service import handle_guess_questions, process_type2
+from rag_stream.services.guess_questions_service import handle_guess_questions, process_type2
 
 
 async def _test_handle_guess_questions_should_call_general_chat_when_type2_results_empty():
@@ -21,7 +21,7 @@ async def _test_handle_guess_questions_should_call_general_chat_when_type2_resul
     )
 
     with patch(
-        "src.services.guess_questions_service.get_client",
+        "rag_stream.services.guess_questions_service.get_client",
         return_value=general_client,
     ) as mock_get_client:
         result = await handle_guess_questions("园区最近安全态势怎么样", intent_service)
@@ -48,7 +48,7 @@ async def _test_handle_guess_questions_should_return_empty_when_general_chat_una
     }
 
     with patch(
-        "src.services.guess_questions_service.get_client",
+        "rag_stream.services.guess_questions_service.get_client",
         side_effect=ValueError("missing GENRAL_CHAT client"),
     ):
         result = await handle_guess_questions("园区最近安全态势怎么样", intent_service)

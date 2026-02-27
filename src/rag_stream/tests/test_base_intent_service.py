@@ -3,8 +3,8 @@ import json
 from dataclasses import dataclass
 from typing import Any, Dict, List
 
-from src.services.intent_service import BaseIntentService
-from src.services.intent_service.base_intent_service import IntentRecognizerSettings
+from rag_stream.services.intent_service import BaseIntentService
+from rag_stream.services.intent_service.base_intent_service import IntentRecognizerSettings
 
 
 @dataclass

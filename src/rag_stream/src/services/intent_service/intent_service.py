@@ -5,8 +5,8 @@ IntentService - 意图识别服务
 
 from typing import Any, Dict, List
 
-from src.utils.log_manager_import import marker, trace
-from src.services.intent_service.base_intent_service import (
+from rag_stream.utils.log_manager_import import marker, trace
+from rag_stream.services.intent_service.base_intent_service import (
     BaseIntentService,
     IntentRecognizerSettings,
     IntentResult,

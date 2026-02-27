@@ -15,13 +15,12 @@ from typing import AsyncGenerator, Dict, List, Optional
 
 # 添加 rag_stream 根目录到 sys.path
 rag_stream_root = Path(__file__).parents[1]
-sys.path.insert(0, str(rag_stream_root))
 
-from src.services.intent_service import IntentResult, QueryResult
-from src.services.log_manager import LogManager
-from src.services.intent_service import IntentService
-from src.utils.ragflow_client import RetrievalResult
-from src.config.settings import IntentConfig, LoggingConfig, RAGFlowConfig
+from rag_stream.services.intent_service import IntentResult, QueryResult
+from rag_stream.services.log_manager import LogManager
+from rag_stream.services.intent_service import IntentService
+from rag_stream.utils.ragflow_client import RetrievalResult
+from rag_stream.config.settings import IntentConfig, LoggingConfig, RAGFlowConfig
 
 
 # ==================== Mock 类 ====================

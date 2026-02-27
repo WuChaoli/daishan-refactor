@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Any, Dict, Literal, Optional
 
 from pydantic import BaseModel, Field
-from src.models.emergency_entities import parse_location
+from rag_stream.models.emergency_entities import parse_location
 
 
 class ChatType(str, Enum):

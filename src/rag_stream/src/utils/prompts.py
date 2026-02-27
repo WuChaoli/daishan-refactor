@@ -3,7 +3,7 @@ SourceDispatchPrompts - 资源调度提示词管理
 负责管理资源调度相关的所有提示词模板
 """
 
-from src.models.schemas import AccidentEventData
+from rag_stream.models.schemas import AccidentEventData
 
 
 class SourceDispatchPrompts:

@@ -6,11 +6,11 @@ import os
 import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
 
-from src.services.source_dispath_srvice import (
+from rag_stream.services.source_dispath_srvice import (
     handle_source_dispatch,
     _get_solid_resource_instruction
 )
-from src.models.schemas import SourceDispatchRequest
+from rag_stream.models.schemas import SourceDispatchRequest
 
 
 class TestSourceDispatchDifyIntegration:
@@ -26,7 +26,7 @@ class TestSourceDispatchDifyIntegration:
         }
         with patch.dict(os.environ, env_vars, clear=True):
             # 重置全局工厂实例
-            import src.utils.dify_client_factory as factory_module
+            import rag_stream.utils.dify_client_factory as factory_module
             factory_module._factory_instance = None
             yield env_vars
 
@@ -47,7 +47,7 @@ class TestSourceDispatchDifyIntegration:
     ):
         """测试 handle_source_dispatch 使用工厂获取 client"""
         # Mock DaiShanSQL Server
-        with patch('src.services.source_dispath_srvice.Server') as mock_server:
+        with patch('rag_stream.services.source_dispath_srvice.Server') as mock_server:
             # Mock 数据库查询结果
             mock_server_instance = MagicMock()
             mock_server.return_value = mock_server_instance
@@ -61,7 +61,7 @@ class TestSourceDispatchDifyIntegration:
             }
 
             # Mock DifyClient
-            with patch('src.utils.dify_client_factory.DifyClient') as mock_dify_client:
+            with patch('rag_stream.utils.dify_client_factory.DifyClient') as mock_dify_client:
                 mock_client_instance = MagicMock()
                 mock_dify_client.return_value = mock_client_instance
 
@@ -111,11 +111,11 @@ class TestSourceDispatchDifyIntegration:
         # 清空环境变量
         with patch.dict(os.environ, {}, clear=True):
             # 重置全局工厂实例
-            import src.utils.dify_client_factory as factory_module
+            import rag_stream.utils.dify_client_factory as factory_module
             factory_module._factory_instance = None
 
             # Mock DaiShanSQL Server
-            with patch('src.services.source_dispath_srvice.Server') as mock_server:
+            with patch('rag_stream.services.source_dispath_srvice.Server') as mock_server:
                 mock_server_instance = MagicMock()
                 mock_server.return_value = mock_server_instance
                 mock_server_instance.QueryBySQL.return_value = {

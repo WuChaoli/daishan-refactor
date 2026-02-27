@@ -1,7 +1,7 @@
 """地理距离计算工具测试"""
 import pytest
-from src.utils.geo_utils import calculate_distance, sort_entities_by_distance
-from src.models.emergency_entities import FireFightingFacility, Shelter
+from rag_stream.utils.geo_utils import calculate_distance, sort_entities_by_distance
+from rag_stream.models.emergency_entities import FireFightingFacility, Shelter
 
 
 class TestCalculateDistance:
