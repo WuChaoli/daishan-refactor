@@ -6,7 +6,7 @@ import os
 import pytest
 from unittest.mock import patch, MagicMock
 
-from src.utils.dify_client_factory import get_factory, get_client, list_clients
+from rag_stream.utils.dify_client_factory import get_factory, get_client, list_clients
 
 
 class TestDifyClientFactoryIntegration:
@@ -22,7 +22,7 @@ class TestDifyClientFactoryIntegration:
         }
         with patch.dict(os.environ, env_vars, clear=True):
             # 重置全局工厂实例
-            import src.utils.dify_client_factory as factory_module
+            import rag_stream.utils.dify_client_factory as factory_module
             factory_module._factory_instance = None
             yield env_vars
 
@@ -52,7 +52,7 @@ class TestDifyClientFactoryIntegration:
 
     def test_stream_personnel_dispatch_uses_factory(self, mock_env):
         """测试 stream_personnel_dispatch 使用工厂"""
-        from src.services.dify_service import stream_personnel_dispatch
+        from rag_stream.services.dify_service import stream_personnel_dispatch
 
         # 这个测试验证函数可以正确导入和使用工厂
         # 实际的流式调用需要 mock DifyClient 的行为

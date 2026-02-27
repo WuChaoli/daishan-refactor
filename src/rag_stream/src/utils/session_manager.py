@@ -1,19 +1,8 @@
 from __future__ import annotations
 
 import uuid
-import sys
-import os
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
-
-# 添加项目根目录到Python路径
-# session_manager.py 在: project_root/src/rag_stream/src/utils/
-# 需要向上5级到达项目根目录
-current_file = os.path.abspath(__file__)
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(current_file)))))
-src_root = os.path.join(project_root, "src")
-if src_root not in sys.path:
-    sys.path.insert(0, src_root)
 
 try:
     from log_manager import trace, marker

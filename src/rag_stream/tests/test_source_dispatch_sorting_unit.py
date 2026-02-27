@@ -1,12 +1,12 @@
 """测试资源调度中的距离排序功能 - 单元测试版本"""
-from src.models.schemas import AccidentEventData
-from src.models.emergency_entities import (
+from rag_stream.models.schemas import AccidentEventData
+from rag_stream.models.emergency_entities import (
     FireFightingFacility,
     Shelter,
     MedicalInstitution,
     EmergencySupply
 )
-from src.utils.geo_utils import sort_entities_by_distance
+from rag_stream.utils.geo_utils import sort_entities_by_distance
 
 
 def test_sort_fire_facilities_by_distance():

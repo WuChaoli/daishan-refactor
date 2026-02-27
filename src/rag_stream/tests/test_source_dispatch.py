@@ -8,10 +8,9 @@ import pytest
 
 # 添加项目路径到 sys.path
 # 添加 rag_stream 目录（用于导入 src 包）
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from src.models.schemas import SourceDispatchRequest
-from src.services.source_dispath_srvice import handle_source_dispatch
+from rag_stream.models.schemas import SourceDispatchRequest
+from rag_stream.services.source_dispath_srvice import handle_source_dispatch
 
 
 @pytest.mark.asyncio

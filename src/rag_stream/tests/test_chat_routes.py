@@ -5,17 +5,9 @@ from unittest.mock import AsyncMock, MagicMock, patch, Mock
 import pytest
 from fastapi.testclient import TestClient
 
-# 导入完整的应用而不是单独的 router
-import sys
-from pathlib import Path
-
-# 添加 rag_stream 目录到 Python 路径
-rag_stream_path = Path(__file__).parent.parent
-sys.path.insert(0, str(rag_stream_path))
-
 # 导入 app 和路由函数
-from main import app
-from src.services.dify_service import should_use_dify
+from rag_stream.main import app
+from rag_stream.services.dify_service import should_use_dify
 
 
 @pytest.fixture

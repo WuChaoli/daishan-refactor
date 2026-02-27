@@ -6,6 +6,7 @@ import os
 import sys
 import time
 import httpx
+from typing import Any, Dict
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 
@@ -28,6 +29,24 @@ from log_decorator import logger
 # 加载环境变量 - 使用绝对路径确保正确加载
 env_path = os.path.join(os.path.dirname(__file__), ".env")
 load_dotenv(env_path)
+
+RAG_STREAM_BASE_URL = os.getenv("RAG_STREAM_BASE_URL", "http://127.0.0.1:11028").rstrip("/")
+RAG_STREAM_TIMEOUT = float(os.getenv("RAG_STREAM_TIMEOUT", "30"))
+
+
+async def call_rag_stream_health() -> Dict[str, Any]:
+    """
+    调用 rag_stream 健康检查接口（仓内调用模板）
+    环境变量:
+    - RAG_STREAM_BASE_URL
+    - RAG_STREAM_TIMEOUT
+    """
+    url = f"{RAG_STREAM_BASE_URL}/health"
+    timeout = httpx.Timeout(RAG_STREAM_TIMEOUT)
+    async with httpx.AsyncClient(timeout=timeout) as client:
+        resp = await client.get(url)
+        resp.raise_for_status()
+        return resp.json()
 
 
 # ============================================================
@@ -61,6 +80,13 @@ async def lifespan(app: FastAPI):
         dify_timeout = config.stream_chat_timeout if hasattr(config, 'stream_chat_timeout') else 30.0
         app.state.http_client = httpx.AsyncClient(timeout=dify_timeout)
         logger.info("✓ HTTP 客户端初始化完成")
+
+        # 2.1 rag_stream 服务探活（不阻塞当前服务启动）
+        try:
+            health = await call_rag_stream_health()
+            logger.info(f"✓ rag_stream 探活成功: {health}")
+        except Exception as e:
+            logger.warning(f"⚠ rag_stream 探活失败: {e}")
 
         # 3. 初始化 RAGFlow 客户端
         try:

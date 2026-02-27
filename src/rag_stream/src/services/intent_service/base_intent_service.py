@@ -7,9 +7,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Union
 
-from src.utils.log_manager_import import marker
-from src.config.settings import settings
-from src.utils.ragflow_client import RagflowClient
+from rag_stream.utils.log_manager_import import marker
+from rag_stream.config.settings import settings
+from rag_stream.utils.ragflow_client import RagflowClient
 
 
 @dataclass

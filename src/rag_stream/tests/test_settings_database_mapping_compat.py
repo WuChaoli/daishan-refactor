@@ -1,4 +1,4 @@
-from src.config.settings import RAGFlowConfig
+from rag_stream.config.settings import RAGFlowConfig
 
 
 def test_get_intent_type_should_parse_string_number_mapping():

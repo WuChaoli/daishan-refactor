@@ -7,9 +7,9 @@ import os
 from typing import Optional, AsyncIterator
 
 import aiohttp
-from src.utils.log_manager_import import marker, trace
+from rag_stream.utils.log_manager_import import marker, trace
 
-from src.config.settings import settings
+from rag_stream.config.settings import settings
 
 _SUPPRESS_INTERNAL_LOGS = os.getenv("DIFY_SUPPRESS_INTERNAL_LOGS", "").lower() in {"1", "true", "yes", "on"}
 

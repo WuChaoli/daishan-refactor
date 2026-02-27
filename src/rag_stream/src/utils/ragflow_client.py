@@ -9,8 +9,8 @@ import asyncio
 from dataclasses import dataclass
 from typing import Dict, List
 
-from src.utils.log_manager_import import marker, trace
-from src.config.settings import IntentConfig, RAGFlowConfig
+from rag_stream.utils.log_manager_import import marker, trace
+from rag_stream.config.settings import IntentConfig, RAGFlowConfig
 from ragflow_sdk import RAGFlowClient
 from ragflow_sdk.models import RetrievalRequest
 

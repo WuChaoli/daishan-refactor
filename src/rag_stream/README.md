@@ -2,6 +2,18 @@
 
 基于RAG（检索增强生成）的流式回复服务，支持7个专业领域的智能问答，具备智能会话管理功能。
 
+## 独立服务启动（当前推荐）
+
+- 仓库根目录启动：`uv run python -m rag_stream.main`
+- 子项目目录启动：`cd src/rag_stream && uv run python -m rag_stream.main`
+
+对外调用统一环境变量：
+
+- `RAG_STREAM_BASE_URL`（示例：`http://127.0.0.1:11028`）
+- `RAG_STREAM_TIMEOUT`（默认 `30` 秒）
+
+健康检查接口：`GET /health`（返回 `200` + `{"status":"ok"}`）
+
 ## 功能特性
 
 - 🚀 **流式回复**: 支持实时流式输出，提供更好的用户体验
@@ -29,7 +41,8 @@
 ### 1. 安装依赖
 
 ```bash
-pip install -r requirements.txt
+cd src/rag_stream
+uv sync
 ```
 
 ### 2. 配置环境
@@ -44,10 +57,10 @@ RAG_API_KEY: str = "your-api-key-here"
 ### 3. 启动服务
 
 ```bash
-python main.py
+uv run python -m rag_stream.main
 ```
 
-服务将在 `http://localhost:8000` 启动。
+服务默认在 `http://0.0.0.0:11028` 启动（以 `config.yaml` 为准）。
 
 ### 4. 查看API文档
 

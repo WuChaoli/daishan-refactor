@@ -3,21 +3,12 @@
 用于查询 source_type_mapping.json 中所有表的结构信息
 """
 import json
-import sys
 from pathlib import Path
 from typing import Dict, List, Any
 
-# 添加 DaiShanSQL 目录到 Python 路径
-project_root = Path(__file__).parent.parent.parent.parent
-daishan_sql_path = project_root / "DaiShanSQL"
-sys.path.insert(0, str(daishan_sql_path))
-src_root = project_root / "src"
-if str(src_root) not in sys.path:
-    sys.path.insert(0, str(src_root))
-
 from DaiShanSQL import Server
-from src.utils.log_manager_import import marker
-from src.utils.daishan_sql_logging import format_daishan_log_text
+from rag_stream.utils.log_manager_import import marker
+from rag_stream.utils.daishan_sql_logging import format_daishan_log_text
 
 
 def query_table_structure(server: Server, table_name: str) -> List[Dict[str, Any]]:
@@ -165,7 +156,7 @@ def main():
         print(f"\n✗ 执行失败: {e}")
         import traceback
         traceback.print_exc()
-        sys.exit(1)
+        raise
 
 
 if __name__ == "__main__":

@@ -8,8 +8,8 @@ import asyncio
 from typing import Dict, Any, List, Optional, Callable, Type
 from pathlib import Path
 
-from src.models.schemas import SourceDispatchRequest, AccidentEventData
-from src.models.emergency_entities import (
+from rag_stream.models.schemas import SourceDispatchRequest, AccidentEventData
+from rag_stream.models.emergency_entities import (
     EmergencySupply,
     RescueTeam,
     EmergencyExpert,
@@ -19,10 +19,10 @@ from src.models.emergency_entities import (
     RescueOrganization,
     ProtectionTarget
 )
-from src.utils.prompts import SourceDispatchPrompts
-from src.config.settings import settings
-from src.utils.log_manager_import import trace, marker
-from src.utils.daishan_sql_logging import format_daishan_log_text
+from rag_stream.utils.prompts import SourceDispatchPrompts
+from rag_stream.config.settings import settings
+from rag_stream.utils.log_manager_import import trace, marker
+from rag_stream.utils.daishan_sql_logging import format_daishan_log_text
 from DaiShanSQL import Server
 
 # 加载sourceType映射配置
@@ -323,7 +323,7 @@ def _parse_accident_query_result(query_result: Any, accident_id: int) -> Acciden
 
 def _get_dify_clients() -> tuple:
     """获取Dify客户端实例"""
-    from src.utils.dify_client_factory import get_client
+    from rag_stream.utils.dify_client_factory import get_client
 
     general_client = get_client("GENRAL_CHAT")
     if general_client is None:
@@ -557,7 +557,7 @@ def _sort_by_distance(
     accident_data: AccidentEventData
 ) -> List[Any]:
     """按距离排序实体列表"""
-    from src.utils.geo_utils import sort_entities_by_distance
+    from rag_stream.utils.geo_utils import sort_entities_by_distance
     return sort_entities_by_distance(accident_data, entities)
 
 

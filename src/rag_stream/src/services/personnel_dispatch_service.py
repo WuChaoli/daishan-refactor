@@ -7,7 +7,7 @@ import json
 import asyncio
 from typing import Dict, Any, List, Optional
 
-from src.utils.log_manager_import import entry_trace, marker, trace
+from rag_stream.utils.log_manager_import import entry_trace, marker, trace
 
 
 @entry_trace("personnel_dispatch")
@@ -62,7 +62,7 @@ async def handle_personnel_dispatch(
 
 def _get_dify_clients() -> tuple:
     """获取Dify客户端实例"""
-    from src.utils.dify_client_factory import get_client
+    from rag_stream.utils.dify_client_factory import get_client
 
     general_client = get_client("GENRAL_CHAT")
     if general_client is None:
@@ -94,7 +94,7 @@ async def _extract_entities(
     Returns:
         List[str]: 提取的实体列表
     """
-    from src.utils.prompts import SourceDispatchPrompts
+    from rag_stream.utils.prompts import SourceDispatchPrompts
 
     # 构建实体提取 prompt
     entity_query = SourceDispatchPrompts.get_entity_extraction_prompt(voice_text)

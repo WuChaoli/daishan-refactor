@@ -61,3 +61,5 @@ htmlcov/
 ccsw.log
 
 company/
+.worktrees/
+worktrees/

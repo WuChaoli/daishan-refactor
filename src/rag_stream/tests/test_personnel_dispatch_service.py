@@ -7,7 +7,7 @@
 import pytest
 import asyncio
 from typing import List, Dict
-from src.services.personnel_dispatch_service import handle_personnel_dispatch
+from rag_stream.services.personnel_dispatch_service import handle_personnel_dispatch
 
 
 class TestHandlePersonnelDispatch:

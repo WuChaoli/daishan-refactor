@@ -2,7 +2,7 @@ import asyncio
 import json
 from dataclasses import dataclass
 
-from src.services.intent_service import IntentService
+from rag_stream.services.intent_service import IntentService
 
 
 @dataclass

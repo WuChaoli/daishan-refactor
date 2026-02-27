@@ -2,16 +2,6 @@
 log_manager导入辅助模块
 提供统一的导入接口,处理测试环境中的导入降级
 """
-import sys
-import os
-from pathlib import Path
-
-# 确保项目根目录的src在sys.path中
-current_file = Path(__file__).resolve()
-project_root = current_file.parent.parent.parent.parent.parent  # 向上5级到项目根目录
-src_root = project_root / "src"
-if str(src_root) not in sys.path:
-    sys.path.insert(0, str(src_root))
 
 try:
     from log_manager import trace, marker, entry_trace

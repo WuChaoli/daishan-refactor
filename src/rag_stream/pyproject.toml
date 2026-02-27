@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rag-stream"
+version = "0.1.0"
+description = "rag_stream independent service package"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "aiohttp==3.9.1",
+    "fastapi==0.104.1",
+    "openai>=2.15.0",
+    "pydantic==2.5.0",
+    "pydantic-settings==2.1.0",
+    "python-dotenv>=1.0.1",
+    "python-multipart==0.0.6",
+    "pyyaml==6.0.1",
+    "requests==2.31.0",
+    "uvicorn[standard]==0.24.0",
+    "daishansql",
+    "dify-sdk",
+    "log-manager",
+    "ragflow-sdk",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+]
+
+[tool.setuptools]
+package-dir = { rag_stream = "src" }
+packages = [
+    "rag_stream",
+    "rag_stream.config",
+    "rag_stream.models",
+    "rag_stream.routes",
+    "rag_stream.services",
+    "rag_stream.services.intent_service",
+    "rag_stream.utils",
+]
+
+[tool.uv.sources]
+daishansql = { path = "../DaiShanSQL", editable = true }
+dify-sdk = { path = "../dify_sdk", editable = true }
+log-manager = { path = "../log-manager", editable = true }
+ragflow-sdk = { path = "../ragflow_sdk", editable = true }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

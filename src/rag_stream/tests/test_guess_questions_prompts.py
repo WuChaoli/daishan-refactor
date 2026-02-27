@@ -1,4 +1,4 @@
-from src.utils.prompts import GuessQuestionsPrompts
+from rag_stream.utils.prompts import GuessQuestionsPrompts
 
 
 def test_type2_fallback_prompt_should_emphasize_guess_not_answer():

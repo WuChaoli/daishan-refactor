@@ -6,7 +6,6 @@ from pathlib import Path
 # 添加 DaiShanSQL 目录到 Python 路径
 project_root = Path(__file__).parent.parent.parent
 daishan_sql_path = project_root / "DaiShanSQL"
-sys.path.insert(0, str(daishan_sql_path))
 
 # 导入 Server 类
 from DaiShanSQL import Server

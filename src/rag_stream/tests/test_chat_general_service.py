@@ -32,8 +32,8 @@ if "DaiShanSQL" not in sys.modules:
     daishan_sql_stub.Server = _StubServer
     sys.modules["DaiShanSQL"] = daishan_sql_stub
 
-from src.models.schemas import ChatRequest
-from src.services.chat_general_service import _route_with_sql_result, handle_chat_general
+from rag_stream.models.schemas import ChatRequest
+from rag_stream.services.chat_general_service import _route_with_sql_result, handle_chat_general
 
 
 async def _test_route_with_sql_result_should_keep_original_request_fields():
@@ -107,7 +107,7 @@ async def _test_handle_chat_general_should_fallback_to_general_when_sql_result_e
     chat_with_category = AsyncMock(return_value={"ok": True})
 
     with patch(
-        "src.services.chat_general_service._post_process_type2",
+        "rag_stream.services.chat_general_service._post_process_type2",
         new=AsyncMock(return_value={"type": 2, "data": {"sql_result": ""}}),
     ):
         result = await handle_chat_general(
@@ -154,7 +154,7 @@ async def _test_handle_chat_general_should_route_type3_with_combined_prompt():
     chat_with_category = AsyncMock(return_value={"ok": True})
 
     with patch(
-        "src.services.chat_general_service.asyncio.to_thread",
+        "rag_stream.services.chat_general_service.asyncio.to_thread",
         new=AsyncMock(return_value=sql_result),
     ) as mocked_to_thread:
         result = await handle_chat_general(
@@ -206,7 +206,7 @@ async def _test_handle_chat_general_should_fallback_to_general_when_type3_answer
     chat_with_category = AsyncMock(return_value={"ok": True})
 
     with patch(
-        "src.services.chat_general_service.asyncio.to_thread",
+        "rag_stream.services.chat_general_service.asyncio.to_thread",
         new=AsyncMock(),
     ) as mocked_to_thread:
         result = await handle_chat_general(
@@ -244,7 +244,7 @@ async def _test_handle_chat_general_should_fallback_to_general_when_type3_judgeq
     chat_with_category = AsyncMock(return_value={"ok": True})
 
     with patch(
-        "src.services.chat_general_service.asyncio.to_thread",
+        "rag_stream.services.chat_general_service.asyncio.to_thread",
         new=AsyncMock(side_effect=RuntimeError("mock judge error")),
     ):
         result = await handle_chat_general(

@@ -9,10 +9,8 @@ from pathlib import Path
 
 # 添加项目路径
 project_root = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(project_root / "DaiShanSQL"))
-sys.path.insert(0, str(project_root / "src" / "rag_stream"))
 
-from src.models.emergency_entities import (
+from rag_stream.models.emergency_entities import (
     EmergencySupply,
     RescueTeam,
     EmergencyExpert,

@@ -7,10 +7,10 @@ from typing import Any, Dict, List
 
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
-from src.utils.log_manager_import import entry_trace, marker
+from rag_stream.utils.log_manager_import import entry_trace, marker
 
-from src.config.settings import settings
-from src.models.schemas import (
+from rag_stream.config.settings import settings
+from rag_stream.models.schemas import (
     ChatRequest,
     ChatResponse,
     ChatDeleteRequest,
@@ -20,13 +20,18 @@ from src.models.schemas import (
     SourceDispatchRequest,
     GuessQuestionsRequest,
 )
-from src.services.dify_service import should_use_dify, stream_dify_chatflow_response
-from src.services.chat_general_service import handle_chat_general
-from src.services.personnel_dispatch_service import handle_personnel_dispatch
-from src.services.rag_service import get_or_create_session, stream_chat_response
-from src.services.source_dispath_srvice import handle_source_dispatch
-from src.utils.session_manager import session_manager
+from rag_stream.services.dify_service import should_use_dify, stream_dify_chatflow_response
+from rag_stream.services.chat_general_service import handle_chat_general
+from rag_stream.services.personnel_dispatch_service import handle_personnel_dispatch
+from rag_stream.services.rag_service import get_or_create_session, stream_chat_response
+from rag_stream.services.source_dispath_srvice import handle_source_dispatch
+from rag_stream.utils.session_manager import session_manager
 router = APIRouter()
+
+
+@router.get("/health")
+async def health() -> Dict[str, Any]:
+    return {"status": "ok"}
 
 
 @router.post("/api/chat/{category}", response_model=ChatResponse)
@@ -371,7 +376,7 @@ async def guess_questions(request: GuessQuestionsRequest, http_request: Request)
     Returns:
         推荐问题列表
     """
-    from src.services.guess_questions_service import handle_guess_questions
+    from rag_stream.services.guess_questions_service import handle_guess_questions
 
     intent_service = getattr(http_request.app.state, "intent_service", None)
     if intent_service is None:

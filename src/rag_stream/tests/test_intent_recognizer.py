@@ -3,7 +3,7 @@ import json
 import pytest
 from dataclasses import dataclass
 
-from src.services.intent_service.base_intent_service import (
+from rag_stream.services.intent_service.base_intent_service import (
     BaseIntentService,
 )
 
