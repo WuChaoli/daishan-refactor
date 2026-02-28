@@ -80,6 +80,33 @@ class QueryChat:
 
         return str(content or "")
 
+    @staticmethod
+    def _validate_content(text: str, original: str) -> tuple[bool, str]:
+        """验证 AI 返回的内容是否有效。
+
+        Returns:
+            (is_valid, reason) 元组
+        """
+        if not text:
+            return False, "empty"
+
+        # 检测 JSON 格式（AI 错误返回）
+        if text.strip().startswith(("{", "[")):
+            return False, "json"
+
+        # 检测指令性文字（AI 在解释而非改写）
+        instruction_keywords = ["请", "应该", "建议", "需要", "可以"]
+        if any(kw in text for kw in instruction_keywords):
+            # 但排除原句本身就包含这些词的情况
+            if not any(kw in original for kw in instruction_keywords):
+                return False, "instruction"
+
+        # 检测多行文本（可能包含解释）
+        if "\n" in text and len(text.split("\n")) > 2:
+            return False, "multiline"
+
+        return True, ""
+
     def rewrite_query_remove_company(self, query: str) -> str:
         if not isinstance(query, str):
             marker(
@@ -121,6 +148,17 @@ class QueryChat:
         if not rewritten:
             marker("query_chat.empty_response", {}, level="WARNING")
             return query
+
+        # 内容验证
+        is_valid, reason = self._validate_content(rewritten, query)
+        if not is_valid:
+            marker(
+                "query_chat.content_invalid",
+                {"reason": reason, "response_preview": rewritten[:100]},
+                level="WARNING",
+            )
+            return query  # 回退原句
+
         marker(
             "query_chat.request_complete",
             {"output_len": len(rewritten), "normalized": rewritten != query},
