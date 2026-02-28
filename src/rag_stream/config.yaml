@@ -78,3 +78,18 @@ query_chat:
   model: "Qwen2.5-7B-Instruct"
   timeout: 20
   temperature: 0.0
+
+# ============================================================
+# 意图分类配置（粗粒度分类）
+# ============================================================
+intent_classification:
+  # 是否启用意图分类功能（可由 INTENT_CLASSIFICATION_ENABLED 覆盖）
+  enabled: false
+  # 敏感值建议通过环境变量覆盖：
+  # INTENT_CLASSIFICATION_API_KEY / INTENT_CLASSIFICATION_BASE_URL / INTENT_CLASSIFICATION_MODEL
+  api_key: "xiyunmu"
+  base_url: "http://172.16.11.61:50016/v1"
+  model: "Qwen2.5-7B-Instruct"
+  timeout: 3
+  temperature: 0.0
+  confidence_threshold: 0.5
