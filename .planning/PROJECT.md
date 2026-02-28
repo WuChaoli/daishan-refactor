@@ -8,6 +8,16 @@
 
 用户输入中的企业名可以被稳定移除，同时保留原句其余内容不变。
 
+## Current Milestone: v1.1 Intent Classification Optimization
+
+**Goal:** 引入两阶段意图识别机制，先用 LLM 进行粗粒度分类（数据库/指令/固定问题），再在对应向量库中精检索，解决语义混淆导致分类不准确的问题。
+
+**Target features:**
+- 意图粗分类服务（复用 QueryChat）
+- 两阶段识别流程（分类 → 检索）
+- 分类结果缓存与降级机制
+- 新流程测试与配置调优
+
 ## Requirements
 
 ### Validated
@@ -23,7 +33,11 @@
 
 ### Active
 
-(无活跃需求 - v1.1 规划中)
+- [ ] **CLS-01**: 系统在意图识别前先进行粗粒度分类（数据库/指令/固定问题）
+- [ ] **CLS-02**: 粗分类后，仅在对应类型的向量库中检索
+- [ ] **CLS-03**: 复用现有 QueryChat 工具实现分类逻辑
+- [ ] **CLS-04**: 分类失败时降级到现有检索流程
+- [ ] **CLS-05**: 为新流程添加测试覆盖
 
 ### Out of Scope
 
@@ -33,7 +47,24 @@
 
 ## Context
 
-### Current State (v1.0 Shipped 2026-02-28)
+### Current State (v1.1 Started 2026-02-28)
+
+**Existing Intent Service:**
+- `BaseIntentService`: 基于向量检索的意图识别抽象
+- 三个向量库并发检索，按相似度排序
+- 岱山优先级规则（指令集/固定问题优先判断）
+- 问题：语义混淆导致分类不准确
+
+**Key Issue:**
+- 案例：「XX企业的危化品类目」本应归属数据库问题，但指令集也返回高阈值（>0.7）
+- 原因：不同意图类型的问题在向量空间中语义接近
+
+**Proposed Solution:**
+- 两阶段识别：粗分类（LLM）→ 精检索（向量库）
+- 复用 `QueryChat` 工具，配置分类 prompt
+- 分类结果引导检索路由，减少跨库混淆
+
+### Original Context
 
 **Tech Stack:**
 - Python 3.11+ with uv package manager
