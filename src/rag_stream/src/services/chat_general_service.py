@@ -8,6 +8,7 @@ from rag_stream.config.settings import settings
 from rag_stream.utils.log_manager_import import entry_trace, marker, trace
 from rag_stream.utils.daishan_sql_logging import format_daishan_log_text
 from rag_stream.utils.query_chat import rewrite_query
+
 try:
     from DaiShanSQL.DaiShanSQL.api_server import Server
 except ModuleNotFoundError:
@@ -39,6 +40,7 @@ async def replace_economic_zone(query: str) -> str:
     """
     使用 AI 对 query 进行企业名称清理。
 
+    始终调用模型进行问题删除，不再依赖关键词触发。
     失败时返回原 query，不再执行正则替换。
     """
     if not isinstance(query, str) or not query:
@@ -47,11 +49,6 @@ async def replace_economic_zone(query: str) -> str:
             {"input_type": type(query).__name__ if query is not None else "None"},
             level="WARNING",
         )
-        return query
-
-    # 仅在疑似企业名场景触发 AI 预处理，避免无关问句增加外部依赖成本。
-    if not re.search(r"(?:公司|有限公司|集团|股份|企业|厂)", query):
-        marker("query_normalized_skip_non_company", {"query_len": len(query)})
         return query
 
     if not settings.query_chat.enabled:
