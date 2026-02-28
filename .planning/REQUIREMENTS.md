@@ -15,7 +15,7 @@
 ### Configuration
 
 - [x] **CFG-03**: 支持 `intent_classification` 配置块，包含启用开关、模型参数、阈值设置。
-- [ ] **CFG-04**: 环境变量可以覆盖分类配置。
+- [x] **CFG-04**: 环境变量可以覆盖分类配置。
 
 ### Testing
 
@@ -44,7 +44,7 @@
 | CLS-03 | Phase 6 | Pending |
 | CLS-04 | Phase 5 | Pending |
 | CFG-03 | Phase 5 | Complete |
-| CFG-04 | Phase 5 | Pending |
+| CFG-04 | Phase 5 | Complete |
 | TEST-03 | Phase 7 | Pending |
 | TEST-04 | Phase 7 | Pending |
 | TEST-05 | Phase 7 | Pending |
