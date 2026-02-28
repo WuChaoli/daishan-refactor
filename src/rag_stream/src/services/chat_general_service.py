@@ -7,7 +7,8 @@ from typing import Any, Awaitable, Callable
 from src.config.settings import settings
 from src.utils.log_manager_import import entry_trace, marker, trace
 from src.utils.daishan_sql_logging import format_daishan_log_text
-from src.utils.query_chat import rewrite_query_remove_company
+from src.utils.query_chat import rewrite_query
+
 try:
     from DaiShanSQL.DaiShanSQL.api_server import Server
 except ModuleNotFoundError:
@@ -51,15 +52,16 @@ async def replace_economic_zone(query: str) -> str:
         marker("query_normalized_disabled", {"query_len": len(query)})
         return query
 
-    if not (settings.query_chat.api_key or "").strip() or not (
-        settings.query_chat.base_url or ""
-    ).strip():
+    if (
+        not (settings.query_chat.api_key or "").strip()
+        or not (settings.query_chat.base_url or "").strip()
+    ):
         marker("query_normalized_misconfigured", {"query_len": len(query)})
         return query
 
     marker("query_normalized_start", {"query_len": len(query)})
     try:
-        rewritten = await asyncio.to_thread(rewrite_query_remove_company, query)
+        rewritten = await rewrite_query(query, settings.query_chat)
     except Exception as error:
         marker("query_normalized_failed", {"error": str(error)}, level="WARNING")
         return query
@@ -75,7 +77,10 @@ async def replace_economic_zone(query: str) -> str:
 
 @trace
 def _extract_questions_for_sql(text_input: str, result_items: list[dict]) -> list[str]:
-    marker("extract_questions.start", {"text_len": len(text_input or ''), "candidates": len(result_items or [])})
+    marker(
+        "extract_questions.start",
+        {"text_len": len(text_input or ""), "candidates": len(result_items or [])},
+    )
     questions: list[str] = []
     for item in result_items:
         question_text = item.get("question", "")
@@ -94,7 +99,7 @@ def _extract_questions_for_sql(text_input: str, result_items: list[dict]) -> lis
 
 @trace
 def _extract_question_from_qa_text(question_text: str) -> str:
-    marker("extract_question_from_qa.start", {"text_len": len(question_text or '')})
+    marker("extract_question_from_qa.start", {"text_len": len(question_text or "")})
     if not isinstance(question_text, str):
         return ""
 
@@ -122,23 +127,40 @@ async def _post_process_type1(result_dict: dict) -> dict:
     if kb_name == "园区知识库":
         result = "1"
     elif kb_name == "企业知识库":
-        marker("DaiShanSQL入参", {"入参": format_daishan_log_text("sql_ChemicalCompanyInfo()")})
+        marker(
+            "DaiShanSQL入参",
+            {"入参": format_daishan_log_text("sql_ChemicalCompanyInfo()")},
+        )
         try:
             result = server.sqlFixed.sql_ChemicalCompanyInfo()
             marker("DaiShanSQL出参", {"出参": format_daishan_log_text(result)})
         except Exception as error:
-            marker("DaiShanSQL出参", {"出参": format_daishan_log_text(f"ERROR: {error}")}, level="ERROR")
+            marker(
+                "DaiShanSQL出参",
+                {"出参": format_daishan_log_text(f"ERROR: {error}")},
+                level="ERROR",
+            )
             raise
     elif kb_name == "安全信息知识库":
-        marker("DaiShanSQL入参", {"入参": format_daishan_log_text("sql_SecuritySituation()")})
+        marker(
+            "DaiShanSQL入参",
+            {"入参": format_daishan_log_text("sql_SecuritySituation()")},
+        )
         try:
             result = server.sqlFixed.sql_SecuritySituation()
             marker("DaiShanSQL出参", {"出参": format_daishan_log_text(result)})
         except Exception as error:
-            marker("DaiShanSQL出参", {"出参": format_daishan_log_text(f"ERROR: {error}")}, level="ERROR")
+            marker(
+                "DaiShanSQL出参",
+                {"出参": format_daishan_log_text(f"ERROR: {error}")},
+                level="ERROR",
+            )
             raise
 
-    marker("type1.sql_result_ready", {"kb_name": kb_name, "result_len": len(str(result or ''))})
+    marker(
+        "type1.sql_result_ready",
+        {"kb_name": kb_name, "result_len": len(str(result or ""))},
+    )
     return {"type": 1, "data": {"kb_name": kb_name, "sql_result": str(result)}}
 
 
@@ -204,7 +226,11 @@ async def _post_process_type2(text_input: str, result_dict: dict) -> dict:
         )
         marker("DaiShanSQL出参", {"出参": format_daishan_log_text(sql_result)})
     except Exception as error:
-        marker("DaiShanSQL出参", {"出参": format_daishan_log_text(f"ERROR: {error}")}, level="ERROR")
+        marker(
+            "DaiShanSQL出参",
+            {"出参": format_daishan_log_text(f"ERROR: {error}")},
+            level="ERROR",
+        )
         raise
 
     return {"type": 2, "data": {"sql_result": sql_result}}
@@ -259,7 +285,11 @@ async def _post_process_and_route_type3(
         )
         marker("DaiShanSQL出参", {"出参": format_daishan_log_text(judge_result)})
     except Exception as error:
-        marker("DaiShanSQL出参", {"出参": format_daishan_log_text(f"ERROR: {error}")}, level="ERROR")
+        marker(
+            "DaiShanSQL出参",
+            {"出参": format_daishan_log_text(f"ERROR: {error}")},
+            level="ERROR",
+        )
         return None
 
     judge_result_str = "" if judge_result is None else str(judge_result).strip()
