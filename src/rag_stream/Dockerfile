@@ -18,44 +18,38 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Copy workspace dependency files first (for optimal layer caching)
-# Copy root workspace files
-COPY pyproject.toml uv.lock ./
+# Copy dependency package sources first (for layer caching)
+# These are path dependencies required by rag_stream
+COPY src/DaiShanSQL src/DaiShanSQL/
+COPY src/dify_sdk src/dify_sdk/
+COPY src/ragflow_sdk src/ragflow_sdk/
+COPY src/log-manager src/log-manager/
 
-# Copy workspace member pyproject.toml files (needed for workspace resolution)
+# Copy rag_stream package files
 COPY src/rag_stream/pyproject.toml src/rag_stream/
-COPY src/DaiShanSQL/pyproject.toml src/DaiShanSQL/
-COPY src/dify_sdk/pyproject.toml src/dify_sdk/
-COPY src/ragflow_sdk/pyproject.toml src/ragflow_sdk/
-COPY src/log-manager/pyproject.toml src/log-manager/
-
-# Copy source directories (needed for editable installs)
-COPY src/DaiShanSQL/DaiShanSQL src/DaiShanSQL/DaiShanSQL
-COPY src/dify_sdk/dify_sdk src/dify_sdk/dify_sdk
-COPY src/ragflow_sdk/ragflow_sdk src/ragflow_sdk/ragflow_sdk
-COPY src/log-manager/log_manager src/log-manager/log_manager
-
-# Copy rag_stream source (excluding tests - handled by .dockerignore)
 COPY src/rag_stream/src src/rag_stream/src
 COPY src/rag_stream/static src/rag_stream/static
-COPY src/rag_stream/config.yaml src/rag_stream/config.yaml
 COPY src/rag_stream/README.md src/rag_stream/
 
-# Install dependencies using uv sync
-# --frozen: Use exact versions from lockfile
-# --no-dev: Skip dev dependencies for production
-RUN cd src/rag_stream && uv sync --frozen --no-dev
+# Create virtual environment and install packages
+# First install path dependencies as editable packages
+RUN cd /app/src/DaiShanSQL && pip install -e . && \
+    cd /app/src/dify_sdk && pip install -e . && \
+    cd /app/src/ragflow_sdk && pip install -e . && \
+    cd /app/src/log-manager && pip install -e .
+
+# Install rag_stream package
+RUN cd /app/src/rag_stream && pip install -e .
 
 # ------------------------------------------------------------
 # Stage 2: Runtime - Minimal production image
 # ------------------------------------------------------------
-FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS runtime
+FROM python:3.12-slim-bookworm AS runtime
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PYTHONFAULTHANDLER=1 \
-    PATH="/app/.venv/bin:$PATH"
+    PYTHONFAULTHANDLER=1
 
 WORKDIR /app
 
@@ -64,19 +58,18 @@ WORKDIR /app
 RUN groupadd --gid 1000 appgroup && \
     useradd --uid 1000 --gid appgroup --shell /bin/false --create-home appuser
 
-# Copy virtual environment from builder stage
-COPY --from=builder --chown=appuser:appgroup /app/src/rag_stream/.venv /app/.venv
+# Copy installed packages from builder
+COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 
-# Copy application code with correct ownership
-COPY --from=builder --chown=appuser:appgroup /app/src/rag_stream/src ./src
-COPY --from=builder --chown=appuser:appgroup /app/src/rag_stream/static ./static
-COPY --from=builder --chown=appuser:appgroup /app/src/rag_stream/config.yaml ./config.yaml
-
-# Copy workspace dependencies (editable installs)
+# Copy source code for path dependencies (required for editable installs)
 COPY --from=builder --chown=appuser:appgroup /app/src/DaiShanSQL /app/src/DaiShanSQL
 COPY --from=builder --chown=appuser:appgroup /app/src/dify_sdk /app/src/dify_sdk
 COPY --from=builder --chown=appuser:appgroup /app/src/ragflow_sdk /app/src/ragflow_sdk
 COPY --from=builder --chown=appuser:appgroup /app/src/log-manager /app/src/log-manager
+COPY --from=builder --chown=appuser:appgroup /app/src/rag_stream /app/src/rag_stream
+
+# Set PYTHONPATH to include all source directories
+ENV PYTHONPATH="/app/src:/app/src/DaiShanSQL:/app/src/dify_sdk:/app/src/ragflow_sdk:/app/src/log-manager"
 
 # Create logs directory for backward compatibility (owned by appuser)
 # Note: In production, logs should go to stdout/stderr
