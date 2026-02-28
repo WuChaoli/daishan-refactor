@@ -3,8 +3,9 @@ IntentService - 意图识别服务
 负责处理意图类型(Type 0/1/2/3)的业务逻辑
 """
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
+from src.config.settings import settings
 from src.utils.log_manager_import import marker, trace
 from src.services.intent_service.base_intent_service import (
     BaseIntentService,
@@ -19,6 +20,22 @@ class IntentService(BaseIntentService):
     def __init__(self, ragflow_client):
         super().__init__(ragflow_client=ragflow_client)
         self._use_daishan_priority = False
+        self._intent_classifier: Optional[Any] = None
+
+        # 初始化分类器（如果启用）
+        if settings.intent_classification.enabled:
+            try:
+                from src.utils.intent_classifier import IntentClassifier
+
+                self._intent_classifier = IntentClassifier(settings.intent_classification)
+                marker("intent_classifier.initialized", {"enabled": True})
+            except Exception as e:
+                marker(
+                    "intent_classifier.init_failed",
+                    {"error": str(e)},
+                    level="WARNING",
+                )
+                self._intent_classifier = None
 
     async def process_query(self, text_input: str, user_id: str) -> dict:
         return await super().process_query(text_input, user_id)
@@ -92,6 +109,12 @@ class IntentService(BaseIntentService):
         self._use_daishan_priority = self._should_use_daishan_priority(
             recognizer_settings
         )
+
+        # 预留：可选调用分类服务（Phase 6 使用）
+        # if self._intent_classifier:
+        #     classification_result = self._intent_classifier.classify(text_input)
+        #     ...
+
         return recognizer_settings
 
     
