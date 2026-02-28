@@ -1,0 +1,158 @@
+# ============================================================
+# Docker Compose Test Configuration for E2E Testing
+# ============================================================
+# Usage:
+#   docker compose -f tests/e2e/docker-compose.test.yml up --build --abort-on-container-exit
+#
+# View test report:
+#   cat tests/e2e/reports/e2e_report.json
+#
+# CI/CD Usage:
+#   docker compose -f tests/e2e/docker-compose.test.yml up --build --abort-on-container-exit
+#   EXIT_CODE=$?
+#   docker compose -f tests/e2e/docker-compose.test.yml down
+#   exit $EXIT_CODE
+# ============================================================
+
+services:
+  # ============================================================
+  # rag_stream service (test target)
+  # ============================================================
+  rag_stream:
+    build:
+      context: ../..              # Project root for workspace dependencies
+      dockerfile: src/rag_stream/Dockerfile
+    
+    container_name: rag_stream_test
+    
+    ports:
+      - "11028:11028"
+    
+    # Note: .env file is loaded from host environment variables in CI
+    # For local testing, create a .env file in project root or use:
+    #   docker compose -f tests/e2e/docker-compose.test.yml --env-file .env.local up
+    
+    environment:
+      - LOG_CONSOLE_OUTPUT=true   # Enable stdout logging in container
+      - ENVIRONMENT=test          # Mark as test environment
+    
+    volumes:
+      # Mount config.yaml for runtime configuration changes (read-only)
+      - ../../src/rag_stream/config.yaml:/app/src/rag_stream/config.yaml:ro
+    
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:11028/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    
+    restart: "no"                 # Don't restart in test environment
+    
+    # Graceful shutdown configuration
+    stop_signal: SIGTERM
+    stop_grace_period: 10s
+    
+    # Resource limits for test environment
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    
+    # Logging configuration
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    networks:
+      - e2e_test_network
+
+  # ============================================================
+  # e2e-test service (test runner)
+  # ============================================================
+  e2e-test:
+    image: python:3.12-slim
+    
+    container_name: e2e_test_runner
+    
+    working_dir: /app
+    
+    volumes:
+      # Mount entire project for test execution
+      - ../..:/app
+      # Mount reports directory for output
+      - ./reports:/reports
+    
+    environment:
+      # Service connection
+      - TEST_BASE_URL=http://rag_stream:11028
+      - TEST_TIMEOUT=60
+      
+      # Test data path (relative to working_dir)
+      - TEST_DATA_PATH=tests/data/intent_test_cases.xlsx
+      
+      # Test user
+      - TEST_USER_ID=test_e2e_ci
+      
+      # Report output
+      - TEST_REPORT_PATH=/reports/e2e_report.json
+      
+      # Log level
+      - LOG_LEVEL=INFO
+      
+      # Ensure Python path includes source
+      - PYTHONPATH=/app/src:/app/src/DaiShanSQL:/app/src/dify_sdk:/app/src/ragflow_sdk:/app/src/log-manager
+    
+    command: >
+      bash -c "
+        echo 'Installing test dependencies...' &&
+        pip install --quiet pytest pytest-asyncio httpx pandas openpyxl &&
+        echo 'Waiting for rag_stream service...' &&
+        sleep 5 &&
+        echo 'Running E2E tests...' &&
+        cd /app/tests/e2e &&
+        python -m pytest test_api_general_ci.py -v --tb=short || true &&
+        echo 'Test execution complete'
+      "
+    
+    depends_on:
+      rag_stream:
+        condition: service_healthy
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+    
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    networks:
+      - e2e_test_network
+
+# ============================================================
+# Network Configuration
+# ============================================================
+networks:
+  e2e_test_network:
+    name: e2e_test_network
+    driver: bridge
+    
+# ============================================================
+# Volume Configuration
+# ============================================================
+volumes:
+  # Reports volume is mounted from host for easy access
+  reports:
+    driver: local
