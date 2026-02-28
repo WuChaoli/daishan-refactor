@@ -121,7 +121,7 @@ class QueryChat:
             marker("query_chat.empty_query", {}, level="WARNING")
             return query
 
-        marker("query_chat.request_start", {"query_len": len(source_query)})
+        marker("query_chat.attempt", {"query_len": len(source_query)})
         try:
             client = self._get_client()
             response = client.chat.completions.create(
@@ -142,7 +142,7 @@ class QueryChat:
             )
             rewritten = self._extract_text_content(response).strip()
         except Exception as error:
-            marker("query_chat.request_failed", {"error": str(error)}, level="ERROR")
+            marker("query_chat.api_error", {"error": str(error)}, level="ERROR")
             raise
 
         if not rewritten:
@@ -159,10 +159,7 @@ class QueryChat:
             )
             return query  # 回退原句
 
-        marker(
-            "query_chat.request_complete",
-            {"output_len": len(rewritten), "normalized": rewritten != query},
-        )
+        marker("query_chat.success", {"output_len": len(rewritten)})
         return rewritten
 
 
