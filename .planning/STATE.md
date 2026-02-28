@@ -66,6 +66,13 @@ Progress: [░░░░░░░░░░] 0% (0/0 plans)
 
 None.
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 001 | 重新测试意图分类准确性，并输出测试正确率文档 | 2026-02-28 | a5b4c38 | [001-retest-intent-classification-accuracy](./quick/001-retest-intent-classification-accuracy/) |
+| 002 | 重新测试意图分类准确性（包含关键词删除流程），并输出测试正确率报告 | 2026-02-28 | TBD | [002-retest-intent-with-normalization](./quick/002-retest-intent-with-normalization/) |
+
 ## Session Continuity
 
 Last session: 2026-02-28T08:30:00Z

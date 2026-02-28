@@ -1,0 +1,573 @@
+{
+  "timestamp": "2026-02-28T17:42:23.670199",
+  "flow": "normalization_then_intent",
+  "total_cases": 55,
+  "correct_count": 53,
+  "accuracy": 0.9636363636363636,
+  "type_stats": {
+    "1": {
+      "total": 6,
+      "correct": 5
+    },
+    "2": {
+      "total": 3,
+      "correct": 3
+    },
+    "3": {
+      "total": 46,
+      "correct": 45
+    }
+  },
+  "results": [
+    {
+      "original_query": "介绍一下岱山经开区岱山经开区（岱山经济开发区）情况",
+      "normalized_query": "介绍一下情况",
+      "expected_type": 1,
+      "actual_type": 1,
+      "correct": true,
+      "similarity": 0.6872901538297811,
+      "database": "岱山-指令集",
+      "question": "Question: I 企业的情况介绍一下\tAnswer: global+companyIntroduction #@#@#[knowledgebase:企业知识库]"
+    },
+    {
+      "original_query": "经开区岱山经开区（岱山经济开发区）情况讲解",
+      "normalized_query": "情况讲解",
+      "expected_type": 1,
+      "actual_type": 1,
+      "correct": true,
+      "similarity": 0.644902279934064,
+      "database": "岱山-指令集",
+      "question": "Question: 请简单讲解一下园区的整体情况\tAnswer: global+parkIntroduction #@#@#[knowledgebase:园区知识库]"
+    },
+    {
+      "original_query": "介绍经开区岱山经开区（岱山经济开发区）企业情况",
+      "normalized_query": "介绍企业情况",
+      "expected_type": 1,
+      "actual_type": 1,
+      "correct": true,
+      "similarity": 0.8095190694783703,
+      "database": "岱山-指令集",
+      "question": "Question: I 企业的情况介绍一下\tAnswer: global+companyIntroduction #@#@#[knowledgebase:企业知识库]"
+    },
+    {
+      "original_query": "介绍贝能安全企业详情",
+      "normalized_query": "介绍安全企业详情",
+      "expected_type": 1,
+      "actual_type": 2,
+      "correct": false,
+      "similarity": 0.6674258422491571,
+      "database": "岱山-数据库问题",
+      "question": "Question: 列出所有企业在今日的安全承诺详情，包括企业名称、风险等级和承诺人。\tAnswer: v_ai_ipark_hm_company_promise"
+    },
+    {
+      "original_query": "介绍岱山经开区（岱山经济开发区）安全态势",
+      "normalized_query": "介绍安全态势",
+      "expected_type": 1,
+      "actual_type": 1,
+      "correct": true,
+      "similarity": 0.6125382798432605,
+      "database": "岱山-指令集",
+      "question": "Question: 园区安全状况介绍一下可以吗\tAnswer: global+parkSafetySituation #@#@#[knowledgebase:安全信息知识库]"
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）安全情况怎么样",
+      "normalized_query": "安全情况怎么样",
+      "expected_type": 1,
+      "actual_type": 1,
+      "correct": true,
+      "similarity": 0.6432884507948696,
+      "database": "岱山-指令集",
+      "question": "Question: 园区的安全情况怎么样\tAnswer: global+parkSafetySituation #@#@#[knowledgebase:安全信息知识库]"
+    },
+    {
+      "original_query": "XX企业的危化品类目是什么？",
+      "normalized_query": "危化品类目是什么？",
+      "expected_type": 2,
+      "actual_type": 2,
+      "correct": true,
+      "similarity": 0.6294489913323713,
+      "database": "岱山-数据库问题",
+      "question": "Question: 某个园区里有没有存放爆炸品类危化品的企业？\tAnswer: v_ai_ipark_hm_chemical_detail"
+    },
+    {
+      "original_query": "查询某公司的安全信息",
+      "normalized_query": "查询安全信息",
+      "expected_type": 2,
+      "actual_type": 2,
+      "correct": true,
+      "similarity": 0.6979790514588828,
+      "database": "岱山-数据库问题",
+      "question": "Question: 我想查某个统一社会信用代码对应的第三方安全单位信息。\tAnswer: v_ai_ipark_safety_unit_base_info"
+    },
+    {
+      "original_query": "某化工厂的危险化学品有哪些？",
+      "normalized_query": "化工厂的危险化学品有哪些？",
+      "expected_type": 2,
+      "actual_type": 2,
+      "correct": true,
+      "similarity": 0.5812830394067667,
+      "database": "岱山-数据库问题",
+      "question": "Question: 某园区内重点监管的危险化学品具体有哪些？\tAnswer: v_ai_ipark_hm_chemical_detail"
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）地址在哪",
+      "normalized_query": "地址在哪",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.6624862926180555,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区地址在哪\tAnswer: 请你介绍园区的园区名称、园区简称、园区地址，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）位置在哪",
+      "normalized_query": "位置在哪",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.6199083673014212,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区位置在哪\tAnswer: 请你介绍园区的园区名称、园区简称、园区地址，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）负责人是谁",
+      "normalized_query": "负责人是谁",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.7325262736429927,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区负责人是谁\tAnswer: 请你介绍园区的园区名称、园区简称、园区负责人姓名、园区负责人手机号，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）安全负责人是谁",
+      "normalized_query": "安全负责人是谁",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.7045299036623441,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区安全负责人是谁\tAnswer: 请你介绍园区的园区名称、园区简称、园区负责人姓名、园区负责人手机号，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）负责人联系方式",
+      "normalized_query": "负责人联系方式",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.6398442572994937,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区负责人联系方式\tAnswer: 请你介绍园区的园区名称、园区简称、园区负责人姓名、园区负责人手机号，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）安全负责人联系方式",
+      "normalized_query": "安全负责人联系方式",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.6787325011147166,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区安全负责人联系方式\tAnswer: 请你介绍园区的园区名称、园区简称、园区负责人姓名、园区负责人手机号，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）经历了什么发展历程",
+      "normalized_query": "经历了什么发展历程",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.7026045409577379,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区经历了什么发展历程\tAnswer: 请你介绍园区的园区名称、园区简称、发展历程时间、内容，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）荣誉有哪些",
+      "normalized_query": "荣誉有哪些",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.6262256010807957,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区荣誉有哪些\tAnswer: 请你介绍园区的园区名称、园区简称、发展历程时间、内容，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）公共管廊长度",
+      "normalized_query": "公共管廊长度",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.7089676200518478,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区公共管廊长度\tAnswer: 请你介绍园区的归属园区、管廊名称、设备类型、管理单位类型、地理位置信息、管廊长度、管廊层数、备注、投用日期，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）有哪些企业",
+      "normalized_query": "有哪些企业",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.6674219119860979,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区有哪些企业\tAnswer: 请你介绍园区的所属园区、企业名称、企业简称、统一社会信用代码、企业规模、生产状态、所属行业大类、成立日期、厂区面积、生产场所地址、企业负责人、企业负责人手机、从业人员人数，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）有几家规上企业",
+      "normalized_query": "有几家规上企业",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.7948441925192148,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区有几家规上企业\tAnswer: 请你介绍园区的所属园区、是否规上企业、企业名称、企业简称、统一社会信用代码、企业规模、生产状态、所属行业大类、成立日期、厂区面积、生产场所地址、企业负责人、企业负责人手机、从业人员人数，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）有几家国高企业",
+      "normalized_query": "岱山经开区有几家国高企业",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.6219563598758617,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区有几家国高企业\tAnswer: 请你介绍园区的所属园区、企业标签（高新技术企业）、企业名称、企业简称、统一社会信用代码、企业规模、生产状态、所属行业大类、成立日期、厂区面积、生产场所地址、企业负责人、企业负责人手机、从业人员人数，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）有几家绿色示范企业",
+      "normalized_query": "有几家绿色示范企业",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.7847317453691612,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区有几家绿色示范企业\tAnswer: 请你介绍园区的所属园区、企业标签（绿色示范）、企业名称、企业简称、统一社会信用代码、企业规模、生产状态、所属行业大类、成立日期、厂区面积、生产场所地址、企业负责人、企业负责人手机、从业人员人数，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）有几家单项冠军企业",
+      "normalized_query": "有几家单项冠军企业",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.7746949855974987,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区有几家单项冠军企业\tAnswer: 请你介绍园区的所属园区、企业标签（绿色示范）、企业名称、企业简称、统一社会信用代码、企业规模、生产状态、所属行业大类、成立日期、厂区面积、生产场所地址、企业负责人、企业负责人手机、从业人员人数，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）有几家专精特新企业",
+      "normalized_query": "有几家专精特新企业",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.7179909968929723,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区有几家专精特新企业\tAnswer: 请你介绍园区的所属园区、企业标签（绿色示范）、企业名称、企业简称、统一社会信用代码、企业规模、生产状态、所属行业大类、成立日期、厂区面积、生产场所地址、企业负责人、企业负责人手机、从业人员人数，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）今年工业总产值",
+      "normalized_query": "今年工业总产值",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.6306506394959814,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区今年工业总产值\tAnswer: 请你介绍园区的上报月份、园区产值，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）今年规上工业总产值",
+      "normalized_query": "今年规上工业总产值",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.6492927135154134,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区今年规上工业总产值\tAnswer: 请你介绍园区的上报月份、规上工业总产值，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）今年亩均产值",
+      "normalized_query": "今年亩均产值",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.6281892312258837,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区今年亩均产值\tAnswer: 请你介绍园区的上报月份、亩均产值，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）今年亩均税收",
+      "normalized_query": "今年亩均税收",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.6445727366463938,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区今年亩均税收\tAnswer: 请你介绍园区的上报月份、亩均产值，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）规划面积",
+      "normalized_query": "规划面积",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.7314636318444934,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区规划面积\tAnswer: 请你介绍园区的园区名称、园区规划面积，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）基本信息",
+      "normalized_query": "基本信息",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.6871924774399009,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区基本信息\tAnswer: 请你介绍园区的园区名称、园区简介、园区规划面积、园区地址、园区负责人、园区负责人手机号、安全负责人、安全负责人手机号、发展历程时间、发展历程内容、园区荣誉时间、园区荣誉内容，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）某月规上工业产值同比增速",
+      "normalized_query": "某月规上工业产值同比增速",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.6781873146273925,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区某月规上工业产值同比增速\tAnswer: 请你介绍园区的，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）某月风险走势情况",
+      "normalized_query": "某月风险走势情况",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.7883000704529353,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 某企业某月风险走势情况\tAnswer: 请你介绍园区的企业名称、统计月份、企业每日最高风险等级，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "安贝儿能源能科技2025年风险走势情况",
+      "normalized_query": "2025年风险走势情况",
+      "expected_type": 3,
+      "actual_type": 2,
+      "correct": false,
+      "similarity": 0.5932885739593796,
+      "database": "岱山-数据库问题",
+      "question": "Question: 2023年园区风险等级分布情况如何？\tAnswer: v_ai_ipark_ra_park_daily_risk_summary_year"
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）当前的风险分级管控情况",
+      "normalized_query": "当前的风险分级管控情况",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.7918469548554263,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区当前的风险分级管控情况\tAnswer: 请你介绍园区的园区名称  企业类型 风险分析单元总数 安全风险事件总数 管控措施总数，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）近7日的隐患预警统计情况",
+      "normalized_query": "近7日的隐患预警统计情况",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.7751223104230064,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区近7日的隐患预警统计情况\tAnswer: 请你介绍园区的园区名称 时间 重大隐患预警数 隐患临期提醒数 隐患超期提醒数，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）近1月的隐患预警统计情况",
+      "normalized_query": "近1月的隐患预警统计情况",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.7812810395162145,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区近1月的隐患预警统计情况\tAnswer: 请你介绍园区的园区名称 时间 重大隐患预警数 隐患临期提醒数 隐患超期提醒数，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）近3月的隐患预警统计情况",
+      "normalized_query": "近3月的隐患预警统计情况",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.7864026823286946,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区近3月的隐患预警统计情况\tAnswer: 请你介绍园区的园区名称 时间 重大隐患预警数 隐患临期提醒数 隐患超期提醒数，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）上周的双重预防机制运行效果如何",
+      "normalized_query": "上周的双重预防机制运行效果如何",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.8091295396291417,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区上周的双重预防机制运行效果如何\tAnswer: 请你介绍园区的园区名称  企业总数 优良中差分别对应数量，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）隐患排查与整改情况如何",
+      "normalized_query": "隐患排查与整改情况如何",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.7993145193002413,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区隐患排查与整改情况如何\tAnswer: 请你介绍园区的园区名称  企业类型 排查任务完成率 隐患整改完成率，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）实时的作业票预警情况？",
+      "normalized_query": "实时的作业票预警情况？",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.8288550196607412,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区实时的作业票预警情况？\tAnswer: 请你介绍园区的园区名称 报警数 报警详情（所属企业 作业编码 报警类型 报警等级 报警开始时间 销警时间 报警状态 ），优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）企业人员有多少",
+      "normalized_query": "企业人员有多少",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.7455688841296267,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区企业人员有多少\tAnswer: 请你介绍园区的企业名称、企业简称、统一社会信用代码、企业规模、生产状态、所属行业大类、成立日期、厂区面积、生产场所地址、企业负责人、企业负责人手机、从业人员人数、是否涉及两重点一重大（重大危险源/重点监管危险化学品/重点监管危险化工工艺）、是否规上企业、企业标签，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）有哪些第三方单位",
+      "normalized_query": "哪些第三方单位",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.6969267739804826,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区有哪些第三方单位\tAnswer: 请你介绍园区的所属园区、单位名称、社会统一信用代码、单位类型、单位负责人、联系方式，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "贝尔材料科技有限公司的详细信息",
+      "normalized_query": "的详细信息",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.5456833608906813,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 某企业的详细信息\tAnswer: 请你介绍园区的企业名称、企业简称、统一社会信用代码、企业规模、生产状态、所属行业大类、成立日期、厂区面积、生产场所地址、企业负责人、企业负责人手机、从业人员人数、是否涉及两重点一重大（重大危险源/重点监管危险化学品/重点监管危险化工工艺）、是否规上企业、企业标签，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）有哪些企业涉及重大危险源",
+      "normalized_query": "哪些企业涉及重大危险源",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.7299971564540693,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区有哪些企业涉及重大危险源\tAnswer: 请你介绍园区的园区名称、园区简称、发展历程时间、内容，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）有哪些企业涉及重点监管危险化工工艺",
+      "normalized_query": "哪些企业涉及重点监管危险化工工艺",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.8123223568550026,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区有哪些企业涉及重点监管危险化工工艺\tAnswer: 请你介绍园区的属园区、企业名称、是否涉及重点监管危化品，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）有哪些企业涉及重点监管危险化学品",
+      "normalized_query": "哪些企业涉及重点监管危险化学品",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.7548814751180042,
+      "database": "岱山-指令集-固定问题",
+      "question": "问题：园区有哪些企业涉及重点监管危险化学品\t回答：请你介绍园区的所属园区、所属企业名称、所属部门、岗位名称、姓名、性别、联系电话、人员类型，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）第三方人员有多少",
+      "normalized_query": "第三方人员有多少",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.7378641996642338,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区第三方人员有多少\tAnswer: 请你介绍园区的所属园区、上报企业名称、第三方单位名称、姓名、联系电话、岗位名称、是否高风险岗位，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）企业安全生产行政许可证正常/临期/超期的有多少",
+      "normalized_query": "企业安全生产行政许可证正常/临期/超期的有多少",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.7874547439485268,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区企业安全生产行政许可证正常/临期/超期的有多少\tAnswer: 请你介绍园区的所属园区、企业名称、许可证类型、许可证状态，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）有多少岱山经开区（岱山经济开发区）公共视频监控设备",
+      "normalized_query": "多少公共视频监控设备",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.7584322741339605,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区有多少园区公共视频监控设备\tAnswer: 请你介绍园区的视频归属、关联园区、视频分类，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）岱山经开区（岱山经济开发区）公共视频分别监控哪些区域",
+      "normalized_query": "公共视频分别监控哪些区域",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.7931993252627565,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区园区公共视频分别监控哪些区域\tAnswer: 请你介绍园区的视频归属、关联园区、视频分类，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）有多少企业视频监控设备",
+      "normalized_query": "多少企业视频监控设备",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.7621611680924286,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区有多少企业视频监控设备\tAnswer: 请你介绍园区的视频归属、关联园区、视频分类，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）企业有多少监测指标传感器",
+      "normalized_query": "企业有多少监测指标传感器",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.7783787001192951,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区企业有多少监测指标传感器\tAnswer: 请你介绍园区的视频归属、关联园区、视频分类，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）隐患三录入整改情况",
+      "normalized_query": "隐患三录入整改情况",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.7755142478523317,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区隐患三录入整改情况\tAnswer: 请你介绍园区的隐患描述、隐患级别、任务名称、检查内容、企业名称、检查类型、检查日期、责令整改期限、隐患状态，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）AI分析报警情况",
+      "normalized_query": "AI分析报警情况",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.7668664141159252,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区AI分析报警情况\tAnswer: 请你介绍园区的企业名称、通道名称、报警类型、报警开始时间、报警状态，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    },
+    {
+      "original_query": "岱山经开区（岱山经济开发区）企业平均销警时长排名",
+      "normalized_query": "企业平均销警时长排名",
+      "expected_type": 3,
+      "actual_type": 3,
+      "correct": true,
+      "similarity": 0.7555504080751705,
+      "database": "岱山-指令集-固定问题",
+      "question": "Question: 园区企业平均销警时长排名\tAnswer: 请你介绍园区的排名、企业名称、平均销警时长，优先考虑数据库召回的内容；如果数据库没有召回内容，则回复**未查询到相关数据**，以下为数据库查询内容："
+    }
+  ]
+}
