@@ -15,14 +15,15 @@
 - ✓ `rag_stream` 已提供通用问答入口与意图识别流程（`/api/general` + `handle_chat_general`）— existing
 - ✓ 项目已具备 OpenAI 兼容调用依赖（`openai`）和 DaiShanSQL 参考实现 — existing
 - ✓ `rag_stream` 已具备 `config.yaml + .env` 配置加载机制 — existing
+- ✓ 新增 `rag_stream` 内部聊天工具（`src/rag_stream/src/utils/query_chat.py`），实现 OpenAI 兼容 chat 调用 — v1.0
+- ✓ 在 `src/rag_stream/config.yaml` 配置该聊天工具参数，命名使用 `query_chat` 前缀（非 `openai`）— v1.0
+- ✓ 在 `replace_economic_zone` 中调用 AI 删除企业名称并返回改写句 — v1.0
+- ✓ AI 失败时返回原句，不再退回旧正则替换逻辑 — v1.0
+- ✓ 补充单元测试和真实环境测试套件 — v1.0
 
 ### Active
 
-- [ ] 新增 `rag_stream` 内部聊天工具（放在 `src/rag_stream/src/utils`），实现 OpenAI 兼容 chat 调用。
-- [ ] 在 `src/rag_stream/config.yaml` 配置该聊天工具参数，且配置命名不使用 `openai` 前缀。
-- [ ] 在 `replace_economic_zone` 中改为调用 AI 删除企业名称并返回改写句。
-- [ ] AI 失败时返回原句，不再退回旧正则替换逻辑。
-- [ ] 为该改造补充可运行的最小测试验证。
+(无活跃需求 - v1.1 规划中)
 
 ### Out of Scope
 
@@ -32,8 +33,33 @@
 
 ## Context
 
+### Current State (v1.0 Shipped 2026-02-28)
+
+**Tech Stack:**
+- Python 3.11+ with uv package manager
+- OpenAI SDK for AI chat integration
+- pytest + asyncio for testing
+- 11,845 lines of Python code
+
+**Architecture:**
+- 新增 `QueryChat` 工具类 (`src/rag_stream/src/utils/query_chat.py`)
+- 配置模型 `QueryChatConfig` 集成到现有 `settings` 体系
+- 异步接口 `rewrite_query` 支持非阻塞调用
+- 内容验证和统计指标集成
+
+**Testing:**
+- 4 个单元测试覆盖成功/失败路径
+- 11 个真实环境测试用例（typical/complex/boundary）
+- CLI 工具支持 (`scripts/test_real_env.py`)
+
+**Known Issues:**
+- 真实环境测试需要 AI API 密钥才能完整运行
+- 测试数据集可进一步扩展边界情况
+
+### Original Context
+
 - 仓库是 brownfield Python monorepo，`rag_stream` 已有完整服务和测试基础。
-- 现有 `replace_economic_zone` 使用正则统一替换“经开区/开发区”等词，不满足“仅删除企业名”的新需求。
+- 现有 `replace_economic_zone` 使用正则统一替换"经开区/开发区"等词，不满足"仅删除企业名"的新需求。
 - 参考实现位于 `src/DaiShanSQL/DaiShanSQL/Utils/OpenAI_utils.py`，但该实现与 `rag_stream` 配置体系不完全一致，需要按 `rag_stream` 的 `settings` 体系落地。
 
 ## Constraints
@@ -47,9 +73,11 @@
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| 在 `rag_stream` 内新增独立聊天工具而非直接复用 DaiShanSQL 模块 | 降低跨模块耦合，保持 `rag_stream` 自治 | — Pending |
-| 企业名清理由正则改为 AI 改写主路径 | 需求要求“删除企业名且返回原句”，正则难覆盖 | — Pending |
-| 失败兜底改为“原句返回” | 用户明确指定 B 策略 | — Pending |
+| 在 `rag_stream` 内新增独立聊天工具而非直接复用 DaiShanSQL 模块 | 降低跨模块耦合，保持 `rag_stream` 自治 | ✓ Good — 模块独立，易于维护 |
+| 企业名清理由正则改为 AI 改写主路径 | 需求要求"删除企业名且返回原句"，正则难覆盖 | ✓ Good — 满足需求，测试通过 |
+| 失败兜底改为"原句返回" | 用户明确指定 B 策略 | ✓ Good — 主流程稳定，无中断风险 |
+| 使用模式匹配验证 AI 输出而非精确匹配 | AI 输出有细微差异，模式验证更灵活 | ✓ Good — 适应 AI 不确定性 |
+| dry-run 模式支持无 AI 环境测试 | 便于开发和 CI 环境验证 | ✓ Good — 开发体验良好 |
 
 ---
-*Last updated: 2026-02-28 after initialization*
+*Last updated: 2026-02-28 after v1.0 milestone*
