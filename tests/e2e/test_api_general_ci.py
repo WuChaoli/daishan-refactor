@@ -38,9 +38,6 @@ import pytest
 if TYPE_CHECKING:
     from conftest import TestConfig
 
-if TYPE_CHECKING:
-    from conftest import TestConfig
-
 
 # =============================================================================
 # Data Classes
@@ -48,7 +45,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class ApiApiTestCase:
+class ApiTestCase:
     """Test case data class."""
 
     question: str
@@ -58,10 +55,10 @@ class ApiApiTestCase:
 
 
 @dataclass
-class ApiApiTestResult:
+class ApiTestResult:
     """Single test result."""
 
-    test_case: ApiApiTestCase
+    test_case: ApiTestCase
     success: bool
     status_code: int | None = None
     response_time_ms: float = 0.0
@@ -72,13 +69,13 @@ class ApiApiTestResult:
 
 
 @dataclass
-class ApiApiTestReport:
+class ApiTestReport:
     """Complete test report."""
 
     total: int = 0
     passed: int = 0
     failed: int = 0
-    results: list[ApiApiTestResult] = field(default_factory=list)
+    results: list[ApiTestResult] = field(default_factory=list)
     start_time: str = ""
     end_time: str = ""
     duration_seconds: float = 0.0
@@ -145,7 +142,9 @@ def load_config_from_env() -> dict[str, Any]:
 # =============================================================================
 
 
-def load_test_cases(data_path: str, filter_type: int | None = None) -> list[ApiTestCase]:
+def load_test_cases(
+    data_path: str, filter_type: int | None = None
+) -> list[ApiTestCase]:
     """Load test cases from Excel file.
 
     Args:
