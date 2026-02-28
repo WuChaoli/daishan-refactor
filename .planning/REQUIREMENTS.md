@@ -7,8 +7,8 @@
 
 ### Configuration
 
-- [ ] **CFG-01**: `rag_stream` 可以从 `config.yaml` 读取 query 清理聊天配置（不使用 openai 前缀命名）。
-- [ ] **CFG-02**: 环境变量可以覆盖上述 query 清理聊天配置。
+- [x] **CFG-01**: `rag_stream` 可以从 `config.yaml` 读取 query 清理聊天配置（不使用 openai 前缀命名）。
+- [x] **CFG-02**: 环境变量可以覆盖上述 query 清理聊天配置。
 
 ### Query Normalization
 
@@ -45,8 +45,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CFG-01 | Phase 1 | Pending |
-| CFG-02 | Phase 1 | Pending |
+| CFG-01 | Phase 1 | Complete |
+| CFG-02 | Phase 1 | Complete |
 | NORM-01 | Phase 2 | Pending |
 | NORM-02 | Phase 2 | Pending |
 | NORM-03 | Phase 2 | Pending |

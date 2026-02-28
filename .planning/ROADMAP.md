@@ -6,7 +6,7 @@
 
 ## Phases
 
-- [ ] **Phase 1: 配置建模** - 增加 query 清理配置域并接入 settings 加载链路。
+- [x] **Phase 1: 配置建模** - 增加 query 清理配置域并接入 settings 加载链路。（完成于 2026-02-28）
 - [ ] **Phase 2: AI 改写接入** - 新增聊天工具并接入 `replace_economic_zone`。
 - [ ] **Phase 3: 测试回归** - 覆盖成功/失败路径并完成最小验证。
 
@@ -57,6 +57,6 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. 配置建模 | 0/1 | Not started | - |
+| 1. 配置建模 | 1/1 | Complete | 2026-02-28 |
 | 2. AI 改写接入 | 0/2 | Not started | - |
 | 3. 测试回归 | 0/1 | Not started | - |
