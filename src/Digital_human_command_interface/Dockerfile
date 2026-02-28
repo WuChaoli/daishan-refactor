@@ -28,10 +28,11 @@ COPY src/Digital_human_command_interface/main.py src/Digital_human_command_inter
 COPY src/Digital_human_command_interface/config.yaml src/Digital_human_command_interface/
 COPY src/Digital_human_command_interface/README.md src/Digital_human_command_interface/
 
-# Install path dependencies
+# Install path dependencies (packages with pyproject.toml)
 RUN cd /app/src/ragflow_sdk && pip install -e . && \
-    cd /app/src/log-manager && pip install -e . && \
-    cd /app/src/log_decorator && pip install -e .
+    cd /app/src/log-manager && pip install -e .
+
+# Note: log_decorator is a simple module (not a package), so we just add it to PYTHONPATH
 
 # Install Digital_human_command_interface package
 RUN cd /app/src/Digital_human_command_interface && pip install -e .
@@ -62,8 +63,8 @@ COPY --from=builder --chown=appuser:appgroup /app/src/log-manager /app/src/log-m
 COPY --from=builder --chown=appuser:appgroup /app/src/log_decorator /app/src/log_decorator
 COPY --from=builder --chown=appuser:appgroup /app/src/Digital_human_command_interface /app/src/Digital_human_command_interface
 
-# Set PYTHONPATH
-ENV PYTHONPATH="/app/src:/app/src/ragflow_sdk:/app/src/log-manager:/app/src/log_decorator"
+# Set PYTHONPATH - include log_decorator for direct module imports
+ENV PYTHONPATH="/app/src:/app/src/ragflow_sdk:/app/src/log-manager:/app/src/log_decorator:/app/src/Digital_human_command_interface"
 
 # Create logs directory
 RUN mkdir -p /app/logs && chown appuser:appgroup /app/logs
@@ -82,4 +83,6 @@ HEALTHCHECK --interval=30s \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:11029/health', timeout=5)" || exit 1
 
 # Use exec form CMD for proper signal forwarding
-CMD ["python", "-m", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "11029", "--app-dir", "/app/src/Digital_human_command_interface"]
+# Run from Digital_human_command_interface directory so 'src.main' resolves correctly
+WORKDIR /app/src/Digital_human_command_interface
+CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "11029"]
