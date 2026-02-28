@@ -24,8 +24,8 @@
 
 ### 📋 v1.1 Intent Classification Optimization (Planned)
 
-- [ ] **Phase 5: 意图分类基础** — 建立粗粒度分类服务与配置体系
-- [ ] **Phase 6: 分类驱动检索** — 连接分类结果与向量库检索流程
+- [x] **Phase 5: 意图分类基础** — 建立粗粒度分类服务与配置体系
+- [x] **Phase 6: 分类驱动检索** — 连接分类结果与向量库检索流程
 - [ ] **Phase 7: 测试验证** — 覆盖新流程的单元测试与集成测试
 
 ## Phase Details
@@ -45,9 +45,9 @@
 4. 环境变量可以覆盖配置中的分类参数（如模型名称、温度）
 
 **Plans**: 3 plans
-- [ ] [05-01-PLAN.md](.planning/phases/05-意图分类基础/05-01-PLAN.md) — 意图分类服务与配置（CLS-01, CLS-02, CFG-03）
-- [ ] [05-02-PLAN.md](.planning/phases/05-意图分类基础/05-02-PLAN.md) — 分类失败降级机制（CLS-04）
-- [ ] [05-03-PLAN.md](.planning/phases/05-意图分类基础/05-03-PLAN.md) — 配置集成与验证（CFG-03, CFG-04）
+- [x] [05-01-PLAN.md](.planning/phases/05-意图分类基础/05-01-PLAN.md) — 意图分类服务与配置（CLS-01, CLS-02, CFG-03）
+- [x] [05-02-PLAN.md](.planning/phases/05-意图分类基础/05-02-PLAN.md) — 分类失败降级机制（CLS-04）
+- [x] [05-03-PLAN.md](.planning/phases/05-意图分类基础/05-03-PLAN.md) — 配置集成与验证（CFG-03, CFG-04）
 
 ### Phase 6: 分类驱动检索
 
@@ -62,7 +62,7 @@
 2. 不同意图类型的查询不会跨库混淆检索结果
 
 **Plans**: 1 plan
-- [ ] [06-01-PLAN.md](.planning/phases/06-分类驱动检索/06-01-PLAN.md) — 分类驱动检索实现（CLS-03）
+- [x] [06-01-PLAN.md](.planning/phases/06-分类驱动检索/06-01-PLAN.md) — 分类驱动检索实现（CLS-03）
 
 ### Phase 7: 测试验证
 
@@ -83,10 +83,10 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 5. 意图分类基础 | 3/3 | Planned | - |
-| 6. 分类驱动检索 | 0/1 | Planned | - |
+| 5. 意图分类基础 | 3/3 | Completed | 2026-02-28 |
+| 6. 分类驱动检索 | 1/1 | Completed | 2026-02-28 |
 | 7. 测试验证 | 0/0 | Not started | - |
 
 ---
 *Roadmap created: 2026-02-28*
-*Last updated: 2026-02-28 - Phase 6 plan created*
+*Last updated: 2026-02-28 - Phase 6 completed*

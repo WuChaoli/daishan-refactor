@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Intent Classification Optimization
-status: unknown
-last_updated: "2026-02-28T05:25:38.744Z"
+status: in_progress
+last_updated: "2026-02-28T06:26:00Z"
 progress:
-  total_phases: 5
+  total_phases: 6
   completed_phases: 5
-  total_plans: 8
-  completed_plans: 8
+  total_plans: 9
+  completed_plans: 9
 ---
 
 # Project State
@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 
 ## Current Position
 
-Phase: 05-意图分类基础
-Plan: 05-03
-Status: Completed config integration and validation
-Last activity: 2026-02-28 — Completed plan 05-03
+Phase: 06-分类驱动检索
+Plan: 06-01
+Status: Completed classification-driven retrieval implementation
+Last activity: 2026-02-28 — Completed plan 06-01
 
-Progress: [█████████░░░░░░░░] 67% (2/3 plans)
+Progress: [████████████████░░] 100% (1/1 plans)
 
 ## Accumulated Context
 
@@ -51,8 +51,8 @@ Progress: [█████████░░░░░░░░] 67% (2/3 plans)
 3. 工具复用：使用现有 `QueryChat` 实现，新增分类 prompt 配置
 
 **Roadmap 结构：**
-- Phase 5: 意图分类基础（CLS-01, CLS-02, CLS-04, CFG-03, CFG-04）
-- Phase 6: 分类驱动检索（CLS-03）
+- Phase 5: 意图分类基础（CLS-01, CLS-02, CLS-04, CFG-03, CFG-04）✅
+- Phase 6: 分类驱动检索（CLS-03）✅
 - Phase 7: 测试验证（TEST-03, TEST-04, TEST-05）
 
 ### Decisions
@@ -60,6 +60,9 @@ Progress: [█████████░░░░░░░░] 67% (2/3 plans)
 - **Classifier initialization wrapped in try/except** to prevent blocking main flow on startup failures (05-03)
 - **Phase 5 only completes integration preparation**; actual classification calls deferred to Phase 6 (05-03)
 - **Config validation logs warnings** instead of raising exceptions for missing fields (05-03)
+- **Use dataclasses.replace for immutable settings update** when filtering database_mapping (06-01)
+- **Keep backward compatibility** with optional text_input parameter defaulting to None (06-01)
+- **Defensive programming**: return full mapping when no matching database found (06-01)
 
 ### Pending Todos
 
@@ -71,6 +74,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-28T05:30:00Z
-Stopped at: Completed 05-03-PLAN.md - Config Integration and Validation
-Resume file: —
+Last session: 2026-02-28T06:26:00Z
+Stopped at: Completed 06-01-PLAN.md - Classification-Driven Retrieval
+Resume file: .planning/phases/06-分类驱动检索/06-01-SUMMARY.md
