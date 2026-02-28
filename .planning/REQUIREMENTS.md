@@ -7,22 +7,22 @@
 
 ### Integration Testing Framework
 
-- [ ] **INT-01**: 集成测试框架支持 .venv 环境隔离运行
+- [x] **INT-01**: 集成测试框架支持 .venv 环境隔离运行
   - 测试脚本自动检测并激活 .venv 环境
   - 支持通过环境变量覆盖默认 Python 解释器路径
   - 测试失败时提供清晰的虚拟环境诊断信息
 
-- [ ] **INT-02**: 外部 AI API 服务连通性测试
+- [x] **INT-02**: 外部 AI API 服务连通性测试
   - 验证 QueryChat 工具能成功调用 AI API
   - 测试 API 认证是否有效
   - 超时和错误响应处理验证
 
-- [ ] **INT-03**: 向量库服务连通性测试
+- [x] **INT-03**: 向量库服务连通性测试
   - 验证向量库连接配置正确
   - 测试基础查询操作可正常执行
   - 验证所有配置的向量库均可访问
 
-- [ ] **INT-04**: 数据库服务连通性测试
+- [x] **INT-04**: 数据库服务连通性测试
   - 验证达梦数据库连接正常
   - 测试基础 SQL 查询可执行
   - 验证连接池配置有效
@@ -104,10 +104,10 @@ Deferred to future release.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INT-01 | Phase 9 | Pending |
-| INT-02 | Phase 9 | Pending |
-| INT-03 | Phase 9 | Pending |
-| INT-04 | Phase 9 | Pending |
+| INT-01 | Phase 9 | Complete |
+| INT-02 | Phase 9 | Complete |
+| INT-03 | Phase 9 | Complete |
+| INT-04 | Phase 9 | Complete |
 | INT-05 | Phase 10 | Pending |
 | INT-06 | Phase 10 | Pending |
 | INT-07 | Phase 11 | Pending |

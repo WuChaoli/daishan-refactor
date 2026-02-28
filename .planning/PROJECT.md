@@ -14,7 +14,7 @@
 
 **Next Milestone:** v1.2 Integration Testing for CI/CD
 
-## Current Milestone: v1.2 Integration Testing for CI/CD
+## Current Milestone: v1.2 Integration Testing for CI/CD (In Progress)
 
 **Goal:** 设计集成测试套件，使用 .venv 环境连接外部真实环境，验证接口连通性，支持 CI/CD 自动化测试。
 
@@ -24,6 +24,19 @@
 - 核心接口 E2E 测试（/api/general 等）
 - CI/CD 流水线集成配置
 - 测试数据与环境配置分离
+
+## Next Milestone: v1.3 Production Build and Deployment Scripts
+
+**Goal:** 创建生产环境的构建和运行脚本，支持自动化部署和运维。
+
+**Target features:**
+- Docker 容器化配置（Dockerfile + docker-compose）
+- 生产环境构建脚本（依赖安装、静态资源构建）
+- 服务启动脚本（支持 graceful shutdown）
+- 环境配置管理（生产环境变量模板）
+- 健康检查和监控端点
+- 日志轮转和清理机制
+- 数据库迁移脚本集成
 
 ## Requirements
 
@@ -135,4 +148,4 @@
 | 降级时返回 type_id=0 并标记 degraded | 明确区分正常/降级结果 | ✓ Good — 调用方可感知降级 |
 
 ---
-*Last updated: 2026-02-28 after v1.2 milestone started*
+*Last updated: 2026-02-28 after v1.3 milestone started*

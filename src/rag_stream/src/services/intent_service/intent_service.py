@@ -26,9 +26,11 @@ class IntentService(BaseIntentService):
         # 初始化分类器（如果启用）
         if settings.intent_classification.enabled:
             try:
-                from src.utils.intent_classifier import IntentClassifier
+                from rag_stream.utils.intent_classifier import IntentClassifier
 
-                self._intent_classifier = IntentClassifier(settings.intent_classification)
+                self._intent_classifier = IntentClassifier(
+                    settings.intent_classification
+                )
                 marker("intent_classifier.initialized", {"enabled": True})
             except Exception as e:
                 marker(
@@ -53,7 +55,13 @@ class IntentService(BaseIntentService):
         fixed_instruction_table = "岱山-指令集-固定问题"
         priority_threshold = float(recognizer_settings.priority_similarity_threshold)
 
-        marker("岱山优先级判断启动", {"priority_threshold": priority_threshold, "tables": [instruction_table, fixed_instruction_table]})
+        marker(
+            "岱山优先级判断启动",
+            {
+                "priority_threshold": priority_threshold,
+                "tables": [instruction_table, fixed_instruction_table],
+            },
+        )
 
         # 第一步：收集优先级候选结果
         priority_candidates = []
@@ -63,18 +71,30 @@ class IntentService(BaseIntentService):
                 best_in_table = max(table_items, key=BaseIntentService._safe_similarity)
                 best_similarity = BaseIntentService._safe_similarity(best_in_table)
                 priority_candidates.append(best_in_table)
-                marker("优先表最高相似度", {"table": table_name, "similarity": best_similarity, "question_preview": getattr(best_in_table, "question", "")[:50]})
+                marker(
+                    "优先表最高相似度",
+                    {
+                        "table": table_name,
+                        "similarity": best_similarity,
+                        "question_preview": getattr(best_in_table, "question", "")[:50],
+                    },
+                )
 
         # 第二步：判断优先级候选是否满足阈值
         if priority_candidates:
-            best_priority = max(priority_candidates, key=BaseIntentService._safe_similarity)
+            best_priority = max(
+                priority_candidates, key=BaseIntentService._safe_similarity
+            )
             best_priority_similarity = BaseIntentService._safe_similarity(best_priority)
 
-            marker("优先级最佳候选", {
-                "similarity": best_priority_similarity,
-                "threshold": priority_threshold,
-                "satisfied": best_priority_similarity >= priority_threshold
-            })
+            marker(
+                "优先级最佳候选",
+                {
+                    "similarity": best_priority_similarity,
+                    "threshold": priority_threshold,
+                    "satisfied": best_priority_similarity >= priority_threshold,
+                },
+            )
 
             if best_priority_similarity >= priority_threshold:
                 return best_priority
@@ -89,11 +109,14 @@ class IntentService(BaseIntentService):
             global_best_similarity = BaseIntentService._safe_similarity(global_best)
             global_best_table = getattr(global_best, "database", "未知")
 
-            marker("全局最高相似度", {
-                "similarity": global_best_similarity,
-                "database": global_best_table,
-                "question_preview": getattr(global_best, "question", "")[:50]
-            })
+            marker(
+                "全局最高相似度",
+                {
+                    "similarity": global_best_similarity,
+                    "database": global_best_table,
+                    "question_preview": getattr(global_best, "question", "")[:50],
+                },
+            )
             return global_best
 
         marker("所有知识库均无检索结果", {}, level="WARNING")
@@ -154,7 +177,6 @@ class IntentService(BaseIntentService):
 
         return recognizer_settings
 
-    
     async def _query_process_table_results(
         self,
         text_input: str,
@@ -165,7 +187,6 @@ class IntentService(BaseIntentService):
             recognizer_settings=recognizer_settings,
         )
 
-    
     def _sort_process_table_results(
         self,
         table_results: Dict[str, List[Any]],
@@ -176,7 +197,6 @@ class IntentService(BaseIntentService):
             recognizer_settings=recognizer_settings,
         )
 
-    
     def _get_process_judge_function(self):
         if self._use_daishan_priority:
             return self._judge_daishan_intent_priority

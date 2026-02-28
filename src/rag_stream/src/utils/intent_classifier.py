@@ -9,8 +9,8 @@ from typing import Any
 
 from openai import OpenAI
 
-from src.config.settings import IntentClassificationConfig, settings
-from src.utils.log_manager_import import marker
+from rag_stream.config.settings import IntentClassificationConfig, settings
+from rag_stream.utils.log_manager_import import marker
 
 
 @dataclass
@@ -46,7 +46,9 @@ class IntentClassifier:
                 },
                 level="ERROR",
             )
-            raise ValueError("intent_classification 配置不完整，请检查 base_url/api_key/model")
+            raise ValueError(
+                "intent_classification 配置不完整，请检查 base_url/api_key/model"
+            )
 
         return OpenAI(
             base_url=self._config.base_url,
@@ -77,7 +79,7 @@ class IntentClassifier:
                     "1 - 岱山-指令集\n"
                     "2 - 岱山-数据库问题\n"
                     "3 - 岱山-指令集-固定问题\n\n"
-                    "只返回 JSON 格式：{\"type\": 数字编号, \"confidence\": 置信度(0.0-1.0)}，不要添加其他说明。"
+                    '只返回 JSON 格式：{"type": 数字编号, "confidence": 置信度(0.0-1.0)}，不要添加其他说明。'
                 ),
             },
             {"role": "user", "content": query},

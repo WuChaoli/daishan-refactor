@@ -7,8 +7,8 @@ from typing import Any, Optional
 
 from openai import OpenAI
 
-from src.config.settings import QueryChatConfig, settings
-from src.utils.log_manager_import import marker
+from rag_stream.config.settings import QueryChatConfig, settings
+from rag_stream.utils.log_manager_import import marker
 
 
 class QueryChat:
