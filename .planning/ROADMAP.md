@@ -43,11 +43,12 @@
   - Plans:
     - [x] 09-01-PLAN.md — 创建外部服务连通性测试套件
 
-- [x] **Phase 10: API E2E 测试** — 完整 API 流程测试与配置分离（1 plan）(completed 2026-02-28)
+- [x] **Phase 10: API E2E 测试** — 完整 API 流程测试与配置分离（2 plans）(completed 2026-02-28)
   - Requirements: INT-05, INT-06
   - Success Criteria: /api/general 接口完整流程测试通过，配置可环境注入
   - Plans:
     - [x] 10-01-PLAN.md — 创建 CI/CD 就绪的 E2E 测试套件（pytest + Docker Compose + GitHub Actions）
+    - [ ] 10-02-PLAN.md — Gap Closure: 添加意图分类解析逻辑和测试数据（gap closure from verification）
 
 - [ ] **Phase 11: CI/CD 流水线集成** — 测试报告与流水线配置（1 plan）
   - Requirements: INT-07, INT-08
@@ -88,7 +89,7 @@
 | 6. 分类驱动检索 | v1.1 | 1/1 | Complete | 2026-02-28 |
 | 8. API General 端到端测试 | v1.1 | 1/1 | Complete | 2026-02-28 |
 | 9. 外部服务连通性测试 | v1.2 | 1/1 | Complete | 2026-02-28 |
-| 10. API E2E 测试 | v1.2 | 1/1 | Complete | 2026-02-28 |
+| 10. API E2E 测试 | v1.2 | 1/2 | In Progress | 2026-02-28 |
 | 11. CI/CD 流水线集成 | v1.2 | 0/1 | Pending | — |
 | 12. Docker Containerization | v1.3 | 2/2 | Complete | 2026-02-28 |
 | 13. Service Lifecycle Management | v1.3 | 0/1 | Planned | — |
