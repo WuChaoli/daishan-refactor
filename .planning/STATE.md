@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Intent Classification Optimization
-status: planning
-last_updated: "2026-02-28T04:30:00.000Z"
+status: roadmap_created
+last_updated: "2026-02-28T05:00:00.000Z"
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -18,14 +18,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-28)
 
 **Core value:** 用户输入中的企业名可以被稳定移除，同时保留原句其余内容不变。
-**Current focus:** Defining v1.1 requirements
+**Current focus:** Implementing v1.1 intent classification optimization
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: Not started (roadmap created)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-02-28 — Milestone v1.1 started
+Status: Ready to start Phase 5
+Last activity: 2026-02-28 — Roadmap created for v1.1
 
 Progress: [░░░░░░░░░░░░░░░░] 0%
 
@@ -50,6 +50,11 @@ Progress: [░░░░░░░░░░░░░░░░] 0%
 2. 精检索：仅在对应类型的向量库中检索具体问题
 3. 工具复用：使用现有 `QueryChat` 实现，新增分类 prompt 配置
 
+**Roadmap 结构：**
+- Phase 5: 意图分类基础（CLS-01, CLS-02, CLS-04, CFG-03, CFG-04）
+- Phase 6: 分类驱动检索（CLS-03）
+- Phase 7: 测试验证（TEST-03, TEST-04, TEST-05）
+
 ### Decisions
 
 None yet.
@@ -60,12 +65,10 @@ None yet.
 
 ### Blockers/Concerns
 
-- 需要设计分类 prompt，确保 LLM 准确判断类型
-- 需要处理分类失败的降级逻辑
-- 需要测试新流程，验证语义混淆改善效果
+None yet.
 
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Milestone v1.0 complete
+Stopped at: Roadmap created for v1.1
 Resume file: —

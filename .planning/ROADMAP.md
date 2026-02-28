@@ -1,13 +1,13 @@
-# Roadmap: Rag Stream Query Normalization
+# Roadmap: Rag Stream Intent Classification Optimization
 
 ## Overview
 
-本路线图聚焦于在不破坏现有 `rag_stream` 主流程的前提下，引入企业名称清理型 AI 预处理能力。先完成配置与边界定义，再完成工具接入与回退策略，最后通过测试关闭回归风险。
+本路线图聚焦于引入两阶段意图识别机制，先用 LLM 进行粗粒度分类（数据库/指令/固定问题），再在对应向量库中精检索，解决语义混淆导致分类不准确的问题。
 
 ## Milestones
 
 - ✅ **v1.0 Query Normalization** — Phases 1-4 (shipped 2026-02-28)
-- 📋 **v1.1** — Planning
+- 📋 **v1.1 Intent Classification Optimization** — Phases 5-7 (planned)
 
 ## Phases
 
@@ -22,4 +22,66 @@
 详见: `.planning/milestones/v1.0-ROADMAP.md`
 </details>
 
-### 📋 v1.1 [Name] (Planned)
+### 📋 v1.1 Intent Classification Optimization (Planned)
+
+- [ ] **Phase 5: 意图分类基础** — 建立粗粒度分类服务与配置体系
+- [ ] **Phase 6: 分类驱动检索** — 连接分类结果与向量库检索流程
+- [ ] **Phase 7: 测试验证** — 覆盖新流程的单元测试与集成测试
+
+## Phase Details
+
+### Phase 5: 意图分类基础
+
+**Goal**: 建立基于 LLM 的粗粒度意图分类服务，提供稳定可靠的分类能力
+
+**Depends on**: v1.0 (QueryChat tool exists)
+
+**Requirements**: CLS-01, CLS-02, CLS-04, CFG-03, CFG-04
+
+**Success Criteria** (what must be TRUE):
+1. 系统在意图识别前能对用户 query 进行粗粒度分类（岱山-指令集 1 / 岱山-数据库问题 2 / 岱山-指令集-固定问题 3）
+2. 分类失败或返回无效结果时，系统能降级到现有向量检索流程
+3. 管理员可在 `config.yaml` 中配置分类开关、模型参数和阈值
+4. 环境变量可以覆盖配置中的分类参数（如模型名称、温度）
+
+**Plans**: TBD
+
+### Phase 6: 分类驱动检索
+
+**Goal**: 将分类结果与向量库检索流程连接，实现两阶段识别机制
+
+**Depends on**: Phase 5
+
+**Requirements**: CLS-03
+
+**Success Criteria** (what must be TRUE):
+1. 分类成功后，系统仅在对应类型的向量库中检索具体问题
+2. 不同意图类型的查询不会跨库混淆检索结果
+
+**Plans**: TBD
+
+### Phase 7: 测试验证
+
+**Goal**: 通过测试验证两阶段识别流程的正确性与稳定性
+
+**Depends on**: Phase 6
+
+**Requirements**: TEST-03, TEST-04, TEST-05
+
+**Success Criteria** (what must be TRUE):
+1. 单元测试覆盖分类成功路径（岱山-指令集 1 / 岱山-数据库问题 2 / 岱山-指令集-固定问题 3）
+2. 单元测试覆盖分类失败降级路径
+3. 集成测试验证两阶段识别流程从 query 输入到结果输出的完整可用性
+
+**Plans**: TBD
+
+## Progress
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 5. 意图分类基础 | 0/0 | Not started | - |
+| 6. 分类驱动检索 | 0/0 | Not started | - |
+| 7. 测试验证 | 0/0 | Not started | - |
+
+---
+*Roadmap created: 2026-02-28*

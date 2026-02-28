@@ -1,64 +1,59 @@
-# Requirements: Rag Stream Query Normalization
+# Requirements: Rag Stream Intent Classification Optimization
 
 **Defined:** 2026-02-28
 **Core Value:** 用户输入中的企业名可以被稳定移除，同时保留原句其余内容不变。
 
 ## v1 Requirements
 
+### Classification Service
+
+- [ ] **CLS-01**: 系统在意图识别前先进行粗粒度分类（岱山-指令集 1 / 岱山-数据库问题 2 / 岱山-指令集-固定问题 3）。
+- [ ] **CLS-02**: 复用现有 `QueryChat` 工具实现分类逻辑，配置专门的分类 prompt。
+- [ ] **CLS-03**: 分类后，仅在对应类型的向量库中检索具体问题。
+- [ ] **CLS-04**: 分类失败或返回无效结果时，降级到现有向量检索流程。
+
 ### Configuration
 
-- [x] **CFG-01**: `rag_stream` 可以从 `config.yaml` 读取 query 清理聊天配置（不使用 openai 前缀命名）。
-- [x] **CFG-02**: 环境变量可以覆盖上述 query 清理聊天配置。
-
-### Query Normalization
-
-- [x] **NORM-01**: 系统在 `handle_chat_general` 中对用户 query 执行 AI 改写预处理。
-- [x] **NORM-02**: AI 改写目标是删除企业名称，尽量保持原句其余内容不变。
-- [ ] **NORM-03**: 改写函数只返回纯文本句子，供后续意图识别继续使用。
-
-### Resilience
-
-- [ ] **SAFE-01**: 当 AI 调用失败、超时或返回空值时，系统返回原 query，不中断主流程。
+- [ ] **CFG-03**: 支持 `intent_classification` 配置块，包含启用开关、模型参数、阈值设置。
+- [ ] **CFG-04**: 环境变量可以覆盖分类配置。
 
 ### Testing
 
-- [x] **TEST-01**: 单测覆盖 AI 改写成功路径。
-- [x] **TEST-02**: 单测覆盖 AI 异常时原句回退路径。
+- [ ] **TEST-03**: 单测覆盖分类成功路径（0/1/2/3 不同类型）。
+- [ ] **TEST-04**: 单测覆盖分类失败降级路径。
+- [ ] **TEST-05**: 集成测试验证两阶段识别流程完整可用。
 
 ## v2 Requirements
 
-### Quality & Optimization
-
-- **QLTY-01**: 增加企业名称识别效果评估与离线样本回放。
-- **QLTY-02**: 增加 query 清理缓存与限流策略。
-- **QLTY-03**: 增加多模型路由策略（按请求类型切换模型）。
+(未来待定义)
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| 改造 type1/type2/type3 主业务路由策略 | 本次仅改 query 预处理步骤 |
-| 实现企业知识图谱实体标准化 | 超出本次最小可交付范围 |
-| 改造其他子系统（Digital_human_command_interface / DaiShanSQL） | 本次范围限定为 rag_stream |
+| 训练专用意图分类模型 | 复用 LLM 足够，避免模型维护成本 |
+| 重构所有现有向量检索逻辑 | 本次仅新增分类层，保持现有检索逻辑不变 |
+| 改造 Ragflow 接口 | 在 rag_stream 内部实现分类，不依赖远端改造 |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CFG-01 | Phase 1 | Complete |
-| CFG-02 | Phase 1 | Complete |
-| NORM-01 | Phase 2 | Complete |
-| NORM-02 | Phase 2 | Complete |
-| NORM-03 | Phase 2 | Pending |
-| SAFE-01 | Phase 2 | Pending |
-| TEST-01 | Phase 3 | Complete |
-| TEST-02 | Phase 3 | Complete |
+| CLS-01 | Phase 5 | Pending |
+| CLS-02 | Phase 5 | Pending |
+| CLS-03 | Phase 6 | Pending |
+| CLS-04 | Phase 5 | Pending |
+| CFG-03 | Phase 5 | Pending |
+| CFG-04 | Phase 5 | Pending |
+| TEST-03 | Phase 7 | Pending |
+| TEST-04 | Phase 7 | Pending |
+| TEST-05 | Phase 7 | Pending |
 
 **Coverage:**
-- v1 requirements: 8 total
-- Mapped to phases: 8
+- v1 requirements: 9 total
+- Mapped to phases: 9/9 (100%)
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-02-28*
-*Last updated: 2026-02-28 after initial definition*
+*Last updated: 2026-02-28 after roadmap creation*
