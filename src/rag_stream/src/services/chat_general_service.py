@@ -4,23 +4,19 @@ import asyncio
 import re
 from typing import Any, Awaitable, Callable
 
-from rag_stream.utils.log_manager_import import entry_trace, marker, trace
-from rag_stream.utils.daishan_sql_logging import format_daishan_log_text
+from src.config.settings import settings
+from src.utils.log_manager_import import entry_trace, marker, trace
+from src.utils.daishan_sql_logging import format_daishan_log_text
+from src.utils.query_chat import rewrite_query
+
 try:
     from DaiShanSQL.DaiShanSQL.api_server import Server
 except ModuleNotFoundError:
     from DaiShanSQL import Server
 
-from rag_stream.models.schemas import ChatRequest
+from src.models.schemas import ChatRequest
 
-_server: Server | None = None
-
-
-def _get_server() -> Server:
-    global _server
-    if _server is None:
-        _server = Server()
-    return _server
+server = Server()
 
 
 def _skip_intent_error_result(result_dict: dict) -> None:
@@ -33,8 +29,58 @@ def _log_fallback_error_and_reraise(error: Exception) -> None:
 
 
 @trace
+async def replace_economic_zone(query: str) -> str:
+    """
+    使用 AI 对 query 进行企业名称清理。
+
+    失败时返回原 query，不再执行正则替换。
+    """
+    if not isinstance(query, str) or not query:
+        marker(
+            "query_normalized_skip_invalid",
+            {"input_type": type(query).__name__ if query is not None else "None"},
+            level="WARNING",
+        )
+        return query
+
+    # 仅在疑似企业名场景触发 AI 预处理，避免无关问句增加外部依赖成本。
+    if not re.search(r"(?:公司|有限公司|集团|股份|企业|厂)", query):
+        marker("query_normalized_skip_non_company", {"query_len": len(query)})
+        return query
+
+    if not settings.query_chat.enabled:
+        marker("query_normalized_disabled", {"query_len": len(query)})
+        return query
+
+    if (
+        not (settings.query_chat.api_key or "").strip()
+        or not (settings.query_chat.base_url or "").strip()
+    ):
+        marker("query_normalized_misconfigured", {"query_len": len(query)})
+        return query
+
+    marker("query_normalized_start", {"query_len": len(query)})
+    try:
+        rewritten = await rewrite_query(query, settings.query_chat)
+    except Exception as error:
+        marker("query_normalized_failed", {"error": str(error)}, level="WARNING")
+        return query
+
+    rewritten_text = str(rewritten).strip() if rewritten is not None else ""
+    if not rewritten_text:
+        marker("query_normalized_empty", {}, level="WARNING")
+        return query
+
+    marker("query_normalized", {"normalized": rewritten_text != query})
+    return rewritten_text
+
+
+@trace
 def _extract_questions_for_sql(text_input: str, result_items: list[dict]) -> list[str]:
-    marker("extract_questions.start", {"text_len": len(text_input or ''), "candidates": len(result_items or [])})
+    marker(
+        "extract_questions.start",
+        {"text_len": len(text_input or ""), "candidates": len(result_items or [])},
+    )
     questions: list[str] = []
     for item in result_items:
         question_text = item.get("question", "")
@@ -53,7 +99,7 @@ def _extract_questions_for_sql(text_input: str, result_items: list[dict]) -> lis
 
 @trace
 def _extract_question_from_qa_text(question_text: str) -> str:
-    marker("extract_question_from_qa.start", {"text_len": len(question_text or '')})
+    marker("extract_question_from_qa.start", {"text_len": len(question_text or "")})
     if not isinstance(question_text, str):
         return ""
 
@@ -81,23 +127,40 @@ async def _post_process_type1(result_dict: dict) -> dict:
     if kb_name == "园区知识库":
         result = "1"
     elif kb_name == "企业知识库":
-        marker("DaiShanSQL入参", {"入参": format_daishan_log_text("sql_ChemicalCompanyInfo()")})
+        marker(
+            "DaiShanSQL入参",
+            {"入参": format_daishan_log_text("sql_ChemicalCompanyInfo()")},
+        )
         try:
-            result = _get_server().sqlFixed.sql_ChemicalCompanyInfo()
+            result = server.sqlFixed.sql_ChemicalCompanyInfo()
             marker("DaiShanSQL出参", {"出参": format_daishan_log_text(result)})
         except Exception as error:
-            marker("DaiShanSQL出参", {"出参": format_daishan_log_text(f"ERROR: {error}")}, level="ERROR")
+            marker(
+                "DaiShanSQL出参",
+                {"出参": format_daishan_log_text(f"ERROR: {error}")},
+                level="ERROR",
+            )
             raise
     elif kb_name == "安全信息知识库":
-        marker("DaiShanSQL入参", {"入参": format_daishan_log_text("sql_SecuritySituation()")})
+        marker(
+            "DaiShanSQL入参",
+            {"入参": format_daishan_log_text("sql_SecuritySituation()")},
+        )
         try:
-            result = _get_server().sqlFixed.sql_SecuritySituation()
+            result = server.sqlFixed.sql_SecuritySituation()
             marker("DaiShanSQL出参", {"出参": format_daishan_log_text(result)})
         except Exception as error:
-            marker("DaiShanSQL出参", {"出参": format_daishan_log_text(f"ERROR: {error}")}, level="ERROR")
+            marker(
+                "DaiShanSQL出参",
+                {"出参": format_daishan_log_text(f"ERROR: {error}")},
+                level="ERROR",
+            )
             raise
 
-    marker("type1.sql_result_ready", {"kb_name": kb_name, "result_len": len(str(result or ''))})
+    marker(
+        "type1.sql_result_ready",
+        {"kb_name": kb_name, "result_len": len(str(result or ""))},
+    )
     return {"type": 1, "data": {"kb_name": kb_name, "sql_result": str(result)}}
 
 
@@ -156,14 +219,18 @@ async def _post_process_type2(text_input: str, result_dict: dict) -> dict:
     )
     try:
         sql_result = await asyncio.to_thread(
-            _get_server().get_sql_result,
+            server.get_sql_result,
             query=text_input,
             history=[],
             questions=questions,
         )
         marker("DaiShanSQL出参", {"出参": format_daishan_log_text(sql_result)})
     except Exception as error:
-        marker("DaiShanSQL出参", {"出参": format_daishan_log_text(f"ERROR: {error}")}, level="ERROR")
+        marker(
+            "DaiShanSQL出参",
+            {"出参": format_daishan_log_text(f"ERROR: {error}")},
+            level="ERROR",
+        )
         raise
 
     return {"type": 2, "data": {"sql_result": sql_result}}
@@ -212,13 +279,17 @@ async def _post_process_and_route_type3(
             },
         )
         judge_result = await asyncio.to_thread(
-            _get_server().judgeQuery,
+            server.judgeQuery,
             request.question,
             return_question,
         )
         marker("DaiShanSQL出参", {"出参": format_daishan_log_text(judge_result)})
     except Exception as error:
-        marker("DaiShanSQL出参", {"出参": format_daishan_log_text(f"ERROR: {error}")}, level="ERROR")
+        marker(
+            "DaiShanSQL出参",
+            {"出参": format_daishan_log_text(f"ERROR: {error}")},
+            level="ERROR",
+        )
         return None
 
     judge_result_str = "" if judge_result is None else str(judge_result).strip()
@@ -242,33 +313,11 @@ async def handle_chat_general(
 ):
     """通用问答业务逻辑（从路由层下沉）"""
 
-    def replace_economic_zone(query: str) -> str:
-        if not query:
-            return query
-
-        replace_rules = [
-            r"岱山\s*经开区\s*[（(]\s*岱山\s*经济\s*开发区\s*[）)]",
-            r"岱山\s*经济\s*开发区",
-            r"岱山\s*经开区",
-            r"经开区",
-            r"(?:东|西)\s*园区",
-            r"(?:东|西)\s*区",
-            r"经济\s*开发区",
-            r"开发区",
-        ]
-
-        result = query
-        for pattern in replace_rules:
-            result = re.sub(pattern, "园区", result)
-
-        return result
-
     user_id = request.user_id or "anonymous"
     original_question = request.question
 
     if isinstance(request.question, str):
-        request.question = replace_economic_zone(request.question)
-        marker("query_normalized", {"normalized": request.question != original_question})
+        request.question = await replace_economic_zone(request.question)
 
     try:
         result_dict = await intent_service.process_query(request.question, user_id)

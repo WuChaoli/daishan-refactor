@@ -3,10 +3,12 @@ IntentService - 意图识别服务
 负责处理意图类型(Type 0/1/2/3)的业务逻辑
 """
 
-from typing import Any, Dict, List
+import dataclasses
+from typing import Any, Dict, List, Optional
 
-from rag_stream.utils.log_manager_import import marker, trace
-from rag_stream.services.intent_service.base_intent_service import (
+from src.config.settings import settings
+from src.utils.log_manager_import import marker, trace
+from src.services.intent_service.base_intent_service import (
     BaseIntentService,
     IntentRecognizerSettings,
     IntentResult,
@@ -19,6 +21,22 @@ class IntentService(BaseIntentService):
     def __init__(self, ragflow_client):
         super().__init__(ragflow_client=ragflow_client)
         self._use_daishan_priority = False
+        self._intent_classifier: Optional[Any] = None
+
+        # 初始化分类器（如果启用）
+        if settings.intent_classification.enabled:
+            try:
+                from src.utils.intent_classifier import IntentClassifier
+
+                self._intent_classifier = IntentClassifier(settings.intent_classification)
+                marker("intent_classifier.initialized", {"enabled": True})
+            except Exception as e:
+                marker(
+                    "intent_classifier.init_failed",
+                    {"error": str(e)},
+                    level="WARNING",
+                )
+                self._intent_classifier = None
 
     async def process_query(self, text_input: str, user_id: str) -> dict:
         return await super().process_query(text_input, user_id)
@@ -87,11 +105,53 @@ class IntentService(BaseIntentService):
         mapping_keys = set(recognizer_settings.database_mapping.keys())
         return {"岱山-指令集", "岱山-指令集-固定问题"}.issubset(mapping_keys)
 
-    def _load_process_settings(self) -> IntentRecognizerSettings:
+    def _load_process_settings(
+        self, text_input: Optional[str] = None
+    ) -> IntentRecognizerSettings:
         recognizer_settings = self._load_intent_recognizer_settings()
         self._use_daishan_priority = self._should_use_daishan_priority(
             recognizer_settings
         )
+
+        # 分类驱动检索（Phase 6）
+        if text_input and self._intent_classifier:
+            classification_result = self._intent_classifier.classify(text_input)
+            threshold = settings.intent_classification.confidence_threshold
+
+            # 降级或低置信度时，保持全量检索
+            if classification_result.degraded:
+                marker(
+                    "classifier.degraded_fallback",
+                    {"query": text_input, "reason": "degraded"},
+                )
+                return recognizer_settings
+
+            if classification_result.confidence < threshold:
+                marker(
+                    "classifier.low_confidence_fallback",
+                    {
+                        "query": text_input,
+                        "confidence": classification_result.confidence,
+                        "threshold": threshold,
+                    },
+                )
+                return recognizer_settings
+
+            # 高置信度时，过滤 database_mapping
+            type_id = classification_result.type_id
+            filtered_mapping = {
+                k: v
+                for k, v in recognizer_settings.database_mapping.items()
+                if v == type_id
+            }
+
+            if filtered_mapping:  # 有匹配的库
+                # 创建新的 IntentRecognizerSettings 实例（保持不可变性）
+                recognizer_settings = dataclasses.replace(
+                    recognizer_settings, database_mapping=filtered_mapping
+                )
+            # else: 没有匹配的库，保持原映射（防御性编程）
+
         return recognizer_settings
 
     

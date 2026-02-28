@@ -9,6 +9,7 @@
 5. 配置优先级：环境变量 > 配置文件 > 默认值
 """
 
+import logging
 import os
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
@@ -340,6 +341,82 @@ class DifyConfig(BaseConfig):
 
 
 # ============================================================
+# Query Chat 配置
+# ============================================================
+
+
+class QueryChatConfig(BaseConfig):
+    """
+    Query Chat 配置
+
+    用于 query 预处理（企业名称清理）的聊天模型配置
+    """
+
+    enabled: bool = Field(default=True, description="是否启用 query 清理功能")
+    api_key: str = Field(default="", description="聊天服务 API Key")
+    base_url: str = Field(default="", description="聊天服务 Base URL")
+    model: str = Field(default="", description="聊天模型名称")
+    timeout: int = Field(default=20, description="HTTP 请求超时时间(秒)")
+    temperature: float = Field(default=0.0, description="采样温度")
+
+    @field_validator("timeout")
+    @classmethod
+    def validate_timeout(cls, v: int) -> int:
+        if v <= 0:
+            raise ValueError(f"timeout 必须大于 0，当前值: {v}")
+        return v
+
+    @field_validator("temperature")
+    @classmethod
+    def validate_temperature(cls, v: float) -> float:
+        if not 0 <= v <= 2:
+            raise ValueError(f"temperature 必须在 0-2 之间，当前值: {v}")
+        return v
+
+
+# ============================================================
+# Intent Classification 配置
+# ============================================================
+
+
+class IntentClassificationConfig(BaseConfig):
+    """
+    Intent Classification 配置
+
+    用于粗粒度意图分类的聊天模型配置
+    """
+
+    enabled: bool = Field(default=False, description="是否启用意图分类功能")
+    api_key: str = Field(default="", description="聊天服务 API Key")
+    base_url: str = Field(default="", description="聊天服务 Base URL")
+    model: str = Field(default="", description="聊天模型名称")
+    timeout: int = Field(default=3, description="HTTP 请求超时时间(秒)")
+    temperature: float = Field(default=0.0, description="采样温度")
+    confidence_threshold: float = Field(default=0.5, description="置信度阈值")
+
+    @field_validator("timeout")
+    @classmethod
+    def validate_timeout(cls, v: int) -> int:
+        if v <= 0:
+            raise ValueError(f"timeout 必须大于 0，当前值: {v}")
+        return v
+
+    @field_validator("temperature")
+    @classmethod
+    def validate_temperature(cls, v: float) -> float:
+        if not 0 <= v <= 2:
+            raise ValueError(f"temperature 必须在 0-2 之间，当前值: {v}")
+        return v
+
+    @field_validator("confidence_threshold")
+    @classmethod
+    def validate_confidence_threshold(cls, v: float) -> float:
+        if not 0 <= v <= 1:
+            raise ValueError(f"confidence_threshold 必须在 0-1 之间，当前值: {v}")
+        return v
+
+
+# ============================================================
 # OpenAI 配置
 # ============================================================
 
@@ -400,6 +477,8 @@ class Settings(BaseModel):
     server: ServerConfig = Field(default_factory=ServerConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
     dify: DifyConfig = Field(default_factory=DifyConfig)
+    query_chat: QueryChatConfig = Field(default_factory=QueryChatConfig)
+    intent_classification: IntentClassificationConfig = Field(default_factory=IntentClassificationConfig)
     openai: OpenAIConfig = Field(default_factory=OpenAIConfig)
     mysql: MySQLConfig = Field(default_factory=MySQLConfig)
 
@@ -437,6 +516,8 @@ class Settings(BaseModel):
         server_cfg = ServerConfig.from_yaml(yaml_path, "server")
         logging_cfg = LoggingConfig.from_yaml(yaml_path, "logging")
         dify_cfg = DifyConfig.from_yaml(yaml_path, "dify")
+        query_chat_cfg = QueryChatConfig.from_yaml(yaml_path, "query_chat")
+        intent_classification_cfg = IntentClassificationConfig.from_yaml(yaml_path, "intent_classification")
         openai_cfg = OpenAIConfig.from_yaml(yaml_path, "openai")
         mysql_cfg = MySQLConfig.from_yaml(yaml_path, "mysql")
 
@@ -446,6 +527,8 @@ class Settings(BaseModel):
             server=server_cfg,
             logging=logging_cfg,
             dify=dify_cfg,
+            query_chat=query_chat_cfg,
+            intent_classification=intent_classification_cfg,
             openai=openai_cfg,
             mysql=mysql_cfg,
         )
@@ -493,6 +576,21 @@ class Settings(BaseModel):
             "DIFY_BASE_URL": ("dify", "base_url"),
             "DIFY_TIMEOUT": ("dify", "timeout"),
             "DIFY_MAX_RETRIES": ("dify", "max_retries"),
+            # Query Chat 配置
+            "QUERY_CHAT_API_KEY": ("query_chat", "api_key"),
+            "QUERY_CHAT_BASE_URL": ("query_chat", "base_url"),
+            "QUERY_CHAT_MODEL": ("query_chat", "model"),
+            "QUERY_CHAT_ENABLED": ("query_chat", "enabled"),
+            "QUERY_CHAT_TIMEOUT": ("query_chat", "timeout"),
+            "QUERY_CHAT_TEMPERATURE": ("query_chat", "temperature"),
+            # Intent Classification 配置
+            "INTENT_CLASSIFICATION_ENABLED": ("intent_classification", "enabled"),
+            "INTENT_CLASSIFICATION_API_KEY": ("intent_classification", "api_key"),
+            "INTENT_CLASSIFICATION_BASE_URL": ("intent_classification", "base_url"),
+            "INTENT_CLASSIFICATION_MODEL": ("intent_classification", "model"),
+            "INTENT_CLASSIFICATION_TIMEOUT": ("intent_classification", "timeout"),
+            "INTENT_CLASSIFICATION_TEMPERATURE": ("intent_classification", "temperature"),
+            "INTENT_CLASSIFICATION_CONFIDENCE_THRESHOLD": ("intent_classification", "confidence_threshold"),
             # OpenAI 配置
             "OPENAI_API_KEY": ("openai", "api_key"),
             "OPENAI_BASE_URL": ("openai", "base_url"),
@@ -514,9 +612,9 @@ class Settings(BaseModel):
                 current_value = getattr(section_config, key)
 
                 # 尝试类型转换
-                if isinstance(current_value, int):
+                if type(current_value) is int:
                     value = int(value)
-                elif isinstance(current_value, float):
+                elif type(current_value) is float:
                     value = float(value)
                 elif isinstance(current_value, bool):
                     value = value.lower() in ("true", "yes", "1")
@@ -526,6 +624,73 @@ class Settings(BaseModel):
                 setattr(settings, section, section_config)
 
         return settings
+
+    def validate_query_chat_config(self) -> None:
+        """验证 query_chat 配置，无效时记录告警并降级运行。"""
+        logger = logging.getLogger(__name__)
+        config = self.query_chat
+
+        if not config.enabled:
+            logger.info("Query Chat 功能已禁用（enabled=false）")
+            return
+
+        missing: list[str] = []
+        if not (config.api_key or "").strip():
+            missing.append("api_key")
+        if not (config.base_url or "").strip():
+            missing.append("base_url")
+
+        if missing:
+            logger.warning(
+                "QUERY_CHAT 配置不完整（缺少: %s），query 清理功能将降级运行",
+                ", ".join(missing),
+            )
+
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug(
+                "Query Chat 配置检查: enabled=%s, base_url=%s, model=%s, timeout=%s, temperature=%s, api_key=%s",
+                config.enabled,
+                config.base_url,
+                config.model,
+                config.timeout,
+                config.temperature,
+                "***" if config.api_key else "",
+            )
+
+    def validate_intent_classification_config(self) -> None:
+        """验证 intent_classification 配置，无效时记录告警并降级运行。"""
+        logger = logging.getLogger(__name__)
+        config = self.intent_classification
+
+        if not config.enabled:
+            logger.info("Intent Classification 功能已禁用（enabled=false）")
+            return
+
+        missing: list[str] = []
+        if not (config.api_key or "").strip():
+            missing.append("api_key")
+        if not (config.base_url or "").strip():
+            missing.append("base_url")
+        if not (config.model or "").strip():
+            missing.append("model")
+
+        if missing:
+            logger.warning(
+                "INTENT_CLASSIFICATION 配置不完整（缺少: %s），分类功能将降级运行",
+                ", ".join(missing),
+            )
+
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug(
+                "Intent Classification 配置检查: enabled=%s, base_url=%s, model=%s, timeout=%s, temperature=%s, confidence_threshold=%s, api_key=%s",
+                config.enabled,
+                config.base_url,
+                config.model,
+                config.timeout,
+                config.temperature,
+                config.confidence_threshold,
+                "***" if config.api_key else "",
+            )
 
 
 # ============================================================
@@ -567,7 +732,10 @@ def load_settings() -> Settings:
     base_dir = _repo_dir()
     yaml_path = base_dir / "config.yaml"
 
-    return Settings.load_from_yaml_with_env_override(yaml_path)
+    loaded_settings = Settings.load_from_yaml_with_env_override(yaml_path)
+    loaded_settings.validate_query_chat_config()
+    loaded_settings.validate_intent_classification_config()
+    return loaded_settings
 
 
 # 全局配置实例
