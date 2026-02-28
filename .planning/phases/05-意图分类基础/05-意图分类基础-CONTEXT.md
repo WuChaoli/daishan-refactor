@@ -28,19 +28,25 @@
 1 - 岱山-数据库问题
 2 - 岱山-指令集-固定问题
 
-只返回类型对应的数字编号（0/1/2/3），不要添加其他说明。
+只返回类型对应的数字编号和置信度（0.0-1.0），不要添加其他说明。
 
 输入：{user_query}
-输出：{"type": 数字编号}
+输出：{"type": 数字编号, "confidence": 置信度}
+```
+
+**置信度说明：**
+- 0.0-0.3: 低置信度，分类不确定
+- 0.3-0.7: 中等置信度，分类基本正确
+- 0.7-1.0: 高置信度，分类非常确定
 ```
 **Outcome:** 待实现后测试验证
 
 ### 分类结果格式
 
-**Decision: 返回整数 ID（1/2/3），保持现有数字逻辑**
-**Rationale:** 与现有 intent_mapping.example.json 中的映射关系一致，便于检索时直接使用；整数 ID 便于下游处理和日志记录
-**Code Context:** `IntentRecognizerSettings` 中的 `database_mapping` 使用字符串键名，值为类型 ID
-**Outcome:** 与现有系统兼容
+**Decision: 返回整数 ID（1/2/3）和置信度（0.0-1.0），保持现有数字逻辑**
+**Rationale:** 与现有 intent_mapping.example.json 中的映射关系一致；置信度用于后续复合判断（如置信度低时提示用户更明确表述）
+**Code Context:** `IntentRecognizerSettings` 中的 `database_mapping` 使用字符串键名，值为类型 ID；置信度用于过滤低质量分类
+**Outcome:** 与现有系统兼容，新增信心指标增强可用性
 
 ### 降级策略
 
