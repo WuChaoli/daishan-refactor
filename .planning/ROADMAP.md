@@ -26,7 +26,7 @@ Plans:
 - [x] 01-01: 配置模型与加载逻辑落地
 
 ### Phase 2: AI 改写接入
-**Goal**: 实现聊天工具并在 `replace_economic_zone` 中调用，达到“删除企业名、保留原句”。  
+**Goal**: 实现聊天工具并在 `replace_economic_zone` 中调用，达到"删除企业名、保留原句"。  
 **Depends on**: Phase 1  
 **Requirements**: [NORM-01, NORM-02, NORM-03, SAFE-01]  
 **Success Criteria** (what must be TRUE):
@@ -34,11 +34,10 @@ Plans:
   2. `replace_economic_zone` 使用该工具改写 query。
   3. AI 异常时返回原 query，不再使用旧正则统一替换。
   4. 改写输出为纯文本句子。
-**Plans**: 2 plans
+**Plans**: 1 plan
 
 Plans:
-- [ ] 02-01: 聊天工具实现
-- [ ] 02-02: service 接入与异常回退
+- [x] 02-01: 聊天工具实现（包含异步接口、内容验证、统计指标）
 
 ### Phase 3: 测试回归
 **Goal**: 建立最小测试证据，确保改造可回归。  
@@ -58,5 +57,5 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. 配置建模 | 1/1 | Complete | 2026-02-28 |
-| 2. AI 改写接入 | 0/2 | Not started | - |
+| 2. AI 改写接入 | 1/1 | Planned | - |
 | 3. 测试回归 | 0/1 | Not started | - |
