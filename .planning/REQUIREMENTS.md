@@ -7,14 +7,14 @@
 
 ### Classification Service
 
-- [ ] **CLS-01**: 系统在意图识别前先进行粗粒度分类（岱山-指令集 1 / 岱山-数据库问题 2 / 岱山-指令集-固定问题 3）。
-- [ ] **CLS-02**: 复用现有 `QueryChat` 工具实现分类逻辑，配置专门的分类 prompt。
+- [x] **CLS-01**: 系统在意图识别前先进行粗粒度分类（岱山-指令集 1 / 岱山-数据库问题 2 / 岱山-指令集-固定问题 3）。
+- [x] **CLS-02**: 复用现有 `QueryChat` 工具实现分类逻辑，配置专门的分类 prompt。
 - [ ] **CLS-03**: 分类后，仅在对应类型的向量库中检索具体问题。
 - [ ] **CLS-04**: 分类失败或返回无效结果时，降级到现有向量检索流程。
 
 ### Configuration
 
-- [ ] **CFG-03**: 支持 `intent_classification` 配置块，包含启用开关、模型参数、阈值设置。
+- [x] **CFG-03**: 支持 `intent_classification` 配置块，包含启用开关、模型参数、阈值设置。
 - [ ] **CFG-04**: 环境变量可以覆盖分类配置。
 
 ### Testing
@@ -39,11 +39,11 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CLS-01 | Phase 5 | Pending |
-| CLS-02 | Phase 5 | Pending |
+| CLS-01 | Phase 5 | Complete |
+| CLS-02 | Phase 5 | Complete |
 | CLS-03 | Phase 6 | Pending |
 | CLS-04 | Phase 5 | Pending |
-| CFG-03 | Phase 5 | Pending |
+| CFG-03 | Phase 5 | Complete |
 | CFG-04 | Phase 5 | Pending |
 | TEST-03 | Phase 7 | Pending |
 | TEST-04 | Phase 7 | Pending |
