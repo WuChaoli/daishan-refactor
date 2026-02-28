@@ -260,7 +260,7 @@ class BaseIntentService(ABC):
     async def process_query(self, text_input: str, user_id: str) -> dict:
         """模板方法：配置加载 -> 查表 -> 排序 -> 后处理"""
         try:
-            recognizer_settings = self._load_process_settings()
+            recognizer_settings = self._load_process_settings(text_input)
             table_results = await self._query_process_table_results(
                 text_input,
                 recognizer_settings,
@@ -282,7 +282,9 @@ class BaseIntentService(ABC):
             return self._build_process_error_result(e)
 
     @abstractmethod
-    def _load_process_settings(self) -> IntentRecognizerSettings:
+    def _load_process_settings(
+        self, text_input: Optional[str] = None
+    ) -> IntentRecognizerSettings:
         """步骤1：加载意图识别配置"""
 
     @abstractmethod

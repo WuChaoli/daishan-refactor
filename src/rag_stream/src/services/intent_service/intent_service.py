@@ -3,6 +3,7 @@ IntentService - 意图识别服务
 负责处理意图类型(Type 0/1/2/3)的业务逻辑
 """
 
+import dataclasses
 from typing import Any, Dict, List, Optional
 
 from src.config.settings import settings
@@ -104,16 +105,52 @@ class IntentService(BaseIntentService):
         mapping_keys = set(recognizer_settings.database_mapping.keys())
         return {"岱山-指令集", "岱山-指令集-固定问题"}.issubset(mapping_keys)
 
-    def _load_process_settings(self) -> IntentRecognizerSettings:
+    def _load_process_settings(
+        self, text_input: Optional[str] = None
+    ) -> IntentRecognizerSettings:
         recognizer_settings = self._load_intent_recognizer_settings()
         self._use_daishan_priority = self._should_use_daishan_priority(
             recognizer_settings
         )
 
-        # 预留：可选调用分类服务（Phase 6 使用）
-        # if self._intent_classifier:
-        #     classification_result = self._intent_classifier.classify(text_input)
-        #     ...
+        # 分类驱动检索（Phase 6）
+        if text_input and self._intent_classifier:
+            classification_result = self._intent_classifier.classify(text_input)
+            threshold = settings.intent_classification.confidence_threshold
+
+            # 降级或低置信度时，保持全量检索
+            if classification_result.degraded:
+                marker(
+                    "classifier.degraded_fallback",
+                    {"query": text_input, "reason": "degraded"},
+                )
+                return recognizer_settings
+
+            if classification_result.confidence < threshold:
+                marker(
+                    "classifier.low_confidence_fallback",
+                    {
+                        "query": text_input,
+                        "confidence": classification_result.confidence,
+                        "threshold": threshold,
+                    },
+                )
+                return recognizer_settings
+
+            # 高置信度时，过滤 database_mapping
+            type_id = classification_result.type_id
+            filtered_mapping = {
+                k: v
+                for k, v in recognizer_settings.database_mapping.items()
+                if v == type_id
+            }
+
+            if filtered_mapping:  # 有匹配的库
+                # 创建新的 IntentRecognizerSettings 实例（保持不可变性）
+                recognizer_settings = dataclasses.replace(
+                    recognizer_settings, database_mapping=filtered_mapping
+                )
+            # else: 没有匹配的库，保持原映射（防御性编程）
 
         return recognizer_settings
 
