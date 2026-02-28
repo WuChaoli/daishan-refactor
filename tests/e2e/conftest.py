@@ -53,6 +53,7 @@ class TestConfig:
     # Test behavior configuration
     skip_e2e: bool = False
     log_level: str = "INFO"
+    filter_type: str | None = None
 
     # Report configuration
     report_path: str | None = None
@@ -96,6 +97,7 @@ class TestConfig:
             user_id=os.environ.get("TEST_USER_ID", "test_e2e"),
             skip_e2e=skip_e2e,
             log_level=os.environ.get("LOG_LEVEL", "INFO"),
+            filter_type=os.environ.get("FILTER_TYPE"),
             report_path=os.environ.get("TEST_REPORT_PATH"),
         )
 
