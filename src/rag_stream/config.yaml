@@ -92,4 +92,4 @@ intent_classification:
   model: "Qwen2.5-7B-Instruct"
   timeout: 3
   temperature: 0.0
-  confidence_threshold: 0.5
+  confidence_threshold: 0.7
