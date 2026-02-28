@@ -1,5 +1,19 @@
 # Milestones
 
+## v1.2 Integration Testing for CI/CD (In Progress: 2026-02-28)
+
+**Phases planned:** 3 phases (9-11), 3 plans
+
+**Goal:** 设计集成测试套件，使用 .venv 环境连接外部真实环境，验证接口连通性，支持 CI/CD 自动化测试。
+
+**Key features:**
+- 外部服务连通性测试（AI API、向量库、数据库）
+- API E2E 测试（/api/general 含意图分类链路）
+- 测试配置与环境变量分离
+- CI/CD 流水线集成（GitHub Actions）
+
+---
+
 ## v1.1 Intent Classification Optimization (Shipped: 2026-02-28)
 
 **Phases completed:** 3 phases, 5 plans, 0 tasks
@@ -21,4 +35,3 @@
 - (none recorded)
 
 ---
-

@@ -1,13 +1,14 @@
-# Roadmap: Rag Stream Intent Classification Optimization
+# Roadmap: Rag Stream Integration Testing for CI/CD
 
 ## Overview
 
-本路线图聚焦于引入两阶段意图识别机制，先用 LLM 进行粗粒度分类（数据库/指令/固定问题），再在对应向量库中精检索，解决语义混淆导致分类不准确的问题。
+本路线图聚焦于构建 CI/CD 集成测试套件，使用 .venv 环境连接外部真实环境，验证接口连通性，支持自动化测试流水线。
 
 ## Milestones
 
 - ✅ **v1.0 Query Normalization** — Phases 1-4 (shipped 2026-02-28)
 - ✅ **v1.1 Intent Classification Optimization** — Phases 5-8 (shipped 2026-02-28)
+- ○ **v1.2 Integration Testing for CI/CD** — Phases 9-11 (in progress)
 
 ## Phases
 
@@ -32,9 +33,22 @@
 详见: `.planning/milestones/v1.1-ROADMAP.md`
 </details>
 
-### 📋 Next Milestone (Planning)
+<details>
+<summary>○ v1.2 Integration Testing for CI/CD (Phases 9-11) — IN PROGRESS</summary>
 
-TBD — 使用 `/gsd:new-milestone` 开始规划
+- [ ] **Phase 9: 外部服务连通性测试** — 验证 AI API、向量库、数据库连通性（1 plan）
+  - Requirements: INT-01, INT-02, INT-03, INT-04
+  - Success Criteria: 所有外部服务连通性测试通过，失败时提供诊断信息
+
+- [ ] **Phase 10: API E2E 测试** — 完整 API 流程测试与配置分离（1 plan）
+  - Requirements: INT-05, INT-06
+  - Success Criteria: /api/general 接口完整流程测试通过，配置可环境注入
+
+- [ ] **Phase 11: CI/CD 流水线集成** — 测试报告与流水线配置（1 plan）
+  - Requirements: INT-07, INT-08
+  - Success Criteria: GitHub Actions 工作流可正常运行，生成 JUnit 报告
+
+</details>
 
 ## Progress
 
@@ -44,7 +58,10 @@ TBD — 使用 `/gsd:new-milestone` 开始规划
 | 5. 意图分类基础 | v1.1 | 3/3 | Complete | 2026-02-28 |
 | 6. 分类驱动检索 | v1.1 | 1/1 | Complete | 2026-02-28 |
 | 8. API General 端到端测试 | v1.1 | 1/1 | Complete | 2026-02-28 |
+| 9. 外部服务连通性测试 | v1.2 | 0/1 | Pending | — |
+| 10. API E2E 测试 | v1.2 | 0/1 | Pending | — |
+| 11. CI/CD 流水线集成 | v1.2 | 0/1 | Pending | — |
 
 ---
 *Roadmap created: 2026-02-28*
-*Last updated: 2026-02-28 - v1.1 milestone archived*
+*Last updated: 2026-02-28 - v1.2 roadmap created*

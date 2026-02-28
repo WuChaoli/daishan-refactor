@@ -12,7 +12,18 @@
 
 **Shipped:** 两阶段意图识别机制，先用 LLM 进行粗粒度分类，再在对应向量库中精检索，解决语义混淆导致分类不准确的问题。
 
-**Next Milestone:** TBD
+**Next Milestone:** v1.2 Integration Testing for CI/CD
+
+## Current Milestone: v1.2 Integration Testing for CI/CD
+
+**Goal:** 设计集成测试套件，使用 .venv 环境连接外部真实环境，验证接口连通性，支持 CI/CD 自动化测试。
+
+**Target features:**
+- 集成测试框架设计（支持 .venv 环境隔离）
+- 外部服务连通性测试（AI API、向量库、数据库）
+- 核心接口 E2E 测试（/api/general 等）
+- CI/CD 流水线集成配置
+- 测试数据与环境配置分离
 
 ## Requirements
 
@@ -34,19 +45,21 @@
 
 ### Active
 
-(None — planning next milestone)
+- **INT-01**: 集成测试框架支持 .venv 环境隔离运行
+- **INT-02**: 外部 AI API 服务连通性测试
+- **INT-03**: 向量库服务连通性测试
+- **INT-04**: 数据库服务连通性测试
+- **INT-05**: /api/general 接口 E2E 测试（含意图分类链路）
+- **INT-06**: 测试配置与环境变量分离（支持 CI/CD 注入）
+- **INT-07**: 测试报告输出（JUnit/XML 格式支持）
+- **INT-08**: CI/CD 流水线配置文件（GitHub Actions/GitLab CI）
 
 ### Out of Scope
 
-- 全链路 Prompt 工程平台化（模板中心、策略路由）— 当前只解决企业名清理。
-- 多模型供应商抽象（非 OpenAI 兼容客户端）— 当前只做单客户端实现。
-- 对 `chat_general` 其他 type 路由逻辑的行为改造 — 本次仅改 query 预处理步骤。
-
-### Out of Scope
-
-- 全链路 Prompt 工程平台化（模板中心、策略路由）— 当前只解决企业名清理。
-- 多模型供应商抽象（非 OpenAI 兼容客户端）— 当前只做单客户端实现。
-- 对 `chat_general` 其他 type 路由逻辑的行为改造 — 本次仅改 query 预处理步骤。
+- 性能测试与压力测试 — 属于性能里程碑，非连通性测试
+- 多环境并行测试矩阵 — 当前仅支持单一真实环境
+- Mock/Stub 服务 — 本里程碑聚焦真实环境连通性
+- 安全渗透测试 — 属于安全审计范畴
 
 ## Context
 
@@ -60,7 +73,7 @@
 
 **Two-Stage Recognition:**
 - Stage 1: LLM 粗分类（岱山-指令集 1 / 岱山-数据库问题 2 / 岱山-指令集-固定问题 3）
-- Stage 2: 根据分类结果过滤向量库，仅在对应库中精检索
+- Stage 2: 根据分类结果过滤向量库，仅在对应库中检索
 - 降级策略：分类失败时回退到全库检索
 
 **Key Issue Resolved:**
@@ -122,4 +135,4 @@
 | 降级时返回 type_id=0 并标记 degraded | 明确区分正常/降级结果 | ✓ Good — 调用方可感知降级 |
 
 ---
-*Last updated: 2026-02-28 after v1.1 milestone*
+*Last updated: 2026-02-28 after v1.2 milestone started*
