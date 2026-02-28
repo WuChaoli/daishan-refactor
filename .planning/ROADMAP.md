@@ -61,7 +61,8 @@
 1. 分类成功后，系统仅在对应类型的向量库中检索具体问题
 2. 不同意图类型的查询不会跨库混淆检索结果
 
-**Plans**: TBD
+**Plans**: 1 plan
+- [ ] [06-01-PLAN.md](.planning/phases/06-分类驱动检索/06-01-PLAN.md) — 分类驱动检索实现（CLS-03）
 
 ### Phase 7: 测试验证
 
@@ -82,10 +83,10 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 5. 意图分类基础 | 0/3 | Planned | - |
-| 6. 分类驱动检索 | 0/0 | Not started | - |
+| 5. 意图分类基础 | 3/3 | Planned | - |
+| 6. 分类驱动检索 | 0/1 | Planned | - |
 | 7. 测试验证 | 0/0 | Not started | - |
 
 ---
 *Roadmap created: 2026-02-28*
-*Last updated: 2026-02-28 - Phase 5 plans created*
+*Last updated: 2026-02-28 - Phase 6 plan created*
