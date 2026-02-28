@@ -361,4 +361,5 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "ai_api: AI API 连通性测试")
     config.addinivalue_line("markers", "vector_store: 向量库连通性测试")
     config.addinivalue_line("markers", "database: 数据库连通性测试")
+    config.addinivalue_line("markers", "config: 配置验证测试")
     config.addinivalue_line("markers", "slow: 慢速测试")
