@@ -9,6 +9,7 @@
 - ✅ **v1.0 Query Normalization** — Phases 1-4 (shipped 2026-02-28)
 - ✅ **v1.1 Intent Classification Optimization** — Phases 5-8 (shipped 2026-02-28)
 - ○ **v1.2 Integration Testing for CI/CD** — Phases 9-11 (in progress)
+- ○ **v1.3 Production Build and Deployment Scripts** — Phases 12-15 (planned)
 
 ## Phases
 
@@ -52,6 +53,30 @@
 
 </details>
 
+<details>
+<summary>○ v1.3 Production Build and Deployment Scripts (Phases 12-15) — PLANNED</summary>
+
+- [x] **Phase 12: Docker Containerization** — 安全优化的容器配置（2 plans）
+  - Requirements: DOCKER-01, DOCKER-02
+  - Success Criteria: 多阶段构建成功、非 root 运行、优雅关闭、无 secrets 泄漏
+  - Plans:
+    - [x] 12-01-PLAN.md — Create Production Dockerfile
+    - [ ] 12-02-PLAN.md — Docker Compose Configuration
+
+- [ ] **Phase 13: Service Lifecycle Management** — 启动关闭与资源清理（1 plan）
+  - Requirements: LIFECYCLE-01, LIFECYCLE-02
+  - Success Criteria: SIGTERM 正确处理、连接优雅关闭、启动脚本可靠
+
+- [ ] **Phase 14: Health Checks & Monitoring** — 编排器就绪健康端点（1 plan）
+  - Requirements: HEALTH-01, HEALTH-02
+  - Success Criteria: /health 轻量检查、/health/ready 依赖验证、HTTP 状态码正确
+
+- [ ] **Phase 15: Log Management** — 容器原生日志与轮转（1 plan）
+  - Requirements: LOG-01, LOG-02
+  - Success Criteria: stdout 日志、JSON 结构化、Docker 轮转配置、级别可控
+
+</details>
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -60,9 +85,13 @@
 | 5. 意图分类基础 | v1.1 | 3/3 | Complete | 2026-02-28 |
 | 6. 分类驱动检索 | v1.1 | 1/1 | Complete | 2026-02-28 |
 | 8. API General 端到端测试 | v1.1 | 1/1 | Complete | 2026-02-28 |
-| 9. 外部服务连通性测试 | 1/1 | Complete    | 2026-02-28 | — |
+| 9. 外部服务连通性测试 | v1.2 | 1/1 | Complete | 2026-02-28 |
 | 10. API E2E 测试 | v1.2 | 0/1 | Pending | — |
 | 11. CI/CD 流水线集成 | v1.2 | 0/1 | Pending | — |
+| 12. Docker Containerization | v1.3 | 1/2 | In Progress | 2026-02-28 |
+| 13. Service Lifecycle Management | v1.3 | 0/1 | Planned | — |
+| 14. Health Checks & Monitoring | v1.3 | 0/1 | Planned | — |
+| 15. Log Management | v1.3 | 0/1 | Planned | — |
 
 ### Phase 9: 外部服务连通性测试
 
@@ -98,6 +127,62 @@
 - 生成 JUnit/XML 格式报告
 - 测试失败时通知机制
 
+### Phase 12: Docker Containerization
+
+**Goal:** 安全优化的容器配置
+
+**Requirements:** DOCKER-01, DOCKER-02
+
+**Success Criteria:**
+- Docker image builds with multi-stage uv build
+- Container runs as non-root user (UID ≥ 1000)
+- Graceful shutdown on SIGTERM within 5 seconds
+- No secrets in image layers (`docker history` clean)
+- Image size under 500MB
+
+**Plans:**
+- ✅ **12-01: Create Production Dockerfile** — Multi-stage build, non-root user, exec form CMD (2026-02-28)
+- ⏳ **12-02: Docker Compose Configuration** — Service orchestration, networking, environment variables
+
+### Phase 13: Service Lifecycle Management
+
+**Goal:** 启动关闭与资源清理
+
+**Requirements:** LIFECYCLE-01, LIFECYCLE-02
+
+**Success Criteria:**
+- SIGTERM triggers proper cleanup sequence
+- Lifespan shutdown closes external connections
+- Startup script handles database wait/initialization
+- Uvicorn configured with 4 workers + 30s timeout
+- Container restart policy configured
+
+### Phase 14: Health Checks & Monitoring
+
+**Goal:** 编排器就绪健康端点
+
+**Requirements:** HEALTH-01, HEALTH-02
+
+**Success Criteria:**
+- GET `/health` responds in <100ms with 200 OK
+- GET `/health/ready` validates RAGFlow connectivity
+- Proper HTTP status codes (200/503)
+- Docker HEALTHCHECK passes during normal operation
+- Health response includes dependency status
+
+### Phase 15: Log Management
+
+**Goal:** 容器原生日志与轮转
+
+**Requirements:** LOG-01, LOG-02
+
+**Success Criteria:**
+- Logs output to stdout/stderr (visible via `docker logs`)
+- No file logging in container filesystem
+- Docker log rotation configured (10MB max, 3 files)
+- Structured JSON format
+- Log level configurable via env var
+
 ---
 *Roadmap created: 2026-02-28*
-*Last updated: 2026-02-28 - Added phase detail sections*
+*Last updated: 2026-02-28 - Completed Phase 12 Plan 01*

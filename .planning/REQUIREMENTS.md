@@ -74,6 +74,56 @@
 
 - QUERY-01 ~ QUERY-05: All Complete
 
+## v1.3 Requirements
+
+### Docker Containerization
+
+- [x] **DOCKER-01**: 多阶段 Dockerfile 构建（开发/生产分离）
+  - 使用 uv 官方镜像优化构建层缓存
+  - 分离构建依赖与运行时依赖
+  - 最终镜像使用非 root 用户运行 (UID 1000)
+
+- [ ] **DOCKER-02**: Docker Compose 生产编排配置
+  - 创建 compose.yaml 定义服务、网络和卷
+  - 配置服务依赖和健康检查
+  - 支持环境变量注入敏感配置
+
+### Service Lifecycle
+
+- [ ] **LIFECYCLE-01**: 服务启动脚本（支持 graceful startup）
+  - 启动前验证环境配置完整性
+  - 按顺序初始化外部连接（数据库、向量库）
+  - 支持启动超时和失败重试
+
+- [ ] **LIFECYCLE-02**: 优雅关闭机制（graceful shutdown）
+  - 捕获 SIGTERM 信号触发关闭流程
+  - 等待活跃请求处理完成后关闭
+  - 清理外部连接（Milvus、DaiShanSQL）
+
+### Health Checks
+
+- [ ] **HEALTH-01**: /health 存活探针端点
+  - 返回服务基本状态（200 OK）
+  - 轻量级检查，不依赖外部服务
+  - 用于 Docker/K8s 存活检测
+
+- [ ] **HEALTH-02**: /health/ready 就绪探针端点
+  - 检查所有外部依赖可用性（AI API、向量库、数据库）
+  - 任一依赖不可用返回 503
+  - 用于流量路由决策
+
+### Log Management
+
+- [ ] **LOG-01**: 结构化日志输出配置
+  - 使用现有 python-json-logger 输出 JSON 格式
+  - 统一日志字段（timestamp、level、message、trace_id）
+  - 区分访问日志和应用日志
+
+- [ ] **LOG-02**: Docker 日志轮转配置
+  - 配置 Docker daemon 日志驱动（json-file）
+  - 设置单文件大小限制（100MB）和保留数量（10个）
+  - 避免容器日志占满磁盘
+
 ## v2 Requirements
 
 Deferred to future release.
@@ -112,12 +162,21 @@ Deferred to future release.
 | INT-06 | Phase 10 | Pending |
 | INT-07 | Phase 11 | Pending |
 | INT-08 | Phase 11 | Pending |
+| DOCKER-01 | Phase 12 | Complete |
+| DOCKER-02 | Phase 12 | In Progress |
+| LIFECYCLE-01 | Phase 13 | Pending |
+| LIFECYCLE-02 | Phase 13 | Pending |
+| HEALTH-01 | Phase 14 | Pending |
+| HEALTH-02 | Phase 14 | Pending |
+| LOG-01 | Phase 15 | Pending |
+| LOG-02 | Phase 15 | Pending |
 
 **Coverage:**
-- v1.2 requirements: 8 total
-- Mapped to phases: 8
+- v1.2 requirements: 8 total (4 complete, 4 pending)
+- v1.3 requirements: 8 total (1 complete, 1 in progress, 6 pending)
+- Total mapped: 16
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-02-28*
-*Last updated: 2026-02-28 after v1.2 requirements defined*
+*Last updated: 2026-02-28 - Completed DOCKER-01 requirement*
