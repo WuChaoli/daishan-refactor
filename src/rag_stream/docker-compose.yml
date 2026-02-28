@@ -1,0 +1,63 @@
+# ============================================================
+# Docker Compose Configuration for rag_stream
+# Local Development
+# ============================================================
+# Usage:
+#   docker compose up -d          # Start in detached mode
+#   docker compose logs -f        # Follow logs
+#   docker compose down           # Stop and remove containers
+# ============================================================
+
+services:
+  rag_stream:
+    build:
+      context: ../..              # Project root for workspace dependencies
+      dockerfile: src/rag_stream/Dockerfile
+    
+    container_name: rag_stream_dev
+    
+    ports:
+      - "11028:11028"
+    
+    env_file:
+      - ../../.env                # Load environment variables from project root
+    
+    environment:
+      - LOG_CONSOLE_OUTPUT=true   # Enable stdout logging in container
+    
+    volumes:
+      # Mount config.yaml for runtime configuration changes (read-only)
+      - ../../config.yaml:/app/config.yaml:ro
+    
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:11028/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    restart: unless-stopped
+    
+    # Graceful shutdown configuration
+    stop_signal: SIGTERM
+    stop_grace_period: 10s
+    
+    # Security: Run as non-root user (defined in Dockerfile)
+    # user: "1000:1000"  # Handled in Dockerfile
+    
+    # Resource hints for development
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    
+    # Logging configuration (development - simple output)
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
