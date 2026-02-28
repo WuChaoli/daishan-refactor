@@ -79,6 +79,24 @@
 
 **Plans**: TBD
 
+### Phase 8: API General 端到端测试
+
+**Goal**: 创建端到端真实环境测试，验证 `/api/general` 接口的完整可用性，记录意图分类过程
+
+**Depends on**: Phase 6
+
+**Requirements**: TEST-05
+
+**Success Criteria** (what must be TRUE):
+1. 测试用例覆盖 3 种意图类型（Type1/Type2/Type3）
+2. Excel 文件可被非技术人员编辑维护
+3. 测试能本地启动服务并真实调用 /api/general 接口
+4. 测试记录意图分类过程和结果
+5. 流式响应被完整接收并验证非空
+
+**Plans**: 1 plan
+- [ ] [08-01-PLAN.md](.planning/phases/08-api-general/08-01-PLAN.md) — 端到端测试实现（TEST-05）
+
 ## Progress
 
 | Phase | Plans Complete | Status | Completed |
@@ -86,7 +104,8 @@
 | 5. 意图分类基础 | 3/3 | Completed | 2026-02-28 |
 | 6. 分类驱动检索 | 1/1 | Completed | 2026-02-28 |
 | 7. 测试验证 | 0/0 | Not started | - |
+| 8. API General 端到端测试 | 0/1 | Planned | - |
 
 ---
 *Roadmap created: 2026-02-28*
-*Last updated: 2026-02-28 - Phase 6 completed*
+*Last updated: 2026-02-28 - Phase 8 planned*
