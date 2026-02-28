@@ -456,6 +456,7 @@ def test_replace_economic_zone_should_log_start_and_success():
 
 
 async def _test_replace_economic_zone_should_log_failure_and_fallback():
+    """AI 异常时回退原句 - 异常在 rewrite_query 内部捕获"""
     query = "浙江世倍尔新材料有限公司现在怎么样"
     with (
         patch("src.services.chat_general_service.marker") as mocked_marker,
@@ -468,11 +469,9 @@ async def _test_replace_economic_zone_should_log_failure_and_fallback():
 
     assert result == query
     mocked_marker.assert_any_call("query_normalized_start", {"query_len": len(query)})
-    mocked_marker.assert_any_call(
-        "query_normalized_failed",
-        {"error": "mock ai error"},
-        level="WARNING",
-    )
+    # rewrite_query 内部捕获异常并返回原 query，不会抛出到 replace_economic_zone
+    # 因此会记录 query_normalized 而不是 query_normalized_failed
+    mocked_marker.assert_any_call("query_normalized", {"normalized": False})
 
 
 def test_replace_economic_zone_should_log_failure_and_fallback():
@@ -506,3 +505,81 @@ async def _test_replace_economic_zone_success():
 
 def test_replace_economic_zone_success():
     asyncio.run(_test_replace_economic_zone_success())
+
+
+async def _test_replace_economic_zone_api_error_fallback():
+    """TEST-02: AI API 异常时回退原句"""
+    query = "某某公司安全情况查询"
+
+    with (
+        patch("src.services.chat_general_service.marker") as mocked_marker,
+        patch(
+            "src.services.chat_general_service.asyncio.to_thread",
+            new=AsyncMock(side_effect=RuntimeError("API timeout")),
+        ),
+    ):
+        result = await replace_economic_zone(query)
+
+    # 验证返回原 query（降级）
+    assert result == query
+    # 异常在 rewrite_query 内部捕获并返回原 query，不会记录 query_normalized_failed
+    mocked_marker.assert_any_call("query_normalized_start", {"query_len": len(query)})
+    mocked_marker.assert_any_call("query_normalized", {"normalized": False})
+
+
+def test_replace_economic_zone_api_error_fallback():
+    asyncio.run(_test_replace_economic_zone_api_error_fallback())
+
+
+async def _test_replace_economic_zone_empty_response_fallback():
+    """TEST-02: AI 返回空值时回退原句"""
+    query = "某某公司安全情况查询"
+
+    with (
+        patch("src.services.chat_general_service.marker") as mocked_marker,
+        patch(
+            "src.services.chat_general_service.asyncio.to_thread",
+            new=AsyncMock(return_value=""),
+        ),
+    ):
+        result = await replace_economic_zone(query)
+
+    # 验证返回原 query
+    assert result == query
+    # Verify empty response logging
+    mocked_marker.assert_any_call("query_normalized_empty", {}, level="WARNING")
+
+
+def test_replace_economic_zone_empty_response_fallback():
+    asyncio.run(_test_replace_economic_zone_empty_response_fallback())
+
+
+async def _test_replace_economic_zone_disabled_fallback():
+    """TEST-02: 配置禁用时直接返回原句"""
+    query = "某某公司安全情况查询"
+
+    with (
+        patch(
+            "src.services.chat_general_service.settings.query_chat.enabled",
+            new=False,
+        ),
+        patch("src.services.chat_general_service.marker") as mocked_marker,
+        patch(
+            "src.services.chat_general_service.asyncio.to_thread",
+            new=AsyncMock(return_value="unused"),
+        ) as mocked_to_thread,
+    ):
+        result = await replace_economic_zone(query)
+
+    # 验证返回原 query
+    assert result == query
+    # 不调用 AI
+    mocked_to_thread.assert_not_awaited()
+    # Verify disabled logging
+    mocked_marker.assert_any_call(
+        "query_normalized_disabled", {"query_len": len(query)}
+    )
+
+
+def test_replace_economic_zone_disabled_fallback():
+    asyncio.run(_test_replace_economic_zone_disabled_fallback())
