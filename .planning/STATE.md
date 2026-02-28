@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Integration Testing for CI/CD
-status: defining_requirements
-last_updated: "2026-02-28T08:00:00.000Z"
+status: in_progress
+last_updated: "2026-02-28T08:21:35Z"
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 3
+  completed_plans: 1
 ---
 
 # Project State
@@ -18,18 +18,28 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-28)
 
 **Core value:** 用户输入中的企业名可以被稳定移除，同时保留原句其余内容不变。
-**Current focus:** Defining v1.2 integration testing requirements
+**Current focus:** Phase 9 - External service connectivity testing complete
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements for v1.2 milestone
-Last activity: 2026-02-28 — Milestone v1.2 started
+Phase: 09-external-service-connectivity
+Plan: 09-01 (Complete)
+Status: In Progress - Phase 9 complete, ready for Phase 10
+Last activity: 2026-02-28 — Completed 09-01 external service connectivity tests
 
-Progress: [░░░░░░░░░░] 0% (0/0 plans)
+Progress: [▓▓▓▓░░░░░░] 33% (1/3 plans in v1.2)
 
 ## Accumulated Context
+
+### Current Milestone Context
+
+**v1.2 Integration Testing for CI/CD (In Progress)**
+- Phase 9: 外部服务连通性测试 - ✅ 完成
+  - 创建了 conftest.py 共享测试基础设施
+  - 实现了 AI API、向量库、数据库连通性测试
+  - 添加了配置验证测试（无需外部服务）
+  - 支持环境变量跳过控制 (SKIP_AI_TEST, SKIP_VECTOR_TEST, SKIP_DB_TEST)
+  - 实现了诊断信息格式化功能
 
 ### Previous Milestone Context
 
@@ -46,23 +56,26 @@ Progress: [░░░░░░░░░░] 0% (0/0 plans)
 
 ### Decisions
 
-(None for current milestone yet)
+1. **Direct Module Loading** - 使用 `importlib.util` 直接加载模块，绕过 `utils/__init__.py` 的导入问题
+2. **Configuration Validation Tests** - 分离配置验证测试，确保无需外部服务也能验证测试基础设施
+3. **Sensitive Data Protection** - 诊断信息隐藏敏感值（API密钥、密码），只显示是否设置
+4. **10-Second Timeout** - 适合 CI/CD 环境快速反馈
 
 ### Roadmap Evolution
 
-(None yet)
+- Phase 9 计划完成，进入 Phase 10 (API E2E 测试)
 
 ### Pending Todos
 
-- Define v1.2 integration testing requirements
-- Create roadmap for integration testing implementation
+- [ ] Phase 10: API E2E 测试 — 完整 API 流程测试与配置分离
+- [ ] Phase 11: CI/CD 流水线集成 — 测试报告与流水线配置
 
 ### Blockers/Concerns
 
-None yet.
+None.
 
 ## Session Continuity
 
-Last session: 2026-02-28T08:00:00Z
-Stopped at: Started v1.2 milestone — Integration Testing for CI/CD
-Resume file: N/A
+Last session: 2026-02-28T08:21:35Z
+Stopped at: Completed 09-01 external service connectivity tests
+Resume file: .planning/phases/09-external-service-connectivity/09-01-SUMMARY.md

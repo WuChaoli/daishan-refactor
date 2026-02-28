@@ -36,11 +36,11 @@
 <details>
 <summary>○ v1.2 Integration Testing for CI/CD (Phases 9-11) — IN PROGRESS</summary>
 
-- [ ] **Phase 9: 外部服务连通性测试** — 验证 AI API、向量库、数据库连通性（1 plan）
+- [x] **Phase 9: 外部服务连通性测试** — 验证 AI API、向量库、数据库连通性（1 plan） (completed 2026-02-28)
   - Requirements: INT-01, INT-02, INT-03, INT-04
   - Success Criteria: 所有外部服务连通性测试通过，失败时提供诊断信息
   - Plans:
-    - [ ] 09-01-PLAN.md — 创建外部服务连通性测试套件
+    - [x] 09-01-PLAN.md — 创建外部服务连通性测试套件
 
 - [ ] **Phase 10: API E2E 测试** — 完整 API 流程测试与配置分离（1 plan）
   - Requirements: INT-05, INT-06
@@ -60,7 +60,7 @@
 | 5. 意图分类基础 | v1.1 | 3/3 | Complete | 2026-02-28 |
 | 6. 分类驱动检索 | v1.1 | 1/1 | Complete | 2026-02-28 |
 | 8. API General 端到端测试 | v1.1 | 1/1 | Complete | 2026-02-28 |
-| 9. 外部服务连通性测试 | v1.2 | 1/1 | Planned | — |
+| 9. 外部服务连通性测试 | 1/1 | Complete   | 2026-02-28 | — |
 | 10. API E2E 测试 | v1.2 | 0/1 | Pending | — |
 | 11. CI/CD 流水线集成 | v1.2 | 0/1 | Pending | — |
 
