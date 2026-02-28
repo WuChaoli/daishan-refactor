@@ -12,8 +12,8 @@
 
 ### Query Normalization
 
-- [ ] **NORM-01**: 系统在 `handle_chat_general` 中对用户 query 执行 AI 改写预处理。
-- [ ] **NORM-02**: AI 改写目标是删除企业名称，尽量保持原句其余内容不变。
+- [x] **NORM-01**: 系统在 `handle_chat_general` 中对用户 query 执行 AI 改写预处理。
+- [x] **NORM-02**: AI 改写目标是删除企业名称，尽量保持原句其余内容不变。
 - [ ] **NORM-03**: 改写函数只返回纯文本句子，供后续意图识别继续使用。
 
 ### Resilience
@@ -47,8 +47,8 @@
 |-------------|-------|--------|
 | CFG-01 | Phase 1 | Complete |
 | CFG-02 | Phase 1 | Complete |
-| NORM-01 | Phase 2 | Pending |
-| NORM-02 | Phase 2 | Pending |
+| NORM-01 | Phase 2 | Complete |
+| NORM-02 | Phase 2 | Complete |
 | NORM-03 | Phase 2 | Pending |
 | SAFE-01 | Phase 2 | Pending |
 | TEST-01 | Phase 3 | Pending |
