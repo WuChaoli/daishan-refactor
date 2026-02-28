@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Intent Classification Optimization
 status: unknown
-last_updated: "2026-02-28T06:18:56.952Z"
+last_updated: "2026-02-28T06:45:00Z"
 progress:
   total_phases: 6
   completed_phases: 6
@@ -22,10 +22,10 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 
 ## Current Position
 
-Phase: 06-分类驱动检索
-Plan: 06-01
-Status: Completed classification-driven retrieval implementation
-Last activity: 2026-02-28 — Completed plan 06-01
+Phase: 08-api-general
+Plan: 08-01
+Status: Completed API general E2E testing implementation
+Last activity: 2026-02-28 — Completed plan 08-01
 
 Progress: [████████████████░░] 100% (1/1 plans)
 
@@ -54,6 +54,7 @@ Progress: [████████████████░░] 100% (1/1 pla
 - Phase 5: 意图分类基础（CLS-01, CLS-02, CLS-04, CFG-03, CFG-04）✅
 - Phase 6: 分类驱动检索（CLS-03）✅
 - Phase 7: 测试验证（TEST-03, TEST-04, TEST-05）
+- Phase 8: API General E2E 测试（TEST-05）✅
 
 ### Decisions
 
@@ -63,6 +64,12 @@ Progress: [████████████████░░] 100% (1/1 pla
 - **Use dataclasses.replace for immutable settings update** when filtering database_mapping (06-01)
 - **Keep backward compatibility** with optional text_input parameter defaulting to None (06-01)
 - **Defensive programming**: return full mapping when no matching database found (06-01)
+- **Excel format for test data**: Chosen for non-technical maintenance of test cases (08-01)
+- **Server lifecycle in test script**: Self-contained E2E tests with automatic startup/cleanup (08-01)
+
+### Roadmap Evolution
+
+- Phase 8 added: 增加真实环境测试，测试真实调用/api/general接口，测试接口是否通畅、记录过程中的意图分类过程
 
 ### Pending Todos
 
@@ -74,6 +81,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-28T06:26:00Z
-Stopped at: Completed 06-01-PLAN.md - Classification-Driven Retrieval
-Resume file: .planning/phases/06-分类驱动检索/06-01-SUMMARY.md
+Last session: 2026-02-28T06:45:00Z
+Stopped at: Completed 08-01-PLAN.md - API General E2E Testing
+Resume file: .planning/phases/08-api-general/08-01-SUMMARY.md

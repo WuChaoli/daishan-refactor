@@ -21,7 +21,7 @@
 
 - [ ] **TEST-03**: 单测覆盖分类成功路径（0/1/2/3 不同类型）。
 - [ ] **TEST-04**: 单测覆盖分类失败降级路径。
-- [ ] **TEST-05**: 集成测试验证两阶段识别流程完整可用。
+- [x] **TEST-05**: 集成测试验证两阶段识别流程完整可用。
 
 ## v2 Requirements
 
@@ -47,7 +47,7 @@
 | CFG-04 | Phase 5 | Complete |
 | TEST-03 | Phase 7 | Pending |
 | TEST-04 | Phase 7 | Pending |
-| TEST-05 | Phase 7 | Pending |
+| TEST-05 | Phase 7 | Complete |
 
 **Coverage:**
 - v1 requirements: 9 total
