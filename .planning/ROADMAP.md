@@ -44,7 +44,10 @@
 3. 管理员可在 `config.yaml` 中配置分类开关、模型参数和阈值
 4. 环境变量可以覆盖配置中的分类参数（如模型名称、温度）
 
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] [05-01-PLAN.md](.planning/phases/05-意图分类基础/05-01-PLAN.md) — 意图分类服务与配置（CLS-01, CLS-02, CFG-03）
+- [ ] [05-02-PLAN.md](.planning/phases/05-意图分类基础/05-02-PLAN.md) — 分类失败降级机制（CLS-04）
+- [ ] [05-03-PLAN.md](.planning/phases/05-意图分类基础/05-03-PLAN.md) — 配置集成与验证（CFG-03, CFG-04）
 
 ### Phase 6: 分类驱动检索
 
@@ -79,9 +82,10 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 5. 意图分类基础 | 0/0 | Not started | - |
+| 5. 意图分类基础 | 0/3 | Planned | - |
 | 6. 分类驱动检索 | 0/0 | Not started | - |
 | 7. 测试验证 | 0/0 | Not started | - |
 
 ---
 *Roadmap created: 2026-02-28*
+*Last updated: 2026-02-28 - Phase 5 plans created*
