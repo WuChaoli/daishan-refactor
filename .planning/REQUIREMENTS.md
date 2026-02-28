@@ -22,8 +22,8 @@
 
 ### Testing
 
-- [ ] **TEST-01**: 单测覆盖 AI 改写成功路径。
-- [ ] **TEST-02**: 单测覆盖 AI 异常时原句回退路径。
+- [x] **TEST-01**: 单测覆盖 AI 改写成功路径。
+- [x] **TEST-02**: 单测覆盖 AI 异常时原句回退路径。
 
 ## v2 Requirements
 
@@ -51,8 +51,8 @@
 | NORM-02 | Phase 2 | Complete |
 | NORM-03 | Phase 2 | Pending |
 | SAFE-01 | Phase 2 | Pending |
-| TEST-01 | Phase 3 | Pending |
-| TEST-02 | Phase 3 | Pending |
+| TEST-01 | Phase 3 | Complete |
+| TEST-02 | Phase 3 | Complete |
 
 **Coverage:**
 - v1 requirements: 8 total
