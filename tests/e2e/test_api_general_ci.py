@@ -196,6 +196,87 @@ def load_test_cases(
 
 
 # =============================================================================
+# Log Parsing Functions
+# =============================================================================
+
+
+def find_latest_log_file(log_dir: Path) -> Path | None:
+    """Find the latest log file in the log directory.
+
+    Args:
+        log_dir: Directory containing log files
+
+    Returns:
+        Path to the latest log file, or None if directory/file doesn't exist
+    """
+    if not log_dir.exists():
+        return None
+
+    log_files = list(log_dir.glob("*.log"))
+    if not log_files:
+        return None
+
+    return max(log_files, key=lambda p: p.stat().st_mtime)
+
+
+def parse_intent_classification_logs(log_dir: Path) -> list[dict[str, Any]]:
+    """Parse intent classification logs from log files.
+
+    Args:
+        log_dir: Directory containing log files
+
+    Returns:
+        List of classification log entries with relevant markers
+    """
+    latest_log = find_latest_log_file(log_dir)
+    if not latest_log:
+        return []
+
+    classifications = []
+    try:
+        with open(latest_log, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+
+                try:
+                    entry = json.loads(line)
+                    marker_type = entry.get("marker", "")
+                    if marker_type in (
+                        "classifier.attempt",
+                        "classifier.success",
+                        "classifier.degraded_fallback",
+                        "classifier.low_confidence_fallback",
+                    ):
+                        classifications.append(entry)
+                except json.JSONDecodeError:
+                    continue
+    except Exception:
+        pass
+
+    return classifications
+
+
+def extract_classification_result(
+    logs: list[dict[str, Any]],
+) -> tuple[int | None, float | None]:
+    """Extract classification type and confidence from logs.
+
+    Args:
+        logs: List of classification log entries
+
+    Returns:
+        Tuple of (type_id, confidence) or (None, None) if not found
+    """
+    for entry in reversed(logs):
+        if entry.get("marker") == "classifier.success":
+            data = entry.get("data", {})
+            return data.get("type_id"), data.get("confidence")
+    return None, None
+
+
+# =============================================================================
 # API Call Functions
 # =============================================================================
 
@@ -291,6 +372,13 @@ async def run_single_test(
             return result
 
         result.success = True
+
+        # Parse intent classification from logs
+        log_dir = Path(os.environ.get("LOG_DIR", ".log-manager/runs"))
+        classification_logs = parse_intent_classification_logs(log_dir)
+        class_type, confidence = extract_classification_result(classification_logs)
+        result.classification_type = class_type
+        result.classification_confidence = confidence
 
     except httpx.TimeoutException:
         result.error_message = f"Request timeout after {result.response_time_ms:.0f}ms"
