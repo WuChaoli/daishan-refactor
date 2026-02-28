@@ -1,20 +1,23 @@
 # ============================================================
-# Docker Compose Configuration for rag_stream
+# Docker Compose Configuration for Daishan Services
 # Local Development
 # ============================================================
 # Usage:
-#   docker compose up -d          # Start in detached mode
+#   docker compose up -d          # Start both services
 #   docker compose logs -f        # Follow logs
 #   docker compose down           # Stop and remove containers
 # ============================================================
 
 services:
+  # ============================================================
+  # rag_stream 服务
+  # ============================================================
   rag_stream:
     build:
       context: ../..              # Project root for workspace dependencies
       dockerfile: src/rag_stream/Dockerfile
     
-    container_name: rag_stream_dev
+    container_name: rag_stream
     
     ports:
       - "11028:11028"
@@ -27,7 +30,7 @@ services:
     
     volumes:
       # Mount config.yaml for runtime configuration changes (read-only)
-      - ../../config.yaml:/app/config.yaml:ro
+      - ../../src/rag_stream/config.yaml:/app/src/rag_stream/config.yaml:ro
     
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:11028/health')"]
@@ -42,9 +45,6 @@ services:
     stop_signal: SIGTERM
     stop_grace_period: 10s
     
-    # Security: Run as non-root user (defined in Dockerfile)
-    # user: "1000:1000"  # Handled in Dockerfile
-    
     # Resource hints for development
     deploy:
       resources:
@@ -55,9 +55,76 @@ services:
           cpus: '0.5'
           memory: 512M
     
-    # Logging configuration (development - simple output)
+    # Logging configuration
     logging:
       driver: json-file
       options:
         max-size: "10m"
         max-file: "3"
+
+  # ============================================================
+  # Digital_human_command_interface 服务（意图识别）
+  # ============================================================
+  digital_human:
+    build:
+      context: ../..              # Project root for workspace dependencies
+      dockerfile: src/Digital_human_command_interface/Dockerfile
+    
+    container_name: digital_human
+    
+    ports:
+      - "11029:11029"
+    
+    env_file:
+      - ../../.env                # Load environment variables from project root
+    
+    environment:
+      - RAG_STREAM_BASE_URL=http://rag_stream:11028  # 服务间通信使用容器名
+      - LOG_CONSOLE_OUTPUT=true
+    
+    volumes:
+      # Mount config.yaml for runtime configuration changes (read-only)
+      - ../../src/Digital_human_command_interface/config.yaml:/app/src/Digital_human_command_interface/config.yaml:ro
+    
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:11029/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    restart: unless-stopped
+    
+    # Graceful shutdown configuration
+    stop_signal: SIGTERM
+    stop_grace_period: 10s
+    
+    # 依赖 rag_stream 服务
+    depends_on:
+      rag_stream:
+        condition: service_healthy
+    
+    # Resource hints
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    
+    # Logging configuration
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# ============================================================
+# 网络配置（默认 bridge）
+# ============================================================
+networks:
+  default:
+    name: daishan_network
+    driver: bridge
