@@ -1,0 +1,64 @@
+# Requirements: Rag Stream Query Normalization
+
+**Defined:** 2026-02-28
+**Core Value:** 用户输入中的企业名可以被稳定移除，同时保留原句其余内容不变。
+
+## v1 Requirements
+
+### Configuration
+
+- [ ] **CFG-01**: `rag_stream` 可以从 `config.yaml` 读取 query 清理聊天配置（不使用 openai 前缀命名）。
+- [ ] **CFG-02**: 环境变量可以覆盖上述 query 清理聊天配置。
+
+### Query Normalization
+
+- [ ] **NORM-01**: 系统在 `handle_chat_general` 中对用户 query 执行 AI 改写预处理。
+- [ ] **NORM-02**: AI 改写目标是删除企业名称，尽量保持原句其余内容不变。
+- [ ] **NORM-03**: 改写函数只返回纯文本句子，供后续意图识别继续使用。
+
+### Resilience
+
+- [ ] **SAFE-01**: 当 AI 调用失败、超时或返回空值时，系统返回原 query，不中断主流程。
+
+### Testing
+
+- [ ] **TEST-01**: 单测覆盖 AI 改写成功路径。
+- [ ] **TEST-02**: 单测覆盖 AI 异常时原句回退路径。
+
+## v2 Requirements
+
+### Quality & Optimization
+
+- **QLTY-01**: 增加企业名称识别效果评估与离线样本回放。
+- **QLTY-02**: 增加 query 清理缓存与限流策略。
+- **QLTY-03**: 增加多模型路由策略（按请求类型切换模型）。
+
+## Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| 改造 type1/type2/type3 主业务路由策略 | 本次仅改 query 预处理步骤 |
+| 实现企业知识图谱实体标准化 | 超出本次最小可交付范围 |
+| 改造其他子系统（Digital_human_command_interface / DaiShanSQL） | 本次范围限定为 rag_stream |
+
+## Traceability
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| CFG-01 | Phase 1 | Pending |
+| CFG-02 | Phase 1 | Pending |
+| NORM-01 | Phase 2 | Pending |
+| NORM-02 | Phase 2 | Pending |
+| NORM-03 | Phase 2 | Pending |
+| SAFE-01 | Phase 2 | Pending |
+| TEST-01 | Phase 3 | Pending |
+| TEST-02 | Phase 3 | Pending |
+
+**Coverage:**
+- v1 requirements: 8 total
+- Mapped to phases: 8
+- Unmapped: 0 ✓
+
+---
+*Requirements defined: 2026-02-28*
+*Last updated: 2026-02-28 after initial definition*
