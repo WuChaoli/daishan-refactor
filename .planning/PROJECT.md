@@ -8,15 +8,11 @@
 
 用户输入中的企业名可以被稳定移除，同时保留原句其余内容不变。
 
-## Current Milestone: v1.1 Intent Classification Optimization
+## Current State: v1.1 Shipped (2026-02-28)
 
-**Goal:** 引入两阶段意图识别机制，先用 LLM 进行粗粒度分类（数据库/指令/固定问题），再在对应向量库中精检索，解决语义混淆导致分类不准确的问题。
+**Shipped:** 两阶段意图识别机制，先用 LLM 进行粗粒度分类，再在对应向量库中精检索，解决语义混淆导致分类不准确的问题。
 
-**Target features:**
-- 意图粗分类服务（复用 QueryChat）
-- 两阶段识别流程（分类 → 检索）
-- 分类结果缓存与降级机制
-- 新流程测试与配置调优
+**Next Milestone:** TBD
 
 ## Requirements
 
@@ -30,14 +26,21 @@
 - ✓ 在 `replace_economic_zone` 中调用 AI 删除企业名称并返回改写句 — v1.0
 - ✓ AI 失败时返回原句，不再退回旧正则替换逻辑 — v1.0
 - ✓ 补充单元测试和真实环境测试套件 — v1.0
+- ✓ **CLS-01**: 系统在意图识别前先进行粗粒度分类（数据库/指令/固定问题）— v1.1
+- ✓ **CLS-02**: 粗分类后，仅在对应类型的向量库中检索 — v1.1
+- ✓ **CLS-03**: 复用现有 QueryChat 工具实现分类逻辑 — v1.1
+- ✓ **CLS-04**: 分类失败时降级到现有检索流程 — v1.1
+- ✓ **CLS-05**: 为新流程添加测试覆盖 — v1.1 (E2E测试)
 
 ### Active
 
-- [ ] **CLS-01**: 系统在意图识别前先进行粗粒度分类（数据库/指令/固定问题）
-- [ ] **CLS-02**: 粗分类后，仅在对应类型的向量库中检索
-- [ ] **CLS-03**: 复用现有 QueryChat 工具实现分类逻辑
-- [ ] **CLS-04**: 分类失败时降级到现有检索流程
-- [ ] **CLS-05**: 为新流程添加测试覆盖
+(None — planning next milestone)
+
+### Out of Scope
+
+- 全链路 Prompt 工程平台化（模板中心、策略路由）— 当前只解决企业名清理。
+- 多模型供应商抽象（非 OpenAI 兼容客户端）— 当前只做单客户端实现。
+- 对 `chat_general` 其他 type 路由逻辑的行为改造 — 本次仅改 query 预处理步骤。
 
 ### Out of Scope
 
@@ -47,22 +50,27 @@
 
 ## Context
 
-### Current State (v1.1 Started 2026-02-28)
+### Current State (v1.1 Shipped 2026-02-28)
 
-**Existing Intent Service:**
-- `BaseIntentService`: 基于向量检索的意图识别抽象
-- 三个向量库并发检索，按相似度排序
-- 岱山优先级规则（指令集/固定问题优先判断）
-- 问题：语义混淆导致分类不准确
+**Intent Classification Service:**
+- `IntentClassifier`: 基于 LLM 的粗粒度意图分类
+- `ClassificationResult`: 分类结果数据类（type_id, confidence, degraded）
+- 配置驱动：`intent_classification.enabled` 开关控制
+- 降级机制：超时/错误/无效结果时降级到全量检索
 
-**Key Issue:**
-- 案例：「XX企业的危化品类目」本应归属数据库问题，但指令集也返回高阈值（>0.7）
-- 原因：不同意图类型的问题在向量空间中语义接近
+**Two-Stage Recognition:**
+- Stage 1: LLM 粗分类（岱山-指令集 1 / 岱山-数据库问题 2 / 岱山-指令集-固定问题 3）
+- Stage 2: 根据分类结果过滤向量库，仅在对应库中精检索
+- 降级策略：分类失败时回退到全库检索
 
-**Proposed Solution:**
-- 两阶段识别：粗分类（LLM）→ 精检索（向量库）
-- 复用 `QueryChat` 工具，配置分类 prompt
-- 分类结果引导检索路由，减少跨库混淆
+**Key Issue Resolved:**
+- 案例：「XX企业的危化品类目」现在通过 LLM 分类为 Type2，只在数据库问题库检索
+- 结果：避免跨库语义混淆，提高分类准确率
+
+**Testing:**
+- 14 个单元测试覆盖分类服务（成功/降级路径）
+- E2E 测试：9 个测试用例覆盖 3 种意图类型
+- Excel 测试数据集支持非技术人员维护
 
 ### Original Context
 
@@ -109,6 +117,9 @@
 | 失败兜底改为"原句返回" | 用户明确指定 B 策略 | ✓ Good — 主流程稳定，无中断风险 |
 | 使用模式匹配验证 AI 输出而非精确匹配 | AI 输出有细微差异，模式验证更灵活 | ✓ Good — 适应 AI 不确定性 |
 | dry-run 模式支持无 AI 环境测试 | 便于开发和 CI 环境验证 | ✓ Good — 开发体验良好 |
+| 意图分类使用专用配置块 `intent_classification` | 与 `query_chat` 分离，独立控制 | ✓ Good — 可独立开关分类功能 |
+| 分类驱动检索时创建新的 Settings 实例 | 保持不可变性，避免副作用 | ✓ Good — 代码清晰，易于测试 |
+| 降级时返回 type_id=0 并标记 degraded | 明确区分正常/降级结果 | ✓ Good — 调用方可感知降级 |
 
 ---
-*Last updated: 2026-02-28 after v1.0 milestone*
+*Last updated: 2026-02-28 after v1.1 milestone*

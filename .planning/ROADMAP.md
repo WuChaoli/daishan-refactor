@@ -7,7 +7,7 @@
 ## Milestones
 
 - ✅ **v1.0 Query Normalization** — Phases 1-4 (shipped 2026-02-28)
-- 📋 **v1.1 Intent Classification Optimization** — Phases 5-7 (planned)
+- ✅ **v1.1 Intent Classification Optimization** — Phases 5-8 (shipped 2026-02-28)
 
 ## Phases
 
@@ -22,90 +22,29 @@
 详见: `.planning/milestones/v1.0-ROADMAP.md`
 </details>
 
-### 📋 v1.1 Intent Classification Optimization (Planned)
+<details>
+<summary>✅ v1.1 Intent Classification Optimization (Phases 5-8) — SHIPPED 2026-02-28</summary>
 
-- [x] **Phase 5: 意图分类基础** — 建立粗粒度分类服务与配置体系
-- [x] **Phase 6: 分类驱动检索** — 连接分类结果与向量库检索流程
-- [ ] **Phase 7: 测试验证** — 覆盖新流程的单元测试与集成测试
+- [x] **Phase 5: 意图分类基础** — 建立粗粒度分类服务与配置体系（3 plans）
+- [x] **Phase 6: 分类驱动检索** — 连接分类结果与向量库检索流程（1 plan）
+- [x] **Phase 8: API General 端到端测试** — 创建 E2E 测试验证完整流程（1 plan）
 
-## Phase Details
+详见: `.planning/milestones/v1.1-ROADMAP.md`
+</details>
 
-### Phase 5: 意图分类基础
+### 📋 Next Milestone (Planning)
 
-**Goal**: 建立基于 LLM 的粗粒度意图分类服务，提供稳定可靠的分类能力
-
-**Depends on**: v1.0 (QueryChat tool exists)
-
-**Requirements**: CLS-01, CLS-02, CLS-04, CFG-03, CFG-04
-
-**Success Criteria** (what must be TRUE):
-1. 系统在意图识别前能对用户 query 进行粗粒度分类（岱山-指令集 1 / 岱山-数据库问题 2 / 岱山-指令集-固定问题 3）
-2. 分类失败或返回无效结果时，系统能降级到现有向量检索流程
-3. 管理员可在 `config.yaml` 中配置分类开关、模型参数和阈值
-4. 环境变量可以覆盖配置中的分类参数（如模型名称、温度）
-
-**Plans**: 3 plans
-- [x] [05-01-PLAN.md](.planning/phases/05-意图分类基础/05-01-PLAN.md) — 意图分类服务与配置（CLS-01, CLS-02, CFG-03）
-- [x] [05-02-PLAN.md](.planning/phases/05-意图分类基础/05-02-PLAN.md) — 分类失败降级机制（CLS-04）
-- [x] [05-03-PLAN.md](.planning/phases/05-意图分类基础/05-03-PLAN.md) — 配置集成与验证（CFG-03, CFG-04）
-
-### Phase 6: 分类驱动检索
-
-**Goal**: 将分类结果与向量库检索流程连接，实现两阶段识别机制
-
-**Depends on**: Phase 5
-
-**Requirements**: CLS-03
-
-**Success Criteria** (what must be TRUE):
-1. 分类成功后，系统仅在对应类型的向量库中检索具体问题
-2. 不同意图类型的查询不会跨库混淆检索结果
-
-**Plans**: 1 plan
-- [x] [06-01-PLAN.md](.planning/phases/06-分类驱动检索/06-01-PLAN.md) — 分类驱动检索实现（CLS-03）
-
-### Phase 7: 测试验证
-
-**Goal**: 通过测试验证两阶段识别流程的正确性与稳定性
-
-**Depends on**: Phase 6
-
-**Requirements**: TEST-03, TEST-04, TEST-05
-
-**Success Criteria** (what must be TRUE):
-1. 单元测试覆盖分类成功路径（岱山-指令集 1 / 岱山-数据库问题 2 / 岱山-指令集-固定问题 3）
-2. 单元测试覆盖分类失败降级路径
-3. 集成测试验证两阶段识别流程从 query 输入到结果输出的完整可用性
-
-**Plans**: TBD
-
-### Phase 8: API General 端到端测试
-
-**Goal**: 创建端到端真实环境测试，验证 `/api/general` 接口的完整可用性，记录意图分类过程
-
-**Depends on**: Phase 6
-
-**Requirements**: TEST-05
-
-**Success Criteria** (what must be TRUE):
-1. 测试用例覆盖 3 种意图类型（Type1/Type2/Type3）
-2. Excel 文件可被非技术人员编辑维护
-3. 测试能本地启动服务并真实调用 /api/general 接口
-4. 测试记录意图分类过程和结果
-5. 流式响应被完整接收并验证非空
-
-**Plans**: 1 plan
-- [ ] [08-01-PLAN.md](.planning/phases/08-api-general/08-01-PLAN.md) — 端到端测试实现（TEST-05）
+TBD — 使用 `/gsd:new-milestone` 开始规划
 
 ## Progress
 
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 5. 意图分类基础 | 3/3 | Completed | 2026-02-28 |
-| 6. 分类驱动检索 | 1/1 | Completed | 2026-02-28 |
-| 7. 测试验证 | 0/0 | Not started | - |
-| 8. API General 端到端测试 | 0/1 | Planned | - |
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 1-4 | v1.0 | 5/5 | Complete | 2026-02-28 |
+| 5. 意图分类基础 | v1.1 | 3/3 | Complete | 2026-02-28 |
+| 6. 分类驱动检索 | v1.1 | 1/1 | Complete | 2026-02-28 |
+| 8. API General 端到端测试 | v1.1 | 1/1 | Complete | 2026-02-28 |
 
 ---
 *Roadmap created: 2026-02-28*
-*Last updated: 2026-02-28 - Phase 8 planned*
+*Last updated: 2026-02-28 - v1.1 milestone archived*
