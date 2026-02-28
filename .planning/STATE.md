@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Production Build and Deployment Scripts
 status: in_progress
-last_updated: "2026-02-28T21:12:21.000Z"
+last_updated: "2026-02-28T21:48:00.000Z"
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 8
-  completed_plans: 2
+  completed_plans: 3
 ---
 
 # Project State
@@ -35,7 +35,11 @@ Progress: [██░░░░░░░░] 25% (2/8 plans)
 
 **v1.2 Integration Testing for CI/CD (In Progress)**
 - Phase 9: 外部服务连通性测试 - ✅ 完成
-- Phase 10-11: 待完成（API E2E 测试 + CI/CD 集成）
+- Phase 10: API E2E 测试套件 - Plan 01 完成
+  - CI/CD就绪的E2E测试套件
+  - Docker Compose测试环境
+  - GitHub Actions工作流
+- Phase 11: 待完成（CI/CD 集成）
 
 **v1.1 Intent Classification Optimization (Completed 2026-02-28)**
 - 实现了基于 LLM 的粗粒度意图分类服务
@@ -61,6 +65,10 @@ Progress: [██░░░░░░░░] 25% (2/8 plans)
 | 40s health check start_period | FastAPI with 4 workers needs time to initialize | 2026-02-28 |
 | 10s stop_grace_period with SIGTERM | Allows lifespan cleanup for graceful shutdown | 2026-02-28 |
 | json-file log driver with rotation | Prevents disk exhaustion, 30MB total per container | 2026-02-28 |
+| Environment-based E2E configuration | 12-factor app principles, no hardcoded values | 2026-02-28 |
+| Docker Compose manages test services | Removes need for Python ServerManager in CI | 2026-02-28 |
+| pytest-asyncio for E2E tests | Native async support, cleaner test code | 2026-02-28 |
+| JSON test reports | Machine-readable for CI integration | 2026-02-28 |
 
 ### Roadmap Evolution
 
@@ -95,11 +103,40 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-28T21:12:21Z
-Stopped at: Completed Phase 12 Plan 02 - Docker Compose Configuration
-Resume file: .planning/phases/12-docker-containerization/12-02-SUMMARY.md
+Last session: 2026-02-28T21:48:00Z
+Stopped at: Completed Phase 10 Plan 01 - CI/CD Ready E2E Test Suite
+Resume file: .planning/phases/10-api-e2e/10-01-SUMMARY.md
 
 ### Completed Work
+
+**Phase 10 Plan 01: Create CI/CD Ready E2E Test Suite**
+- Created `tests/e2e/__init__.py` - Package marker
+- Created `tests/e2e/conftest.py` - Pytest fixtures:
+  - test_config: Environment-based configuration
+  - base_url: Service URL from TEST_BASE_URL
+  - client: httpx.AsyncClient with timeout
+  - event_loop: Session-scoped asyncio loop
+  - filter_type: Command line option support
+- Created `tests/e2e/test_api_general_ci.py` - Main test suite:
+  - test_api_general_health: Service health verification
+  - test_api_general_all_cases: Excel data-driven tests
+  - test_api_general_by_type: Parameterized intent tests
+  - ApiTestCase, ApiTestResult, ApiTestReport data classes
+  - JSON report generation with detailed metrics
+- Created `tests/e2e/docker-compose.test.yml` - Test environment:
+  - rag_stream service with health checks
+  - e2e-test service for test execution
+  - Dedicated test network and volumes
+- Created `.github/workflows/e2e-test.yml` - GitHub Actions workflow:
+  - Triggers on push/PR to main
+  - Docker Buildx for efficient builds
+  - Artifact upload for test reports
+  - PR comments with test results
+- Commits:
+  - `cd0b470` feat(10-01): create E2E test directory structure and shared fixtures
+  - `32390dc` feat(10-01): create CI/CD ready E2E test suite
+  - `842353f` feat(10-01): create Docker Compose test configuration
+  - `b93c8c7` feat(10-01): create GitHub Actions E2E test workflow
 
 **Phase 12 Plan 02: Create Docker Compose Configurations**
 - Created `src/rag_stream/docker-compose.yml` - Local development configuration:
