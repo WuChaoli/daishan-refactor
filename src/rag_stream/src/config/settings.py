@@ -375,6 +375,48 @@ class QueryChatConfig(BaseConfig):
 
 
 # ============================================================
+# Intent Classification 配置
+# ============================================================
+
+
+class IntentClassificationConfig(BaseConfig):
+    """
+    Intent Classification 配置
+
+    用于粗粒度意图分类的聊天模型配置
+    """
+
+    enabled: bool = Field(default=False, description="是否启用意图分类功能")
+    api_key: str = Field(default="", description="聊天服务 API Key")
+    base_url: str = Field(default="", description="聊天服务 Base URL")
+    model: str = Field(default="", description="聊天模型名称")
+    timeout: int = Field(default=3, description="HTTP 请求超时时间(秒)")
+    temperature: float = Field(default=0.0, description="采样温度")
+    confidence_threshold: float = Field(default=0.5, description="置信度阈值")
+
+    @field_validator("timeout")
+    @classmethod
+    def validate_timeout(cls, v: int) -> int:
+        if v <= 0:
+            raise ValueError(f"timeout 必须大于 0，当前值: {v}")
+        return v
+
+    @field_validator("temperature")
+    @classmethod
+    def validate_temperature(cls, v: float) -> float:
+        if not 0 <= v <= 2:
+            raise ValueError(f"temperature 必须在 0-2 之间，当前值: {v}")
+        return v
+
+    @field_validator("confidence_threshold")
+    @classmethod
+    def validate_confidence_threshold(cls, v: float) -> float:
+        if not 0 <= v <= 1:
+            raise ValueError(f"confidence_threshold 必须在 0-1 之间，当前值: {v}")
+        return v
+
+
+# ============================================================
 # OpenAI 配置
 # ============================================================
 
@@ -436,6 +478,7 @@ class Settings(BaseModel):
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
     dify: DifyConfig = Field(default_factory=DifyConfig)
     query_chat: QueryChatConfig = Field(default_factory=QueryChatConfig)
+    intent_classification: IntentClassificationConfig = Field(default_factory=IntentClassificationConfig)
     openai: OpenAIConfig = Field(default_factory=OpenAIConfig)
     mysql: MySQLConfig = Field(default_factory=MySQLConfig)
 
@@ -474,6 +517,7 @@ class Settings(BaseModel):
         logging_cfg = LoggingConfig.from_yaml(yaml_path, "logging")
         dify_cfg = DifyConfig.from_yaml(yaml_path, "dify")
         query_chat_cfg = QueryChatConfig.from_yaml(yaml_path, "query_chat")
+        intent_classification_cfg = IntentClassificationConfig.from_yaml(yaml_path, "intent_classification")
         openai_cfg = OpenAIConfig.from_yaml(yaml_path, "openai")
         mysql_cfg = MySQLConfig.from_yaml(yaml_path, "mysql")
 
@@ -484,6 +528,7 @@ class Settings(BaseModel):
             logging=logging_cfg,
             dify=dify_cfg,
             query_chat=query_chat_cfg,
+            intent_classification=intent_classification_cfg,
             openai=openai_cfg,
             mysql=mysql_cfg,
         )
@@ -538,6 +583,14 @@ class Settings(BaseModel):
             "QUERY_CHAT_ENABLED": ("query_chat", "enabled"),
             "QUERY_CHAT_TIMEOUT": ("query_chat", "timeout"),
             "QUERY_CHAT_TEMPERATURE": ("query_chat", "temperature"),
+            # Intent Classification 配置
+            "INTENT_CLASSIFICATION_ENABLED": ("intent_classification", "enabled"),
+            "INTENT_CLASSIFICATION_API_KEY": ("intent_classification", "api_key"),
+            "INTENT_CLASSIFICATION_BASE_URL": ("intent_classification", "base_url"),
+            "INTENT_CLASSIFICATION_MODEL": ("intent_classification", "model"),
+            "INTENT_CLASSIFICATION_TIMEOUT": ("intent_classification", "timeout"),
+            "INTENT_CLASSIFICATION_TEMPERATURE": ("intent_classification", "temperature"),
+            "INTENT_CLASSIFICATION_CONFIDENCE_THRESHOLD": ("intent_classification", "confidence_threshold"),
             # OpenAI 配置
             "OPENAI_API_KEY": ("openai", "api_key"),
             "OPENAI_BASE_URL": ("openai", "base_url"),
