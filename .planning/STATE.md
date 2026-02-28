@@ -35,10 +35,11 @@ Progress: [██░░░░░░░░] 25% (2/8 plans)
 
 **v1.2 Integration Testing for CI/CD (In Progress)**
 - Phase 9: 外部服务连通性测试 - ✅ 完成
-- Phase 10: API E2E 测试套件 - Plan 01 完成
+- Phase 10: API E2E 测试套件 - Plan 01, 02 完成
   - CI/CD就绪的E2E测试套件
   - Docker Compose测试环境
   - GitHub Actions工作流
+  - Gap Closure: 意图分类日志解析与测试数据完善
 - Phase 11: 待完成（CI/CD 集成）
 
 **v1.1 Intent Classification Optimization (Completed 2026-02-28)**
@@ -69,6 +70,8 @@ Progress: [██░░░░░░░░] 25% (2/8 plans)
 | Docker Compose manages test services | Removes need for Python ServerManager in CI | 2026-02-28 |
 | pytest-asyncio for E2E tests | Native async support, cleaner test code | 2026-02-28 |
 | JSON test reports | Machine-readable for CI integration | 2026-02-28 |
+| Log directory via LOG_DIR env var | Consistent with .log-manager project structure | 2026-02-28 |
+| Copy test data to tests/data/ | Match Docker Compose TEST_DATA_PATH configuration | 2026-02-28 |
 
 ### Roadmap Evolution
 
@@ -103,11 +106,25 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-28T21:48:00Z
-Stopped at: Completed Phase 10 Plan 01 - CI/CD Ready E2E Test Suite
-Resume file: .planning/phases/10-api-e2e/10-01-SUMMARY.md
+Last session: 2026-02-28T22:20:12Z
+Stopped at: Completed Phase 10 Plan 02 - Gap Closure for Intent Classification
+Resume file: .planning/phases/10-api-e2e/10-02-SUMMARY.md
 
 ### Completed Work
+
+**Phase 10 Plan 02: Gap Closure - Intent Classification Parsing**
+- Added `parse_intent_classification_logs()` function to extract classifier markers from log files
+- Added `extract_classification_result()` function to parse type_id and confidence
+- Added `find_latest_log_file()` helper for locating most recent log file
+- Updated `run_single_test()` to populate classification_type and classification_confidence
+- Created `tests/data/intent_test_cases.xlsx` with 55 test cases for CI environment
+- Closed gaps identified in 10-VERIFICATION.md:
+  - Gap 1: Intent classification parsing logic (was missing, now implemented)
+  - Gap 2: Test data file location (was at wrong path, now at tests/data/)
+- Commits:
+  - `42d1737` feat(10-02): add intent classification log parsing functions
+  - `30ae55c` feat(10-02): add test data file for E2E tests
+  - `4c56922` test(10-02): verify gap closure with syntax and import checks
 
 **Phase 10 Plan 01: Create CI/CD Ready E2E Test Suite**
 - Created `tests/e2e/__init__.py` - Package marker

@@ -29,7 +29,7 @@
 
 ### API E2E Testing
 
-- [ ] **INT-05**: /api/general 接口 E2E 测试（含意图分类链路）
+- [x] **INT-05**: /api/general 接口 E2E 测试（含意图分类链路）
   - 测试完整请求-响应流程
   - 验证意图分类结果符合预期
   - 验证降级机制在故障时正常工作
@@ -158,7 +158,7 @@ Deferred to future release.
 | INT-02 | Phase 9 | Complete |
 | INT-03 | Phase 9 | Complete |
 | INT-04 | Phase 9 | Complete |
-| INT-05 | Phase 10 | Pending |
+| INT-05 | Phase 10 | Complete |
 | INT-06 | Phase 10 | Pending |
 | INT-07 | Phase 11 | Pending |
 | INT-08 | Phase 11 | Pending |
