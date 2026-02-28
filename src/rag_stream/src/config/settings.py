@@ -657,6 +657,41 @@ class Settings(BaseModel):
                 "***" if config.api_key else "",
             )
 
+    def validate_intent_classification_config(self) -> None:
+        """验证 intent_classification 配置，无效时记录告警并降级运行。"""
+        logger = logging.getLogger(__name__)
+        config = self.intent_classification
+
+        if not config.enabled:
+            logger.info("Intent Classification 功能已禁用（enabled=false）")
+            return
+
+        missing: list[str] = []
+        if not (config.api_key or "").strip():
+            missing.append("api_key")
+        if not (config.base_url or "").strip():
+            missing.append("base_url")
+        if not (config.model or "").strip():
+            missing.append("model")
+
+        if missing:
+            logger.warning(
+                "INTENT_CLASSIFICATION 配置不完整（缺少: %s），分类功能将降级运行",
+                ", ".join(missing),
+            )
+
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug(
+                "Intent Classification 配置检查: enabled=%s, base_url=%s, model=%s, timeout=%s, temperature=%s, confidence_threshold=%s, api_key=%s",
+                config.enabled,
+                config.base_url,
+                config.model,
+                config.timeout,
+                config.temperature,
+                config.confidence_threshold,
+                "***" if config.api_key else "",
+            )
+
 
 # ============================================================
 # 全局配置实例
@@ -699,6 +734,7 @@ def load_settings() -> Settings:
 
     loaded_settings = Settings.load_from_yaml_with_env_override(yaml_path)
     loaded_settings.validate_query_chat_config()
+    loaded_settings.validate_intent_classification_config()
     return loaded_settings
 
 
