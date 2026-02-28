@@ -181,3 +181,144 @@ class TestDegradationPaths:
         # 测试空白字符串
         result3 = classifier.classify("   ")
         assert result3.degraded is True
+
+
+class TestSuccessPaths:
+    """成功路径测试。"""
+
+    @pytest.fixture
+    def config(self):
+        """测试配置。"""
+        return IntentClassificationConfig(
+            enabled=True,
+            api_key="test_key",
+            base_url="http://test.com/v1",
+            model="test-model",
+            timeout=10,
+            temperature=0.0,
+            confidence_threshold=0.5,
+        )
+
+    @pytest.fixture
+    def classifier(self, config):
+        """测试分类器。"""
+        return IntentClassifier(config)
+
+    def test_database_question_classification(self, classifier):
+        """测试数据库问题分类。"""
+        query = "如何查询危化品类目"
+
+        with patch.object(classifier, "_get_client") as mock_get_client:
+            mock_client = Mock()
+            mock_response = Mock()
+            mock_message = Mock()
+
+            # 返回数据库问题类型
+            mock_message.content = '{"type": 2, "confidence": 0.8}'
+            mock_response.choices = [Mock(message=mock_message)]
+            mock_client.chat.completions.create.return_value = mock_response
+            mock_get_client.return_value = mock_client
+
+            result = classifier.classify(query)
+
+            # 验证结果
+            assert result.degraded is False
+            assert result.type_id == 2
+            assert result.confidence == 0.8
+            assert '{"type": 2, "confidence": 0.8}' in result.raw_response
+
+    def test_instruction_set_classification(self, classifier):
+        """测试指令集分类。"""
+        query = "如何使用系统"
+
+        with patch.object(classifier, "_get_client") as mock_get_client:
+            mock_client = Mock()
+            mock_response = Mock()
+            mock_message = Mock()
+
+            # 返回指令集类型
+            mock_message.content = '{"type": 1, "confidence": 0.9}'
+            mock_response.choices = [Mock(message=mock_message)]
+            mock_client.chat.completions.create.return_value = mock_response
+            mock_get_client.return_value = mock_client
+
+            result = classifier.classify(query)
+
+            # 验证结果
+            assert result.degraded is False
+            assert result.type_id == 1
+            assert result.confidence == 0.9
+
+    def test_fixed_question_classification(self, classifier):
+        """测试固定问题分类。"""
+        query = "系统支持哪些功能"
+
+        with patch.object(classifier, "_get_client") as mock_get_client:
+            mock_client = Mock()
+            mock_response = Mock()
+            mock_message = Mock()
+
+            # 返回固定问题类型
+            mock_message.content = '{"type": 3, "confidence": 0.7}'
+            mock_response.choices = [Mock(message=mock_message)]
+            mock_client.chat.completions.create.return_value = mock_response
+            mock_get_client.return_value = mock_client
+
+            result = classifier.classify(query)
+
+            # 验证结果
+            assert result.degraded is False
+            assert result.type_id == 3
+            assert result.confidence == 0.7
+
+    def test_low_confidence_classification(self, classifier):
+        """测试低置信度分类。"""
+        query = "模糊的问题"
+
+        with patch.object(classifier, "_get_client") as mock_get_client:
+            mock_client = Mock()
+            mock_response = Mock()
+            mock_message = Mock()
+
+            # 返回低置信度
+            mock_message.content = '{"type": 2, "confidence": 0.2}'
+            mock_response.choices = [Mock(message=mock_message)]
+            mock_client.chat.completions.create.return_value = mock_response
+            mock_get_client.return_value = mock_client
+
+            result = classifier.classify(query)
+
+            # 验证结果（低置信度也是成功分类）
+            assert result.degraded is False
+            assert result.type_id == 2
+            assert result.confidence == 0.2
+
+    def test_feature_disabled_degradation(self, config):
+        """测试功能禁用不调用 API。"""
+        config.enabled = False
+        classifier = IntentClassifier(config)
+
+        with patch.object(classifier, "_get_client") as mock_get_client:
+            # 功能禁用时不应调用 _get_client
+            result = classifier.classify("测试查询")
+
+            # 验证降级且未调用 API
+            assert result.degraded is True
+            assert result.type_id == 0
+            mock_get_client.assert_not_called()
+
+    def test_client_initialization(self, classifier):
+        """测试客户端初始化。"""
+        with patch("src.utils.intent_classifier.OpenAI") as mock_openai:
+            mock_client_instance = Mock()
+            mock_openai.return_value = mock_client_instance
+
+            # 首次调用应初始化客户端
+            client1 = classifier._get_client()
+
+            # 再次调用应复用客户端
+            client2 = classifier._get_client()
+
+            assert client1 is client2
+            mock_openai.assert_called_once()
+
