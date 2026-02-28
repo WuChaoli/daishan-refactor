@@ -1,0 +1,82 @@
+# ============================================================
+# Docker Compose Production Overrides for rag_stream
+# ============================================================
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# This file extends docker-compose.yml with production-specific settings:
+# - Resource limits and reservations
+# - Log rotation with json-file driver
+# - More aggressive restart policy
+# - No development volume mounts
+# ============================================================
+
+services:
+  rag_stream:
+    container_name: rag_stream_prod
+    
+    # Production: Environment variables passed explicitly or via secrets
+    # Do not use .env file mount in production
+    env_file: []  # Override to empty - use explicit env vars or secrets
+    
+    environment:
+      # Production logging: stdout only, no file logs
+      - LOG_CONSOLE_OUTPUT=true
+      - LOG_LEVEL=INFO
+      # Production-specific settings
+      - PYTHONFAULTHANDLER=1
+    
+    # Production: No volume mounts for config
+    # Configuration should be injected via environment variables,
+    # secrets, or config management systems (Kubernetes ConfigMaps, etc.)
+    volumes: []  # Override to empty
+    
+    # Production: Always restart on failure
+    restart: always
+    
+    # Production resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+        # Restart policy for swarm/stack deployments
+        restart_policy:
+          condition: any
+          delay: 5s
+          max_attempts: 3
+          window: 120s
+    
+    # Production logging with json-file driver and rotation
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service,environment"
+        env: "OS,CUDA_VERSION"
+    
+    # Security: Explicit read-only root filesystem if supported
+    # Note: Requires tmpfs mounts for any writeable areas
+    # read_only: true
+    
+    # Security: Drop all capabilities and add only required ones
+    # cap_drop:
+    #   - ALL
+    # cap_add:
+    #   - NET_BIND_SERVICE  # If binding to privileged ports
+    
+    # Security: No new privileges
+    # security_opt:
+    #   - no-new-privileges:true
+    
+    # Health check (inherits from base but can override if needed)
+    # healthcheck:
+    #   test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:11028/health')"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 40s
