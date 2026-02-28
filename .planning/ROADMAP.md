@@ -59,3 +59,13 @@ Plans:
 | 1. 配置建模 | 1/1 | Complete | 2026-02-28 |
 | 2. AI 改写接入 | 1/1 | Complete | 2026-02-28 |
 | 3. 测试回归 | 0/1 | Not started | - |
+
+### Phase 4: 补充真实环境测试
+
+**Goal:** 使用真实 AI 服务验证端到端链路，补充 mock 测试的不足
+**Requirements**: [REAL-01, REAL-02]
+**Depends on:** Phase 3
+**Plans:** 1 plan
+
+Plans:
+- [ ] 04-01: 创建真实环境测试脚本和数据集（覆盖典型企业名改写、复杂句子结构、无企业名 query 和边界情况）
