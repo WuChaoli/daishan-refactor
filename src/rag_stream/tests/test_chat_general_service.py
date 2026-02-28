@@ -96,7 +96,9 @@ async def _test_handle_chat_general_should_fallback_to_general_when_intent_has_e
 
 
 def test_handle_chat_general_should_fallback_to_general_when_intent_has_error():
-    asyncio.run(_test_handle_chat_general_should_fallback_to_general_when_intent_has_error())
+    asyncio.run(
+        _test_handle_chat_general_should_fallback_to_general_when_intent_has_error()
+    )
 
 
 async def _test_handle_chat_general_should_fallback_to_general_when_sql_result_empty():
@@ -125,7 +127,9 @@ async def _test_handle_chat_general_should_fallback_to_general_when_sql_result_e
 
 
 def test_handle_chat_general_should_fallback_to_general_when_sql_result_empty():
-    asyncio.run(_test_handle_chat_general_should_fallback_to_general_when_sql_result_empty())
+    asyncio.run(
+        _test_handle_chat_general_should_fallback_to_general_when_sql_result_empty()
+    )
 
 
 async def _test_handle_chat_general_should_route_type3_with_combined_prompt():
@@ -179,9 +183,7 @@ async def _test_handle_chat_general_should_route_type3_with_combined_prompt():
     assert category_arg == "通用"
     assert isinstance(routed_request, ChatRequest)
     assert routed_request.question == (
-        "园区安全负责人是谁\n\n"
-        f"{str(sql_result)}\n\n"
-        "东区的安全负责人是谁？"
+        f"园区安全负责人是谁\n\n{str(sql_result)}\n\n东区的安全负责人是谁？"
     )
     assert routed_request.user_id == "user-001"
     assert routed_request.session_id == "session-001"
@@ -193,7 +195,9 @@ def test_handle_chat_general_should_route_type3_with_combined_prompt():
 
 
 async def _test_handle_chat_general_should_fallback_to_general_when_type3_answer_missing():
-    request = ChatRequest(question="东区的安全负责人是谁？", user_id="user-001", stream=True)
+    request = ChatRequest(
+        question="东区的安全负责人是谁？", user_id="user-001", stream=True
+    )
 
     intent_service = AsyncMock()
     intent_service.process_query.return_value = {
@@ -231,7 +235,9 @@ def test_handle_chat_general_should_fallback_to_general_when_type3_answer_missin
 
 
 async def _test_handle_chat_general_should_fallback_to_general_when_type3_judgequery_raise():
-    request = ChatRequest(question="东区的安全负责人是谁？", user_id="user-001", stream=True)
+    request = ChatRequest(
+        question="东区的安全负责人是谁？", user_id="user-001", stream=True
+    )
 
     intent_service = AsyncMock()
     intent_service.process_query.return_value = {
@@ -294,7 +300,9 @@ async def _test_handle_chat_general_should_use_ai_rewrite_before_intent():
 
     assert result == {"ok": True}
     mocked_to_thread.assert_awaited_once()
-    intent_service.process_query.assert_awaited_once_with("介绍一下在园区的情况", "user-001")
+    intent_service.process_query.assert_awaited_once_with(
+        "介绍一下在园区的情况", "user-001"
+    )
     assert request.question == "介绍一下浙江世倍尔新材料有限公司在园区的情况"
 
 
@@ -344,15 +352,20 @@ def test_handle_chat_general_should_keep_original_query_when_ai_rewrite_fails():
 
 async def _test_replace_economic_zone_should_log_skip_when_no_company_keyword():
     query = "今天园区天气怎么样"
-    with patch("src.services.chat_general_service.marker") as mocked_marker, patch(
-        "src.services.chat_general_service.asyncio.to_thread",
-        new=AsyncMock(return_value="unused"),
-    ) as mocked_to_thread:
+    with (
+        patch("src.services.chat_general_service.marker") as mocked_marker,
+        patch(
+            "src.services.chat_general_service.asyncio.to_thread",
+            new=AsyncMock(return_value="unused"),
+        ) as mocked_to_thread,
+    ):
         result = await replace_economic_zone(query)
 
     assert result == query
     mocked_to_thread.assert_not_awaited()
-    mocked_marker.assert_any_call("query_normalized_skip_non_company", {"query_len": len(query)})
+    mocked_marker.assert_any_call(
+        "query_normalized_skip_non_company", {"query_len": len(query)}
+    )
 
 
 def test_replace_economic_zone_should_log_skip_when_no_company_keyword():
@@ -361,18 +374,24 @@ def test_replace_economic_zone_should_log_skip_when_no_company_keyword():
 
 async def _test_replace_economic_zone_should_fallback_when_disabled():
     query = "浙江世倍尔新材料有限公司现在怎么样"
-    with patch(
-        "src.services.chat_general_service.settings.query_chat.enabled",
-        new=False,
-    ), patch("src.services.chat_general_service.marker") as mocked_marker, patch(
-        "src.services.chat_general_service.asyncio.to_thread",
-        new=AsyncMock(return_value="unused"),
-    ) as mocked_to_thread:
+    with (
+        patch(
+            "src.services.chat_general_service.settings.query_chat.enabled",
+            new=False,
+        ),
+        patch("src.services.chat_general_service.marker") as mocked_marker,
+        patch(
+            "src.services.chat_general_service.asyncio.to_thread",
+            new=AsyncMock(return_value="unused"),
+        ) as mocked_to_thread,
+    ):
         result = await replace_economic_zone(query)
 
     assert result == query
     mocked_to_thread.assert_not_awaited()
-    mocked_marker.assert_any_call("query_normalized_disabled", {"query_len": len(query)})
+    mocked_marker.assert_any_call(
+        "query_normalized_disabled", {"query_len": len(query)}
+    )
 
 
 def test_replace_economic_zone_should_fallback_when_disabled():
@@ -381,19 +400,25 @@ def test_replace_economic_zone_should_fallback_when_disabled():
 
 async def _test_replace_economic_zone_should_fallback_when_misconfigured():
     query = "浙江世倍尔新材料有限公司现在怎么样"
-    with patch(
-        "src.services.chat_general_service.settings.query_chat.enabled",
-        new=True,
-    ), patch(
-        "src.services.chat_general_service.settings.query_chat.api_key",
-        new="",
-    ), patch(
-        "src.services.chat_general_service.settings.query_chat.base_url",
-        new="",
-    ), patch("src.services.chat_general_service.marker") as mocked_marker, patch(
-        "src.services.chat_general_service.asyncio.to_thread",
-        new=AsyncMock(return_value="unused"),
-    ) as mocked_to_thread:
+    with (
+        patch(
+            "src.services.chat_general_service.settings.query_chat.enabled",
+            new=True,
+        ),
+        patch(
+            "src.services.chat_general_service.settings.query_chat.api_key",
+            new="",
+        ),
+        patch(
+            "src.services.chat_general_service.settings.query_chat.base_url",
+            new="",
+        ),
+        patch("src.services.chat_general_service.marker") as mocked_marker,
+        patch(
+            "src.services.chat_general_service.asyncio.to_thread",
+            new=AsyncMock(return_value="unused"),
+        ) as mocked_to_thread,
+    ):
         result = await replace_economic_zone(query)
 
     assert result == query
@@ -411,10 +436,13 @@ def test_replace_economic_zone_should_fallback_when_misconfigured():
 async def _test_replace_economic_zone_should_log_start_and_success():
     query = "浙江世倍尔新材料有限公司现在怎么样"
     rewritten = "现在怎么样"
-    with patch("src.services.chat_general_service.marker") as mocked_marker, patch(
-        "src.services.chat_general_service.asyncio.to_thread",
-        new=AsyncMock(return_value=rewritten),
-    ) as mocked_to_thread:
+    with (
+        patch("src.services.chat_general_service.marker") as mocked_marker,
+        patch(
+            "src.services.chat_general_service.asyncio.to_thread",
+            new=AsyncMock(return_value=rewritten),
+        ) as mocked_to_thread,
+    ):
         result = await replace_economic_zone(query)
 
     assert result == rewritten
@@ -429,9 +457,12 @@ def test_replace_economic_zone_should_log_start_and_success():
 
 async def _test_replace_economic_zone_should_log_failure_and_fallback():
     query = "浙江世倍尔新材料有限公司现在怎么样"
-    with patch("src.services.chat_general_service.marker") as mocked_marker, patch(
-        "src.services.chat_general_service.asyncio.to_thread",
-        new=AsyncMock(side_effect=RuntimeError("mock ai error")),
+    with (
+        patch("src.services.chat_general_service.marker") as mocked_marker,
+        patch(
+            "src.services.chat_general_service.asyncio.to_thread",
+            new=AsyncMock(side_effect=RuntimeError("mock ai error")),
+        ),
     ):
         result = await replace_economic_zone(query)
 
@@ -446,3 +477,32 @@ async def _test_replace_economic_zone_should_log_failure_and_fallback():
 
 def test_replace_economic_zone_should_log_failure_and_fallback():
     asyncio.run(_test_replace_economic_zone_should_log_failure_and_fallback())
+
+
+async def _test_replace_economic_zone_success():
+    """TEST-01: AI 改写成功路径测试"""
+    query = "某某公司安全情况查询"
+    expected_rewritten = "查询安全情况"
+
+    with (
+        patch("src.services.chat_general_service.marker") as mocked_marker,
+        patch(
+            "src.services.chat_general_service.asyncio.to_thread",
+            new=AsyncMock(return_value=expected_rewritten),
+        ) as mocked_to_thread,
+    ):
+        result = await replace_economic_zone(query)
+
+    assert result == expected_rewritten
+    mocked_to_thread.assert_awaited_once()
+    # Verify the call used correct arguments
+    call_args = mocked_to_thread.await_args
+    assert call_args.args[0].__name__ == "rewrite_query_remove_company"
+    assert call_args.args[1] == query
+    # Verify success logging
+    mocked_marker.assert_any_call("query_normalized_start", {"query_len": len(query)})
+    mocked_marker.assert_any_call("query_normalized", {"normalized": True})
+
+
+def test_replace_economic_zone_success():
+    asyncio.run(_test_replace_economic_zone_success())
