@@ -60,8 +60,8 @@
   - Requirements: DOCKER-01, DOCKER-02
   - Success Criteria: 多阶段构建成功、非 root 运行、优雅关闭、无 secrets 泄漏
   - Plans:
-    - [x] 12-01-PLAN.md — Create Production Dockerfile
-    - [ ] 12-02-PLAN.md — Docker Compose Configuration
+    - [x] 12-01-PLAN.md — Create Production Dockerfile (2026-02-28)
+    - [x] 12-02-PLAN.md — Docker Compose Configuration (2026-02-28)
 
 - [ ] **Phase 13: Service Lifecycle Management** — 启动关闭与资源清理（1 plan）
   - Requirements: LIFECYCLE-01, LIFECYCLE-02
@@ -88,7 +88,7 @@
 | 9. 外部服务连通性测试 | v1.2 | 1/1 | Complete | 2026-02-28 |
 | 10. API E2E 测试 | v1.2 | 0/1 | Pending | — |
 | 11. CI/CD 流水线集成 | v1.2 | 0/1 | Pending | — |
-| 12. Docker Containerization | v1.3 | 1/2 | In Progress | 2026-02-28 |
+| 12. Docker Containerization | v1.3 | 2/2 | Complete | 2026-02-28 |
 | 13. Service Lifecycle Management | v1.3 | 0/1 | Planned | — |
 | 14. Health Checks & Monitoring | v1.3 | 0/1 | Planned | — |
 | 15. Log Management | v1.3 | 0/1 | Planned | — |
@@ -142,7 +142,7 @@
 
 **Plans:**
 - ✅ **12-01: Create Production Dockerfile** — Multi-stage build, non-root user, exec form CMD (2026-02-28)
-- ⏳ **12-02: Docker Compose Configuration** — Service orchestration, networking, environment variables
+- ✅ **12-02: Docker Compose Configuration** — Service orchestration, health checks, resource limits, graceful shutdown (2026-02-28)
 
 ### Phase 13: Service Lifecycle Management
 
@@ -185,4 +185,4 @@
 
 ---
 *Roadmap created: 2026-02-28*
-*Last updated: 2026-02-28 - Completed Phase 12 Plan 01*
+*Last updated: 2026-02-28 - Completed Phase 12 Plan 02*
