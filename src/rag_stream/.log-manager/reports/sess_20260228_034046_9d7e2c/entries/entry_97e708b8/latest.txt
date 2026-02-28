@@ -1,0 +1,23 @@
+metadata:
+  session_id: sess_20260228_034046_9d7e2c
+  entry_id: entry_97e708b8
+  snapshot_time: '2026-02-28 11:40:47'
+  event_count: 6
+  mode: lite
+error_summary: []
+call_chain:
+- trace_id: tr_541cd10a
+  roots:
+  - function_name: handle_chat_general
+    duration_ms: 0.933
+    exception: null
+    children:
+    - function_name: replace_economic_zone
+      duration_ms: 0.376
+      exception: null
+error_path: null
+chain_memory_top:
+- function_name: replace_economic_zone
+  mem_delta_rss_kb: 0
+- function_name: handle_chat_general
+  mem_delta_rss_kb: 0

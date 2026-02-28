@@ -1,10 +1,7 @@
-"""
-pytest配置文件
-为所有测试设置正确的Python路径
-"""
-import sys
-import os
+"""Shared pytest fixtures for rag_stream tests."""
+
 from pathlib import Path
+import sys
 
 # 获取项目根目录
 # tests/ 位于 src/rag_stream/tests/

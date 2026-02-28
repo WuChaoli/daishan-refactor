@@ -6,9 +6,9 @@ IntentService - 意图识别服务
 import dataclasses
 from typing import Any, Dict, List, Optional
 
-from src.config.settings import settings
-from src.utils.log_manager_import import marker, trace
-from src.services.intent_service.base_intent_service import (
+from rag_stream.config.settings import settings
+from rag_stream.utils.log_manager_import import marker, trace
+from rag_stream.services.intent_service.base_intent_service import (
     BaseIntentService,
     IntentRecognizerSettings,
     IntentResult,

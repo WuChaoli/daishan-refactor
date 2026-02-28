@@ -1,0 +1,28 @@
+metadata:
+  session_id: sess_20260228_034219_e24e60
+  entry_id: entry_0d37881b
+  snapshot_time: '2026-02-28 11:42:20'
+  event_count: 10
+  mode: lite
+error_summary: []
+call_chain:
+- trace_id: tr_9643a384
+  roots:
+  - function_name: handle_chat_general
+    duration_ms: 1.071
+    exception: null
+    children:
+    - function_name: replace_economic_zone
+      duration_ms: 0.195
+      exception: null
+    - function_name: _extract_question_from_qa_text
+      duration_ms: 0.132
+      exception: null
+error_path: null
+chain_memory_top:
+- function_name: replace_economic_zone
+  mem_delta_rss_kb: 0
+- function_name: _extract_question_from_qa_text
+  mem_delta_rss_kb: 0
+- function_name: handle_chat_general
+  mem_delta_rss_kb: 0

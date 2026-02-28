@@ -1,0 +1,123 @@
+{
+  "summary": {
+    "total": 9,
+    "passed": 9,
+    "failed": 0,
+    "pass_rate": "100.0%"
+  },
+  "timing": {
+    "start_time": "2026-02-28T06:55:50Z",
+    "end_time": "2026-02-28T06:57:47Z",
+    "duration_seconds": 0.0
+  },
+  "results": [
+    {
+      "description": "园区安全态势查询 - Type1",
+      "question": "园区安全态势如何？",
+      "expected_type": 1,
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 9801.251649856567,
+      "stream_event_count": 16,
+      "error_message": "",
+      "classification_type": null,
+      "classification_confidence": null
+    },
+    {
+      "description": "危化品企业列表查询 - Type1",
+      "question": "危化品企业有哪些？",
+      "expected_type": 1,
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 20868.450164794922,
+      "stream_event_count": 5,
+      "error_message": "",
+      "classification_type": null,
+      "classification_confidence": null
+    },
+    {
+      "description": "园区安全概况 - Type1",
+      "question": "今日园区整体安全情况",
+      "expected_type": 1,
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 15010.384798049927,
+      "stream_event_count": 15,
+      "error_message": "",
+      "classification_type": null,
+      "classification_confidence": null
+    },
+    {
+      "description": "企业危化品类目查询 - Type2",
+      "question": "XX企业的危化品类目是什么？",
+      "expected_type": 2,
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 11348.84524345398,
+      "stream_event_count": 4,
+      "error_message": "",
+      "classification_type": null,
+      "classification_confidence": null
+    },
+    {
+      "description": "企业安全信息查询 - Type2",
+      "question": "查询某公司的安全信息",
+      "expected_type": 2,
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 18365.439653396606,
+      "stream_event_count": 9,
+      "error_message": "",
+      "classification_type": null,
+      "classification_confidence": null
+    },
+    {
+      "description": "企业危化品查询 - Type2",
+      "question": "某化工厂的危险化学品有哪些？",
+      "expected_type": 2,
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 10399.737358093262,
+      "stream_event_count": 4,
+      "error_message": "",
+      "classification_type": null,
+      "classification_confidence": null
+    },
+    {
+      "description": "安全负责人查询 - Type3",
+      "question": "东区的安全负责人是谁？",
+      "expected_type": 3,
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 11367.469787597656,
+      "stream_event_count": 8,
+      "error_message": "",
+      "classification_type": null,
+      "classification_confidence": null
+    },
+    {
+      "description": "安全负责人联系方式 - Type3",
+      "question": "园区安全负责人联系方式",
+      "expected_type": 3,
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 7901.747941970825,
+      "stream_event_count": 7,
+      "error_message": "",
+      "classification_type": null,
+      "classification_confidence": null
+    },
+    {
+      "description": "应急联系方式查询 - Type3",
+      "question": "园区应急值班电话是多少？",
+      "expected_type": 3,
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 11436.524152755737,
+      "stream_event_count": 10,
+      "error_message": "",
+      "classification_type": null,
+      "classification_confidence": null
+    }
+  ]
+}
