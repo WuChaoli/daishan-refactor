@@ -39,6 +39,8 @@
 - [ ] **Phase 9: 外部服务连通性测试** — 验证 AI API、向量库、数据库连通性（1 plan）
   - Requirements: INT-01, INT-02, INT-03, INT-04
   - Success Criteria: 所有外部服务连通性测试通过，失败时提供诊断信息
+  - Plans:
+    - [ ] 09-01-PLAN.md — 创建外部服务连通性测试套件
 
 - [ ] **Phase 10: API E2E 测试** — 完整 API 流程测试与配置分离（1 plan）
   - Requirements: INT-05, INT-06
@@ -58,10 +60,44 @@
 | 5. 意图分类基础 | v1.1 | 3/3 | Complete | 2026-02-28 |
 | 6. 分类驱动检索 | v1.1 | 1/1 | Complete | 2026-02-28 |
 | 8. API General 端到端测试 | v1.1 | 1/1 | Complete | 2026-02-28 |
-| 9. 外部服务连通性测试 | v1.2 | 0/1 | Pending | — |
+| 9. 外部服务连通性测试 | v1.2 | 1/1 | Planned | — |
 | 10. API E2E 测试 | v1.2 | 0/1 | Pending | — |
 | 11. CI/CD 流水线集成 | v1.2 | 0/1 | Pending | — |
 
+### Phase 9: 外部服务连通性测试
+
+**Goal:** 验证 AI API、向量库、数据库连通性
+
+**Requirements:** INT-01, INT-02, INT-03, INT-04
+
+**Success Criteria:**
+- AI API 连通性测试通过（实际调用验证）
+- 向量库连通性测试通过（实际检索验证）
+- 数据库连通性测试通过（实际查询验证）
+- 失败时提供清晰的诊断信息
+
+### Phase 10: API E2E 测试
+
+**Goal:** 完整 API 流程测试与配置分离
+
+**Requirements:** INT-05, INT-06
+
+**Success Criteria:**
+- /api/general 接口完整流程测试通过
+- 配置支持环境变量注入
+- 测试可在 CI/CD 环境中运行
+
+### Phase 11: CI/CD 流水线集成
+
+**Goal:** 测试报告与流水线配置
+
+**Requirements:** INT-07, INT-08
+
+**Success Criteria:**
+- GitHub Actions 工作流可正常运行
+- 生成 JUnit/XML 格式报告
+- 测试失败时通知机制
+
 ---
 *Roadmap created: 2026-02-28*
-*Last updated: 2026-02-28 - v1.2 roadmap created*
+*Last updated: 2026-02-28 - Added phase detail sections*
