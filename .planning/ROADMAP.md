@@ -66,7 +66,7 @@
     - [x] 12-01-PLAN.md — Create Production Dockerfile (2026-02-28)
     - [x] 12-02-PLAN.md — Docker Compose Configuration (2026-02-28)
 
-- [ ] **Phase 13: Service Lifecycle Management** — 启动关闭与资源清理（1 plan）
+- [x] **Phase 13: Service Lifecycle Management** — 启动关闭与资源清理（1 plan） (completed 2026-03-01)
   - Requirements: LIFECYCLE-01, LIFECYCLE-02
   - Success Criteria: SIGTERM 正确处理、连接优雅关闭、启动脚本可靠
   - Plans:
@@ -94,7 +94,7 @@
 | 10. API E2E 测试 | 2/2 | Complete    | 2026-02-28 | 2026-02-28 |
 | 11. CI/CD 流水线集成 | v1.2 | 0/1 | Pending | — |
 | 12. Docker Containerization | v1.3 | 2/2 | Complete | 2026-02-28 |
-| 13. Service Lifecycle Management | v1.3 | 0/1 | Planned | 2026-03-01 |
+| 13. Service Lifecycle Management | 1/1 | Complete   | 2026-03-01 | 2026-03-01 |
 | 14. Health Checks & Monitoring | v1.3 | 0/1 | Planned | — |
 | 15. Log Management | v1.3 | 0/1 | Planned | — |
 
