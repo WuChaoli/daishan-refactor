@@ -41,9 +41,9 @@ services:
     
     restart: unless-stopped
     
-    # Graceful shutdown configuration
+    # Graceful shutdown configuration - matches Uvicorn 30s timeout
     stop_signal: SIGTERM
-    stop_grace_period: 10s
+    stop_grace_period: 30s
     
     # Resource hints for development
     deploy:
@@ -95,9 +95,9 @@ services:
     
     restart: unless-stopped
     
-    # Graceful shutdown configuration
+    # Graceful shutdown configuration - matches Uvicorn 30s timeout
     stop_signal: SIGTERM
-    stop_grace_period: 10s
+    stop_grace_period: 30s
     
     # 依赖 rag_stream 服务
     depends_on:

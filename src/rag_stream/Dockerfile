@@ -58,8 +58,9 @@ WORKDIR /app
 RUN groupadd --gid 1000 appgroup && \
     useradd --uid 1000 --gid appgroup --shell /bin/false --create-home appuser
 
-# Copy installed packages from builder
+# Copy installed packages and binaries from builder
 COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
 
 # Copy source code for path dependencies (required for editable installs)
 COPY --from=builder --chown=appuser:appgroup /app/src/DaiShanSQL /app/src/DaiShanSQL
@@ -91,4 +92,6 @@ HEALTHCHECK --interval=30s \
 
 # Use exec form CMD for proper signal forwarding (SIGTERM handling)
 # This ensures graceful shutdown when container receives stop signal
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "11028", "--workers", "4"]
+# Workers=4 matches docker-compose resource limits
+# Timeout settings align with docker-compose stop_grace_period: 30s
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "11028", "--workers", "4", "--timeout-keep-alive", "30", "--timeout-graceful-shutdown", "30"]
