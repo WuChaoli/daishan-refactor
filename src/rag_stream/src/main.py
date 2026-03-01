@@ -4,6 +4,9 @@ This module creates the FastAPI application with lifecycle management,
 including startup initialization and graceful shutdown.
 """
 
+import logging
+import signal
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -19,6 +22,15 @@ from rag_stream.lifespan import lifespan as modular_lifespan
 from rag_stream.routes.chat_routes import router
 from rag_stream.services.intent_service import IntentService
 from rag_stream.utils.ragflow_client import RagflowClient
+
+# Configure logging for lifecycle visibility
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)],
+)
+
+logger = logging.getLogger(__name__)
 
 # Global service instances
 ragflow_client = None
@@ -156,13 +168,48 @@ async def shutdown_services():
         # Don't re-raise - shutdown should complete
 
 
+def setup_signal_handlers():
+    """Setup custom signal handlers for graceful shutdown visibility.
+
+    These handlers log signal receipt before Uvicorn's default handling,
+    providing visibility into the shutdown process for operators.
+    """
+
+    def sigterm_handler(signum, frame):
+        """Handle SIGTERM signal with logging before default processing."""
+        logger.info("[SIGNAL] SIGTERM received - initiating graceful shutdown")
+        marker("SIGTERM信号接收", {"signal": "SIGTERM", "action": "graceful_shutdown"})
+        # Re-raise to allow Uvicorn's default handler to run
+        signal.default_int_handler(signum, frame)
+
+    def sigint_handler(signum, frame):
+        """Handle SIGINT signal with logging."""
+        logger.info("[SIGNAL] SIGINT received - shutting down")
+        marker("SIGINT信号接收", {"signal": "SIGINT", "action": "shutdown"})
+        signal.default_int_handler(signum, frame)
+
+    # Register handlers
+    signal.signal(signal.SIGTERM, sigterm_handler)
+    signal.signal(signal.SIGINT, sigint_handler)
+    logger.info("[SIGNAL] Signal handlers registered for SIGTERM and SIGINT")
+
+
+# Setup signal handlers at module load time
+setup_signal_handlers()
+
+
 if __name__ == "__main__":
     import uvicorn
 
     # For local development only
-    # In production, use the Dockerfile CMD with proper worker/timeout settings
+    # In production, use the Dockerfile CMD with proper worker/timeout settings:
+    #   --workers 4 --timeout-keep-alive 30 --timeout-graceful-shutdown 30
+    logger.info(
+        f"[MAIN] Starting development server on {settings.server.host}:{settings.server.port}"
+    )
     uvicorn.run(
         app,
         host=settings.server.host,
         port=settings.server.port,
+        log_level="info",
     )

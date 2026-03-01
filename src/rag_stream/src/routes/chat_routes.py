@@ -20,18 +20,79 @@ from rag_stream.models.schemas import (
     SourceDispatchRequest,
     GuessQuestionsRequest,
 )
-from rag_stream.services.dify_service import should_use_dify, stream_dify_chatflow_response
+from rag_stream.services.dify_service import (
+    should_use_dify,
+    stream_dify_chatflow_response,
+)
 from rag_stream.services.chat_general_service import handle_chat_general
 from rag_stream.services.personnel_dispatch_service import handle_personnel_dispatch
 from rag_stream.services.rag_service import get_or_create_session, stream_chat_response
 from rag_stream.services.source_dispath_srvice import handle_source_dispatch
 from rag_stream.utils.session_manager import session_manager
+
 router = APIRouter()
 
 
 @router.get("/health")
 async def health() -> Dict[str, Any]:
+    """Basic health check endpoint.
+
+    Returns simple OK status for liveness probes.
+    """
     return {"status": "ok"}
+
+
+@router.get("/health/ready")
+async def health_ready(request: Request) -> Dict[str, Any]:
+    """Readiness check endpoint with lifecycle state.
+
+    Returns detailed status including:
+    - HTTP client initialization status
+    - External service connectivity (Dify, RAGFlow)
+    - Service initialization state
+
+    Used for Kubernetes readiness probes and startup verification.
+    """
+    state = request.app.state
+
+    # Gather lifecycle state
+    http_client_ready = hasattr(state, "http_client") and state.http_client is not None
+    service_status = getattr(state, "service_status", {"dify": False, "ragflow": False})
+    ragflow_client_ready = (
+        hasattr(state, "ragflow_client") and state.ragflow_client is not None
+    )
+    intent_service_ready = (
+        hasattr(state, "intent_service") and state.intent_service is not None
+    )
+
+    # Calculate overall readiness
+    external_ready = any(service_status.values())
+    services_ready = ragflow_client_ready and intent_service_ready
+
+    # Determine status
+    if services_ready:
+        status = "ready"
+        http_code = 200
+    elif http_client_ready:
+        status = "degraded"
+        http_code = 200  # Still accept traffic in degraded mode
+    else:
+        status = "not_ready"
+        http_code = 503
+
+    response = {
+        "status": status,
+        "timestamp": datetime.now().isoformat(),
+        "checks": {
+            "http_client": http_client_ready,
+            "external_services": service_status,
+            "ragflow_client": ragflow_client_ready,
+            "intent_service": intent_service_ready,
+        },
+        "ready": status == "ready",
+    }
+
+    return response
 
 
 @router.post("/api/chat/{category}", response_model=ChatResponse)
@@ -42,7 +103,14 @@ async def chat_with_category(
 ):
     """通用聊天接口，根据类别选择对应的chat_id"""
     user_id = request.user_id or None
-    marker("分类聊天请求", {"category": category, "has_user_id": bool(user_id), "question_len": len(request.question)})
+    marker(
+        "分类聊天请求",
+        {
+            "category": category,
+            "has_user_id": bool(user_id),
+            "question_len": len(request.question),
+        },
+    )
     if category not in settings.ragflow.chat_ids:
         marker("分类聊天请求拒绝", {"unsupported_category": category}, level="WARNING")
         raise HTTPException(status_code=400, detail=f"不支持的类别: {category}")
@@ -51,7 +119,9 @@ async def chat_with_category(
     marker("chat_id获取", {"chat_id": chat_id})
 
     session_id = await get_or_create_session(chat_id, category, user_id)
-    marker("会话就绪", {"category": category, "chat_id": chat_id, "session_id": session_id})
+    marker(
+        "会话就绪", {"category": category, "chat_id": chat_id, "session_id": session_id}
+    )
 
     marker("分类聊天流式响应启动", {"category": category, "session_id": session_id})
 
@@ -160,7 +230,10 @@ async def chat_general(request: ChatRequest, http_request: Request):
         marker("通用问答路由失败", {"reason": "intent_service未初始化"}, level="ERROR")
         raise HTTPException(status_code=500, detail="intent_service 未初始化")
 
-    marker("通用问答路由开始", {"question_len": len(request.question), "has_user_id": bool(request.user_id)})
+    marker(
+        "通用问答路由开始",
+        {"question_len": len(request.question), "has_user_id": bool(request.user_id)},
+    )
 
     response = await handle_chat_general(
         request=request,
@@ -200,10 +273,17 @@ async def chat_special(request: ChatRequest):
 async def chat_firmsituation(request: ChatRequest):
     return await chat_with_category("园区企业态势", request)
 
+
 @router.post("/api/stop", status_code=200)
 async def stop_session(request: ChatDeleteRequest):
     """暂停/删除会话"""
-    marker("会话停止请求", {"has_session_id": bool(request.session_id), "has_user_id": bool(request.user_id)})
+    marker(
+        "会话停止请求",
+        {
+            "has_session_id": bool(request.session_id),
+            "has_user_id": bool(request.user_id),
+        },
+    )
     if request.session_id:
         # 按 session_id 删除
         if request.session_id not in session_manager.sessions:
@@ -260,7 +340,11 @@ async def get_session_info(session_id: str) -> Dict[str, Any]:
 
     marker("会话详情查询", {"session_id": session_id})
 
-    return {"code": 0, "message": "获取成功", "data": session_manager.sessions[session_id]}
+    return {
+        "code": 0,
+        "message": "获取成功",
+        "data": session_manager.sessions[session_id],
+    }
 
 
 @router.get("/api/sessions")
@@ -301,26 +385,43 @@ async def people_dispatch(request: PeopleDispatchRequest) -> Dict[str, Any]:
         HTTPException: 当 voiceText 为空时
     """
     if not request.voiceText:
-        marker("人员调度请求拒绝", {"accident_id": request.accidentId, "reason": "voice_text为空"}, level="WARNING")
+        marker(
+            "人员调度请求拒绝",
+            {"accident_id": request.accidentId, "reason": "voice_text为空"},
+            level="WARNING",
+        )
         raise HTTPException(status_code=400, detail="voiceText 不能为空")
 
-    marker("人员调度开始", {"accident_id": request.accidentId, "voice_len": len(request.voiceText)})
+    marker(
+        "人员调度开始",
+        {"accident_id": request.accidentId, "voice_len": len(request.voiceText)},
+    )
 
     user_id = None  # 可以从请求头或其他地方获取
 
     result = await handle_personnel_dispatch(
-        voice_text=request.voiceText,
-        user_id=user_id
+        voice_text=request.voiceText, user_id=user_id
     )
 
     if isinstance(result, dict):
         data = result.get("data")
         data_count = len(data) if isinstance(data, list) else 0
-        marker("人员调度完成", {"accident_id": request.accidentId, "code": result.get("code"), "data_count": data_count})
+        marker(
+            "人员调度完成",
+            {
+                "accident_id": request.accidentId,
+                "code": result.get("code"),
+                "data_count": data_count,
+            },
+        )
     else:
-        marker("人员调度完成", {"accident_id": request.accidentId, "result_type": type(result).__name__})
+        marker(
+            "人员调度完成",
+            {"accident_id": request.accidentId, "result_type": type(result).__name__},
+        )
 
     return result
+
 
 @router.post("/ipark-ae/source-dispatch")
 async def source_dispatch(request: SourceDispatchRequest):
@@ -335,17 +436,34 @@ async def source_dispatch(request: SourceDispatchRequest):
     Returns:
         List[Dict[str, str]]: 资源列表
     """
-    marker("资源调度开始", {"accident_id": request.accidentId, "source_type": request.sourceType, "has_voice_text": bool(request.voiceText)})
+    marker(
+        "资源调度开始",
+        {
+            "accident_id": request.accidentId,
+            "source_type": request.sourceType,
+            "has_voice_text": bool(request.voiceText),
+        },
+    )
     result = await handle_source_dispatch(request)
-    marker("资源调度完成", {"accident_id": request.accidentId, "source_type": request.sourceType, "result_count": len(result)})
+    marker(
+        "资源调度完成",
+        {
+            "accident_id": request.accidentId,
+            "source_type": request.sourceType,
+            "result_count": len(result),
+        },
+    )
     return result
+
 
 @router.get("/health")
 async def health_check() -> Dict[str, Any]:
     session_manager.cleanup_all_expired_sessions()
     active_sessions = len(session_manager.sessions)
     active_users = len(session_manager.user_sessions)
-    marker("健康检查", {"active_sessions": active_sessions, "active_users": active_users})
+    marker(
+        "健康检查", {"active_sessions": active_sessions, "active_users": active_users}
+    )
     return {
         "status": "healthy",
         "timestamp": datetime.now().isoformat(),
@@ -359,12 +477,17 @@ async def get_categories() -> Dict[str, Any]:
     return {
         "code": 0,
         "message": "获取成功",
-        "data": {"categories": list(settings.ragflow.chat_ids.keys()), "chat_ids": settings.ragflow.chat_ids},
+        "data": {
+            "categories": list(settings.ragflow.chat_ids.keys()),
+            "chat_ids": settings.ragflow.chat_ids,
+        },
     }
 
 
 @router.post("/api/guess-questions")
-async def guess_questions(request: GuessQuestionsRequest, http_request: Request) -> List[Dict[str, str]]:
+async def guess_questions(
+    request: GuessQuestionsRequest, http_request: Request
+) -> List[Dict[str, str]]:
     """
     猜你想问接口
 
