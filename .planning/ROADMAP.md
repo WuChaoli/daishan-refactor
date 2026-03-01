@@ -69,6 +69,8 @@
 - [ ] **Phase 13: Service Lifecycle Management** — 启动关闭与资源清理（1 plan）
   - Requirements: LIFECYCLE-01, LIFECYCLE-02
   - Success Criteria: SIGTERM 正确处理、连接优雅关闭、启动脚本可靠
+  - Plans:
+    - [ ] 13-01-PLAN.md — Implement comprehensive service lifecycle management with FastAPI lifespan, graceful shutdown, and resource cleanup
 
 - [ ] **Phase 14: Health Checks & Monitoring** — 编排器就绪健康端点（1 plan）
   - Requirements: HEALTH-01, HEALTH-02
@@ -89,10 +91,10 @@
 | 6. 分类驱动检索 | v1.1 | 1/1 | Complete | 2026-02-28 |
 | 8. API General 端到端测试 | v1.1 | 1/1 | Complete | 2026-02-28 |
 | 9. 外部服务连通性测试 | v1.2 | 1/1 | Complete | 2026-02-28 |
-| 10. API E2E 测试 | 2/2 | Complete   | 2026-02-28 | 2026-02-28 |
+| 10. API E2E 测试 | 2/2 | Complete    | 2026-02-28 | 2026-02-28 |
 | 11. CI/CD 流水线集成 | v1.2 | 0/1 | Pending | — |
 | 12. Docker Containerization | v1.3 | 2/2 | Complete | 2026-02-28 |
-| 13. Service Lifecycle Management | v1.3 | 0/1 | Planned | — |
+| 13. Service Lifecycle Management | v1.3 | 0/1 | Planned | 2026-03-01 |
 | 14. Health Checks & Monitoring | v1.3 | 0/1 | Planned | — |
 | 15. Log Management | v1.3 | 0/1 | Planned | — |
 
@@ -188,4 +190,4 @@
 
 ---
 *Roadmap created: 2026-02-28*
-*Last updated: 2026-02-28 - Completed Phase 12 Plan 02*
+*Last updated: 2026-03-01 - Completed Phase 13 Planning*
