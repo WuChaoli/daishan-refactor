@@ -1,0 +1,41 @@
+metadata:
+  session_id: rag_stream_1772275175
+  entry_id: entry_1e1ef599
+  snapshot_time: '2026-02-28 18:43:57'
+  event_count: 35
+  mode: lite
+error_summary: []
+call_chain:
+- trace_id: tr_f4ff1b55
+  roots:
+  - function_name: handle_chat_general
+    duration_ms: 2164.944
+    exception: null
+    children:
+    - function_name: replace_economic_zone
+      duration_ms: 152.094
+      exception: null
+    - function_name: RagflowClient.query_single_database
+      duration_ms: 1677.134
+      exception: null
+    - function_name: RagflowClient.query_single_database
+      duration_ms: 1533.074
+      exception: null
+    - function_name: RagflowClient.query_single_database
+      duration_ms: 1302.843
+      exception: null
+    - function_name: _extract_question_from_qa_text
+      duration_ms: 0.573
+      exception: null
+error_path: null
+chain_memory_top:
+- function_name: replace_economic_zone
+  mem_delta_rss_kb: 640
+- function_name: handle_chat_general
+  mem_delta_rss_kb: 640
+- function_name: RagflowClient.query_single_database
+  mem_delta_rss_kb: 0
+- function_name: RagflowClient.query_single_database
+  mem_delta_rss_kb: 0
+- function_name: RagflowClient.query_single_database
+  mem_delta_rss_kb: 0
