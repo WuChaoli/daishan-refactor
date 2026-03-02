@@ -30,7 +30,7 @@ from log_decorator import logger
 env_path = os.path.join(os.path.dirname(__file__), ".env")
 load_dotenv(env_path)
 
-RAG_STREAM_BASE_URL = os.getenv("RAG_STREAM_BASE_URL", "http://127.0.0.1:11028").rstrip("/")
+RAG_STREAM_BASE_URL = os.getenv("RAG_STREAM_BASE_URL", "http://127.0.0.1:11027").rstrip("/")
 RAG_STREAM_TIMEOUT = float(os.getenv("RAG_STREAM_TIMEOUT", "30"))
 
 

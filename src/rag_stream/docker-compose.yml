@@ -24,11 +24,10 @@ services:
     container_name: rag_stream
     
     ports:
-      - "11028:11028"
+      - "11027:11027"
     
     env_file:
-      - path: ../../.env          # Load environment variables from project root when present
-        required: false
+      - ../../src/Digital_human_command_interface/.env
     
     environment:
       - LOG_CONSOLE_OUTPUT=true   # Enable stdout logging in container
@@ -38,7 +37,7 @@ services:
       - ../../src/rag_stream/config.yaml:/app/src/rag_stream/config.yaml:ro
     
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:11028/health')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:11027/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -85,8 +84,9 @@ services:
         required: false
     
     environment:
-      - RAG_STREAM_BASE_URL=http://rag_stream:11028  # 服务间通信使用容器名
+      - RAG_STREAM_BASE_URL=http://rag_stream:11027  # 服务间通信使用容器名
       - LOG_CONSOLE_OUTPUT=true
+      - RAGFLOW_API_KEY=${RAGFLOW_API_KEY}
     
     volumes:
       # Mount config.yaml for runtime configuration changes (read-only)

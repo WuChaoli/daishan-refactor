@@ -18,6 +18,7 @@ WORKDIR /app
 
 # Copy dependency package sources first (for layer caching)
 COPY src/ragflow_sdk src/ragflow_sdk/
+COPY src/dify_sdk src/dify_sdk/
 COPY src/log-manager src/log-manager/
 COPY src/log_decorator src/log_decorator/
 
@@ -28,14 +29,15 @@ COPY src/Digital_human_command_interface/main.py src/Digital_human_command_inter
 COPY src/Digital_human_command_interface/config.yaml src/Digital_human_command_interface/
 COPY src/Digital_human_command_interface/README.md src/Digital_human_command_interface/
 
-# Install path dependencies (packages with pyproject.toml)
-RUN cd /app/src/ragflow_sdk && pip install -e . && \
-    cd /app/src/log-manager && pip install -e .
+# Install path dependencies in non-editable mode to avoid stdlib shadowing
+RUN pip install /app/src/ragflow_sdk && \
+    pip install /app/src/dify_sdk && \
+    pip install /app/src/log-manager
 
 # Note: log_decorator is a simple module (not a package), so we just add it to PYTHONPATH
 
 # Install Digital_human_command_interface package
-RUN cd /app/src/Digital_human_command_interface && pip install -e .
+RUN pip install /app/src/Digital_human_command_interface
 
 # ------------------------------------------------------------
 # Stage 2: Runtime - Minimal production image
@@ -63,8 +65,8 @@ COPY --from=builder --chown=appuser:appgroup /app/src/log-manager /app/src/log-m
 COPY --from=builder --chown=appuser:appgroup /app/src/log_decorator /app/src/log_decorator
 COPY --from=builder --chown=appuser:appgroup /app/src/Digital_human_command_interface /app/src/Digital_human_command_interface
 
-# Set PYTHONPATH - include log_decorator for direct module imports
-ENV PYTHONPATH="/app/src:/app/src/ragflow_sdk:/app/src/log-manager:/app/src/log_decorator:/app/src/Digital_human_command_interface"
+# Set PYTHONPATH - keep only necessary source roots
+ENV PYTHONPATH="/app/src:/app/src/log_decorator:/app/src/Digital_human_command_interface"
 
 # Create logs directory
 RUN mkdir -p /app/logs && chown appuser:appgroup /app/logs

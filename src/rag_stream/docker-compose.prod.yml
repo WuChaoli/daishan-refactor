@@ -45,7 +45,7 @@ services:
           memory: 512M
       # Restart policy for swarm/stack deployments
       restart_policy:
-        condition: any
+        condition: on-failure
         delay: 5s
         max_attempts: 3
         window: 120s
@@ -75,7 +75,7 @@ services:
     
     # Health check (inherits from base but can override if needed)
     # healthcheck:
-    #   test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:11028/health')"]
+    #   test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:11027/health')"]
     #   interval: 30s
     #   timeout: 10s
     #   retries: 3

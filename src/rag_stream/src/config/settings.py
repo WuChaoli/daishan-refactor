@@ -219,7 +219,7 @@ class ServerConfig(BaseConfig):
     """
 
     host: str = Field(default="0.0.0.0", description="监听主机地址")
-    port: int = Field(default=11028, description="监听端口")
+    port: int = Field(default=11027, description="监听端口")
 
     @field_validator("port")
     @classmethod
