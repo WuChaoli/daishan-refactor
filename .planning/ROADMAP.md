@@ -188,6 +188,16 @@
 - Structured JSON format
 - Log level configurable via env var
 
+### Phase 16: unify type1/type2 question-json mapping retrieval
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 15
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 16 to break down)
+
 ---
 *Roadmap created: 2026-02-28*
 *Last updated: 2026-03-01 - Completed Phase 13 Planning*

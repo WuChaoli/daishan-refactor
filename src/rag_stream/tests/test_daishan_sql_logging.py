@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import sys
 import types
+from pathlib import Path
 from unittest.mock import AsyncMock, Mock, patch
 
 if "DaiShanSQL" not in sys.modules:
@@ -152,3 +153,68 @@ def test_query_table_structure_should_log_input_output():
     names = [call.args[0] for call in mock_marker.call_args_list]
     assert "DaiShanSQL入参" in names
     assert "DaiShanSQL出参" in names
+
+
+def test_type1_prompt_mapping_load_and_lookup_markers():
+    with patch.object(chat_general_service, "marker") as mock_marker:
+        with patch.object(
+            chat_general_service,
+            "_TYPE1_PROMPT_MAPPING_PATH",
+            Path(__file__).resolve().parents[1]
+            / "src"
+            / "services"
+            / "data"
+            / "type1_question_mapping.json",
+        ):
+            chat_general_service._clear_prompt_mapping_cache()
+            _ = chat_general_service._find_type1_mapping_by_question("I 企业的情况介绍一下")
+
+    names = [call.args[0] for call in mock_marker.call_args_list if call.args]
+    assert "type1.prompt_mapping_loaded" in names
+    assert "type1.prompt_mapping_lookup" in names
+
+
+async def _run_type2_mapping_fallback_marker():
+    request = chat_general_service.ChatRequest(
+        question="查询重点监管危化品",
+        user_id="user-001",
+        stream=True,
+    )
+
+    intent_service = AsyncMock()
+    intent_service.process_query.return_value = {
+        "type": 2,
+        "results": [
+            {
+                "question": "Question: 园区有哪些重点监管危化品\tAnswer: v_ai_ipark_enterprise_key_chemicals",
+                "similarity": 0.77,
+            }
+        ],
+    }
+    chat_with_category = AsyncMock(return_value={"ok": True})
+
+    with (
+        patch.object(
+            chat_general_service,
+            "replace_economic_zone",
+            new=AsyncMock(return_value=request.question),
+        ),
+        patch.object(
+            chat_general_service,
+            "_find_type2_mapping_by_question",
+            return_value="",
+        ),
+        patch.object(chat_general_service, "marker") as mock_marker,
+    ):
+        await chat_general_service.handle_chat_general(
+            request=request,
+            intent_service=intent_service,
+            chat_with_category=chat_with_category,
+        )
+
+    names = [call.args[0] for call in mock_marker.call_args_list if call.args]
+    assert "type2.prompt_unavailable_fallback_general" in names
+
+
+def test_type2_prompt_mapping_fallback_marker():
+    asyncio.run(_run_type2_mapping_fallback_marker())

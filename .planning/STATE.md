@@ -90,6 +90,7 @@ Progress: [██░░░░░░░░] 12% (1/8 plans)
 - v1.3 milestone planning complete
 - Phase 12 Plans 01-02 completed: Docker configuration
 - Phase 13 Plan 01 completed: Service Lifecycle Management
+- Phase 16 added: unify type1/type2 question-json mapping retrieval
 - Ready for Phase 14: Health Checks & Monitoring
 
 ### Pending Todos

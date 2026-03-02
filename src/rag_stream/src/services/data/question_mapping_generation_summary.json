@@ -1,0 +1,21 @@
+{
+  "source": "/home/wuchaoli/codespace/daishan-refactor/.worktrees/feat-type3-question-prompt-mapping/src/rag_stream/tests/data/intent_test_cases.xlsx",
+  "type1": {
+    "conflicts": 0,
+    "format": "question_to_prompt",
+    "processed": 118,
+    "scanned": 118,
+    "skipped_empty": 0,
+    "skipped_error": 0,
+    "source": "/home/wuchaoli/codespace/daishan-refactor/src/rag_stream/src/services/data/岱山-指令集.xlsx"
+  },
+  "type2": {
+    "conflicts": 0,
+    "format": "question_to_prompt",
+    "processed": 8728,
+    "scanned": 8728,
+    "skipped_empty": 0,
+    "skipped_error": 0,
+    "source": "/home/wuchaoli/codespace/daishan-refactor/src/rag_stream/src/services/data/岱山-数据库问题.xlsx"
+  }
+}

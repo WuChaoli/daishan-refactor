@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import re
+from pathlib import Path
 from typing import Any, Awaitable, Callable
 
 from rag_stream.config.settings import settings
@@ -17,6 +19,13 @@ except ModuleNotFoundError:
 from rag_stream.models.schemas import ChatRequest
 
 _server: Server | None = None
+_PROMPT_MAPPING_DATA_DIR = Path(__file__).resolve().parent / "data"
+_TYPE1_PROMPT_MAPPING_PATH = _PROMPT_MAPPING_DATA_DIR / "type1_question_mapping.json"
+_TYPE2_PROMPT_MAPPING_PATH = _PROMPT_MAPPING_DATA_DIR / "type2_question_mapping.json"
+_TYPE3_PROMPT_MAPPING_PATH = (
+    _PROMPT_MAPPING_DATA_DIR / "fixed_question_prompt_mapping.json"
+)
+_prompt_mapping_cache: dict[str, dict[str, dict[str, Any]]] = {}
 
 
 def _get_server() -> Server:
@@ -86,12 +95,15 @@ def _extract_questions_for_sql(text_input: str, result_items: list[dict]) -> lis
     )
     questions: list[str] = []
     for item in result_items:
-        question_text = item.get("question", "")
-        if question_text.startswith("Question: "):
-            parts = question_text.split("\tAnswer: ", 1)
-            if parts and parts[0].startswith("Question: "):
-                extracted_question = parts[0][10:]
-                questions.append(extracted_question.strip())
+        question_text = str(item.get("question", "") or "")
+        extracted_question = _extract_question_from_qa_text(question_text)
+        if extracted_question:
+            questions.append(extracted_question)
+            continue
+
+        normalized_question = question_text.strip()
+        if normalized_question:
+            questions.append(normalized_question)
 
     if not questions:
         questions = [text_input]
@@ -113,6 +125,129 @@ def _extract_question_from_qa_text(question_text: str) -> str:
             return extracted
 
     return ""
+
+
+@trace
+def _extract_primary_question(result_items: list[dict]) -> str:
+    if not result_items:
+        return ""
+
+    first_question = str(result_items[0].get("question", "") or "")
+    extracted_question = _extract_question_from_qa_text(first_question)
+    if extracted_question:
+        return extracted_question
+    return first_question.strip()
+
+
+def _build_mapping_entry(raw_value: Any) -> dict[str, Any]:
+    if isinstance(raw_value, dict):
+        prompt_text = str(raw_value.get("prompt", "") or "").strip()
+        meta = raw_value.get("meta", {})
+        return {
+            "prompt": prompt_text,
+            "meta": meta if isinstance(meta, dict) else {},
+        }
+    return {"prompt": str(raw_value or "").strip(), "meta": {}}
+
+
+@trace
+def _load_prompt_mapping(mapping_type: str, mapping_path: Path) -> dict[str, dict[str, Any]]:
+    cached_mapping = _prompt_mapping_cache.get(mapping_type)
+    if cached_mapping is not None:
+        return cached_mapping
+
+    try:
+        mapping_payload = json.loads(mapping_path.read_text(encoding="utf-8"))
+        if not isinstance(mapping_payload, dict):
+            raise ValueError(f"{mapping_type} prompt mapping root must be object")
+
+        normalized_mapping: dict[str, dict[str, Any]] = {}
+        for key, value in mapping_payload.items():
+            normalized_key = str(key).strip()
+            if not normalized_key:
+                continue
+
+            entry = _build_mapping_entry(value)
+            if not entry.get("prompt", ""):
+                continue
+            normalized_mapping[normalized_key] = entry
+
+        _prompt_mapping_cache[mapping_type] = normalized_mapping
+        marker(
+            f"{mapping_type}.prompt_mapping_loaded",
+            {
+                "entries": len(normalized_mapping),
+                "file": mapping_path.name,
+            },
+        )
+    except FileNotFoundError:
+        marker(
+            f"{mapping_type}.prompt_mapping_missing",
+            {"file": str(mapping_path)},
+            level="WARNING",
+        )
+        _prompt_mapping_cache[mapping_type] = {}
+    except Exception as error:
+        marker(
+            f"{mapping_type}.prompt_mapping_load_failed",
+            {"error": str(error), "file": mapping_path.name},
+            level="WARNING",
+        )
+        _prompt_mapping_cache[mapping_type] = {}
+
+    return _prompt_mapping_cache[mapping_type]
+
+
+@trace
+def _find_mapping_prompt_by_question(
+    mapping_type: str,
+    mapping_path: Path,
+    question: str,
+) -> str:
+    normalized_question = str(question or "").strip()
+    prompt_text = ""
+    if normalized_question:
+        matched_prompt = _load_prompt_mapping(mapping_type, mapping_path).get(
+            normalized_question, {}
+        )
+        prompt_text = str(matched_prompt.get("prompt", "") or "").strip()
+
+    marker(
+        f"{mapping_type}.prompt_mapping_lookup",
+        {"matched": bool(prompt_text), "question_len": len(normalized_question)},
+    )
+    return prompt_text
+
+
+def _clear_prompt_mapping_cache() -> None:
+    _prompt_mapping_cache.clear()
+
+
+@trace
+def _find_type1_mapping_by_question(question: str) -> str:
+    return _find_mapping_prompt_by_question(
+        mapping_type="type1",
+        mapping_path=_TYPE1_PROMPT_MAPPING_PATH,
+        question=question,
+    )
+
+
+@trace
+def _find_type2_mapping_by_question(question: str) -> str:
+    return _find_mapping_prompt_by_question(
+        mapping_type="type2",
+        mapping_path=_TYPE2_PROMPT_MAPPING_PATH,
+        question=question,
+    )
+
+
+@trace
+def _find_type3_prompt_by_question(question: str) -> str:
+    return _find_mapping_prompt_by_question(
+        mapping_type="type3",
+        mapping_path=_TYPE3_PROMPT_MAPPING_PATH,
+        question=question,
+    )
 
 
 @trace
@@ -172,6 +307,7 @@ async def _route_with_sql_result(
     sql_result: Any,
     target_category: str,
     chat_with_category: Callable[[str, ChatRequest], Awaitable[Any]],
+    prefix_text: str = "",
 ):
     if not target_category:
         return None
@@ -180,8 +316,13 @@ async def _route_with_sql_result(
     if not sql_result_str:
         return await chat_with_category(target_category, request)
 
+    prefix_value = str(prefix_text or "").strip()
+    merged_question = f"{request.question}\n\n{sql_result_str}"
+    if prefix_value:
+        merged_question = f"{prefix_value}\n\n{merged_question}"
+
     updated_request = ChatRequest(
-        question=f"{request.question}\n\n{sql_result_str}",
+        question=merged_question,
         session_id=request.session_id,
         user_id=request.user_id,
         stream=request.stream,
@@ -195,10 +336,27 @@ async def _post_process_and_route_type1(
     result_dict: dict,
     chat_with_category: Callable[[str, ChatRequest], Awaitable[Any]],
 ):
+    primary_question = _extract_primary_question(result_dict.get("results", []))
+    mapped_prompt = _find_type1_mapping_by_question(primary_question)
+    if not mapped_prompt:
+        marker(
+            "type1.prompt_unavailable_fallback_general",
+            {"question_len": len(primary_question)},
+            level="WARNING",
+        )
+        return await chat_with_category("通用", request)
+
+    mapped_request = ChatRequest(
+        question=f"{mapped_prompt}\n\n{request.question}",
+        session_id=request.session_id,
+        user_id=request.user_id,
+        stream=request.stream,
+    )
+
     processed_result = await _post_process_type1(result_dict)
     data = processed_result.get("data", {})
     return await _route_with_sql_result(
-        request=request,
+        request=mapped_request,
         sql_result=data.get("sql_result", ""),
         target_category=data.get("kb_name", ""),
         chat_with_category=chat_with_category,
@@ -244,6 +402,16 @@ async def _post_process_and_route_type2(
     result_dict: dict,
     chat_with_category: Callable[[str, ChatRequest], Awaitable[Any]],
 ):
+    primary_question = _extract_primary_question(result_dict.get("results", []))
+    mapped_prompt = _find_type2_mapping_by_question(primary_question)
+    if not mapped_prompt:
+        marker(
+            "type2.prompt_unavailable_fallback_general",
+            {"question_len": len(primary_question)},
+            level="WARNING",
+        )
+        return await chat_with_category("通用", request)
+
     processed_result = await _post_process_type2(request.question, result_dict)
     data = processed_result.get("data", {})
     return await _route_with_sql_result(
@@ -251,6 +419,7 @@ async def _post_process_and_route_type2(
         sql_result=data.get("sql_result", ""),
         target_category="通用",
         chat_with_category=chat_with_category,
+        prefix_text=mapped_prompt,
     )
 
 
@@ -259,14 +428,21 @@ async def _post_process_and_route_type3(
     result_dict: dict,
     chat_with_category: Callable[[str, ChatRequest], Awaitable[Any]],
 ):
-    answer_text = str(result_dict.get("answer", "") or "").strip()
-    if not answer_text:
-        return None
-
     result_items = result_dict.get("results", [])
     first_question = result_items[0].get("question", "") if result_items else ""
     return_question = _extract_question_from_qa_text(first_question)
     if not return_question:
+        return None
+
+    mapped_prompt = _find_type3_prompt_by_question(return_question)
+    fallback_prompt = str(result_dict.get("answer", "") or "").strip()
+    answer_text = mapped_prompt or fallback_prompt
+    if not answer_text:
+        marker(
+            "type3.prompt_unavailable",
+            {"question_len": len(return_question)},
+            level="WARNING",
+        )
         return None
 
     try:

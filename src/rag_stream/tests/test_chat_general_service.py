@@ -33,6 +33,7 @@ if "DaiShanSQL" not in sys.modules:
     sys.modules["DaiShanSQL"] = daishan_sql_stub
 
 from rag_stream.models.schemas import ChatRequest
+from rag_stream.services import chat_general_service
 from rag_stream.services.chat_general_service import (
     _route_with_sql_result,
     handle_chat_general,
@@ -160,11 +161,22 @@ async def _test_handle_chat_general_should_route_type3_with_combined_prompt():
     ]
 
     chat_with_category = AsyncMock(return_value={"ok": True})
+    mapped_prompt = "请你按照模板回答园区安全负责人信息。"
 
-    with patch(
-        "rag_stream.services.chat_general_service.asyncio.to_thread",
-        new=AsyncMock(return_value=sql_result),
-    ) as mocked_to_thread:
+    with (
+        patch(
+            "rag_stream.services.chat_general_service.replace_economic_zone",
+            new=AsyncMock(return_value=request.question),
+        ),
+        patch(
+            "rag_stream.services.chat_general_service._find_type3_prompt_by_question",
+            return_value=mapped_prompt,
+        ),
+        patch(
+            "rag_stream.services.chat_general_service.asyncio.to_thread",
+            new=AsyncMock(return_value=sql_result),
+        ) as mocked_to_thread,
+    ):
         result = await handle_chat_general(
             request=request,
             intent_service=intent_service,
@@ -183,7 +195,7 @@ async def _test_handle_chat_general_should_route_type3_with_combined_prompt():
     assert category_arg == "通用"
     assert isinstance(routed_request, ChatRequest)
     assert routed_request.question == (
-        f"园区安全负责人是谁\n\n{str(sql_result)}\n\n东区的安全负责人是谁？"
+        f"{mapped_prompt}\n\n{str(sql_result)}\n\n东区的安全负责人是谁？"
     )
     assert routed_request.user_id == "user-001"
     assert routed_request.session_id == "session-001"
@@ -213,10 +225,16 @@ async def _test_handle_chat_general_should_fallback_to_general_when_type3_answer
 
     chat_with_category = AsyncMock(return_value={"ok": True})
 
-    with patch(
-        "rag_stream.services.chat_general_service.asyncio.to_thread",
-        new=AsyncMock(),
-    ) as mocked_to_thread:
+    with (
+        patch(
+            "rag_stream.services.chat_general_service.replace_economic_zone",
+            new=AsyncMock(return_value=request.question),
+        ),
+        patch(
+            "rag_stream.services.chat_general_service.asyncio.to_thread",
+            new=AsyncMock(),
+        ) as mocked_to_thread,
+    ):
         result = await handle_chat_general(
             request=request,
             intent_service=intent_service,
@@ -253,9 +271,15 @@ async def _test_handle_chat_general_should_fallback_to_general_when_type3_judgeq
 
     chat_with_category = AsyncMock(return_value={"ok": True})
 
-    with patch(
-        "rag_stream.services.chat_general_service.asyncio.to_thread",
-        new=AsyncMock(side_effect=RuntimeError("mock judge error")),
+    with (
+        patch(
+            "rag_stream.services.chat_general_service.replace_economic_zone",
+            new=AsyncMock(return_value=request.question),
+        ),
+        patch(
+            "rag_stream.services.chat_general_service.asyncio.to_thread",
+            new=AsyncMock(side_effect=RuntimeError("mock judge error")),
+        ),
     ):
         result = await handle_chat_general(
             request=request,
@@ -583,3 +607,230 @@ async def _test_replace_economic_zone_disabled_fallback():
 
 def test_replace_economic_zone_disabled_fallback():
     asyncio.run(_test_replace_economic_zone_disabled_fallback())
+
+
+async def _test_handle_chat_general_should_route_type1_when_mapping_hit():
+    request = ChatRequest(
+        question="介绍园区情况",
+        user_id="user-001",
+        session_id="session-001",
+        stream=False,
+    )
+
+    intent_service = AsyncMock()
+    intent_service.process_query.return_value = {
+        "type": 1,
+        "results": [
+            {
+                "question": "Question: 园区整体情况\tAnswer: global+parkIntro [knowledgebase:园区知识库]",
+                "similarity": 0.81,
+            }
+        ],
+    }
+
+    chat_with_category = AsyncMock(return_value={"ok": True})
+
+    with (
+        patch(
+            "rag_stream.services.chat_general_service.replace_economic_zone",
+            new=AsyncMock(return_value=request.question),
+        ),
+        patch(
+            "rag_stream.services.chat_general_service._find_type1_mapping_by_question",
+            return_value="TYPE1_PROMPT",
+        ) as mocked_lookup,
+    ):
+        result = await handle_chat_general(
+            request=request,
+            intent_service=intent_service,
+            chat_with_category=chat_with_category,
+        )
+
+    assert result == {"ok": True}
+    mocked_lookup.assert_called_once_with("园区整体情况")
+    category_arg, routed_request = chat_with_category.await_args.args
+    assert category_arg == "园区知识库"
+    assert routed_request.question == "TYPE1_PROMPT\n\n介绍园区情况\n\n1"
+
+
+def test_handle_chat_general_should_route_type1_when_mapping_hit():
+    asyncio.run(_test_handle_chat_general_should_route_type1_when_mapping_hit())
+
+
+async def _test_handle_chat_general_should_fallback_general_when_type1_mapping_miss():
+    request = ChatRequest(question="介绍园区情况", user_id="user-001", stream=True)
+
+    intent_service = AsyncMock()
+    intent_service.process_query.return_value = {
+        "type": 1,
+        "results": [
+            {
+                "question": "Question: 园区整体情况\tAnswer: global+parkIntro [knowledgebase:园区知识库]",
+                "similarity": 0.81,
+            }
+        ],
+    }
+
+    chat_with_category = AsyncMock(return_value={"ok": True})
+
+    with (
+        patch(
+            "rag_stream.services.chat_general_service.replace_economic_zone",
+            new=AsyncMock(return_value=request.question),
+        ),
+        patch(
+            "rag_stream.services.chat_general_service._find_type1_mapping_by_question",
+            return_value="",
+        ),
+        patch(
+            "rag_stream.services.chat_general_service._post_process_type1",
+            new=AsyncMock(),
+        ) as mocked_post_type1,
+    ):
+        result = await handle_chat_general(
+            request=request,
+            intent_service=intent_service,
+            chat_with_category=chat_with_category,
+        )
+
+    assert result == {"ok": True}
+    mocked_post_type1.assert_not_awaited()
+    chat_with_category.assert_awaited_once_with("通用", request)
+
+
+def test_handle_chat_general_should_fallback_general_when_type1_mapping_miss():
+    asyncio.run(_test_handle_chat_general_should_fallback_general_when_type1_mapping_miss())
+
+
+async def _test_handle_chat_general_should_route_type2_when_mapping_hit():
+    request = ChatRequest(
+        question="查询重点监管危化品",
+        user_id="user-001",
+        session_id="session-002",
+        stream=False,
+    )
+
+    intent_service = AsyncMock()
+    intent_service.process_query.return_value = {
+        "type": 2,
+        "results": [
+            {
+                "question": "Question: 园区有哪些重点监管危化品\tAnswer: v_ai_ipark_enterprise_key_chemicals",
+                "similarity": 0.77,
+            }
+        ],
+    }
+
+    chat_with_category = AsyncMock(return_value={"ok": True})
+    sql_result = {"rows": [{"name": "甲类危化品"}]}
+
+    with (
+        patch(
+            "rag_stream.services.chat_general_service.replace_economic_zone",
+            new=AsyncMock(return_value=request.question),
+        ),
+        patch(
+            "rag_stream.services.chat_general_service._find_type2_mapping_by_question",
+            return_value="TYPE2_PROMPT",
+        ) as mocked_lookup,
+        patch(
+            "rag_stream.services.chat_general_service.asyncio.to_thread",
+            new=AsyncMock(return_value=sql_result),
+        ) as mocked_to_thread,
+    ):
+        result = await handle_chat_general(
+            request=request,
+            intent_service=intent_service,
+            chat_with_category=chat_with_category,
+        )
+
+    assert result == {"ok": True}
+    mocked_lookup.assert_called_once_with("园区有哪些重点监管危化品")
+    mocked_to_thread.assert_awaited_once()
+    category_arg, routed_request = chat_with_category.await_args.args
+    assert category_arg == "通用"
+    assert routed_request.question.startswith("TYPE2_PROMPT\n\n查询重点监管危化品\n\n")
+    assert routed_request.question.endswith(str(sql_result))
+
+
+def test_handle_chat_general_should_route_type2_when_mapping_hit():
+    asyncio.run(_test_handle_chat_general_should_route_type2_when_mapping_hit())
+
+
+async def _test_handle_chat_general_should_fallback_general_when_type2_mapping_miss():
+    request = ChatRequest(question="查询重点监管危化品", user_id="user-001", stream=True)
+
+    intent_service = AsyncMock()
+    intent_service.process_query.return_value = {
+        "type": 2,
+        "results": [
+            {
+                "question": "Question: 园区有哪些重点监管危化品\tAnswer: v_ai_ipark_enterprise_key_chemicals",
+                "similarity": 0.77,
+            }
+        ],
+    }
+
+    chat_with_category = AsyncMock(return_value={"ok": True})
+
+    with (
+        patch(
+            "rag_stream.services.chat_general_service.replace_economic_zone",
+            new=AsyncMock(return_value=request.question),
+        ),
+        patch(
+            "rag_stream.services.chat_general_service._find_type2_mapping_by_question",
+            return_value="",
+        ),
+        patch(
+            "rag_stream.services.chat_general_service._post_process_type2",
+            new=AsyncMock(),
+        ) as mocked_post_type2,
+    ):
+        result = await handle_chat_general(
+            request=request,
+            intent_service=intent_service,
+            chat_with_category=chat_with_category,
+        )
+
+    assert result == {"ok": True}
+    mocked_post_type2.assert_not_awaited()
+    chat_with_category.assert_awaited_once_with("通用", request)
+
+
+def test_handle_chat_general_should_fallback_general_when_type2_mapping_miss():
+    asyncio.run(_test_handle_chat_general_should_fallback_general_when_type2_mapping_miss())
+
+
+def test_find_type1_mapping_should_warn_when_mapping_file_missing(tmp_path):
+    missing_path = tmp_path / "type1_question_mapping.json"
+    assert not missing_path.exists()
+
+    with (
+        patch.object(chat_general_service, "_TYPE1_PROMPT_MAPPING_PATH", missing_path),
+        patch.object(chat_general_service, "marker") as mocked_marker,
+    ):
+        chat_general_service._clear_prompt_mapping_cache()
+        prompt = chat_general_service._find_type1_mapping_by_question("园区整体情况")
+
+    assert prompt == ""
+    names = [call.args[0] for call in mocked_marker.call_args_list if call.args]
+    assert "type1.prompt_mapping_missing" in names
+    assert "type1.prompt_mapping_lookup" in names
+
+
+def test_find_type2_mapping_should_warn_when_mapping_file_corrupted(tmp_path):
+    mapping_path = tmp_path / "type2_question_mapping.json"
+    mapping_path.write_text("{invalid_json", encoding="utf-8")
+
+    with (
+        patch.object(chat_general_service, "_TYPE2_PROMPT_MAPPING_PATH", mapping_path),
+        patch.object(chat_general_service, "marker") as mocked_marker,
+    ):
+        chat_general_service._clear_prompt_mapping_cache()
+        prompt = chat_general_service._find_type2_mapping_by_question("园区有哪些重点监管危化品")
+
+    assert prompt == ""
+    names = [call.args[0] for call in mocked_marker.call_args_list if call.args]
+    assert "type2.prompt_mapping_load_failed" in names
+    assert "type2.prompt_mapping_lookup" in names
