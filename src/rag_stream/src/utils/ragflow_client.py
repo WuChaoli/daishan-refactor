@@ -43,6 +43,7 @@ class RagflowClient:
         """
         self.ragflow_config = ragflow_config
         self.intent_config = intent_config
+        self.single_query_timeout = float(ragflow_config.timeout)
 
         # 使用根目录的 ragflow_sdk RAGFlowClient
         self.client = RAGFlowClient(
@@ -181,14 +182,19 @@ class RagflowClient:
         try:
             # 使用超时控制
             results = await asyncio.wait_for(
-                self._query_with_sdk(query, dataset), timeout=5.0
+                self._query_with_sdk(query, dataset),
+                timeout=self.single_query_timeout,
             )
 
             marker("单库查询完成", {"database": database, "result_count": len(results)})
             return results
 
         except asyncio.TimeoutError:
-            marker("单库查询超时", {"database": database, "timeout": 5}, level="WARNING")
+            marker(
+                "单库查询超时",
+                {"database": database, "timeout": self.single_query_timeout},
+                level="WARNING",
+            )
             return []
 
         except Exception as e:

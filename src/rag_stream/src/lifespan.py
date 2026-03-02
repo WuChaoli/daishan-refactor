@@ -11,6 +11,10 @@ from typing import AsyncGenerator
 
 from fastapi import FastAPI
 
+from rag_stream.config.settings import settings
+from rag_stream.services.intent_service import IntentService
+from rag_stream.utils.ragflow_client import RagflowClient
+
 from .shutdown import close_database, close_http_client
 from .startup import (
     init_database,
@@ -84,6 +88,27 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         except Exception as exc:
             logger.warning(f"[LIFECYCLE] External service check failed: {exc}")
             app.state.service_status = {"dify": False, "ragflow": False}
+
+        # 4. Initialize business services required by API routes.
+        app.state.ragflow_client = None
+        app.state.intent_service = None
+        try:
+            ragflow_client = RagflowClient(settings.ragflow, settings.intent)
+            app.state.ragflow_client = ragflow_client
+
+            connection_ok = ragflow_client.test_connection()
+            if connection_ok:
+                logger.info("[LIFECYCLE] RAGFlow client initialized")
+            else:
+                logger.warning(
+                    "[LIFECYCLE] RAGFlow connection test failed, continuing in degraded mode"
+                )
+
+            app.state.intent_service = IntentService(ragflow_client)
+            logger.info("[LIFECYCLE] Intent service initialized")
+        except Exception:
+            logger.exception("[LIFECYCLE] Business service initialization failed")
+            raise
 
         # Calculate startup duration
         startup_duration = time.time() - start_time

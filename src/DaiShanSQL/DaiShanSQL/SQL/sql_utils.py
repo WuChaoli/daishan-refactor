@@ -1,8 +1,13 @@
 import os
+import logging
 from dotenv import load_dotenv
 import requests
 # 加载.env文件
 load_dotenv()
+
+
+logger = logging.getLogger(__name__)
+
 
 class MySQLManager:
     def __init__(self, config_file: str = ".env"):
@@ -20,17 +25,68 @@ class MySQLManager:
         self.port = int(os.getenv('DB_PORT', 3306))
         self.connection = None
         self.api_url_ds = os.getenv('SQL_DataBase')
+        self.request_timeout = float(os.getenv("SQL_API_TIMEOUT", "15"))
+
+    @staticmethod
+    def _build_error_result(message: str, *, code: int = 500, **extra):
+        result = {
+            "code": code,
+            "msg": message,
+            "data": [],
+        }
+        result.update(extra)
+        return result
 
     def request_api_sql(self,sql):
-        try:
-            response = requests.post(self.api_url_ds, json={"sql": sql})
-            # print(response.json())
-            outer_data = response.json()  # 第一层解析
+        if not self.api_url_ds:
+            message = "SQL_DataBase is not configured"
+            logger.error(message)
+            return self._build_error_result(message)
 
-            # print(outer_data)
-            return outer_data # 现在是真正的 list of dict
-        except:
-            return []
+        try:
+            response = requests.post(
+                self.api_url_ds,
+                json={"sql": sql},
+                timeout=self.request_timeout,
+            )
+        except requests.RequestException as error:
+            message = f"request failed: {error}"
+            logger.error(message)
+            return self._build_error_result(message, error=str(error))
+
+        try:
+            outer_data = response.json()
+        except ValueError as error:
+            message = "invalid json response from SQL API"
+            logger.error("%s: %s", message, error)
+            return self._build_error_result(
+                message,
+                code=response.status_code or 500,
+                error=str(error),
+                response_text=(response.text or "")[:500],
+            )
+
+        if isinstance(outer_data, dict):
+            normalized = dict(outer_data)
+            normalized.setdefault("code", response.status_code or 200)
+            normalized.setdefault("msg", "")
+            normalized.setdefault("data", [])
+            return normalized
+
+        if isinstance(outer_data, list):
+            return {
+                "code": 200 if response.status_code == 200 else (response.status_code or 500),
+                "msg": "ok",
+                "data": outer_data,
+            }
+
+        message = f"unexpected response type: {type(outer_data).__name__}"
+        logger.error(message)
+        return self._build_error_result(
+            message,
+            code=response.status_code or 500,
+            response_text=(response.text or "")[:500],
+        )
 
 
 if __name__ == "__main__":

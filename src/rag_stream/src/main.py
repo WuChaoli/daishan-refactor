@@ -15,13 +15,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
-from log_manager import LogManagerConfig, configure, entry_trace, marker
+from log_manager import LogManagerConfig, configure, marker
 
 from rag_stream.config.settings import settings
 from rag_stream.lifespan import lifespan as modular_lifespan
 from rag_stream.routes.chat_routes import router
-from rag_stream.services.intent_service import IntentService
-from rag_stream.utils.ragflow_client import RagflowClient
 
 # Configure logging for lifecycle visibility
 logging.basicConfig(
@@ -32,9 +30,6 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-# Global service instances
-ragflow_client = None
-intent_service = None
 base_dir = Path(__file__).resolve().parents[1]
 
 # Initialize log-manager
@@ -104,48 +99,6 @@ async def root():
 
 # Include chat routes
 app.include_router(router)
-
-
-# Store service references in app.state during startup
-# These are set by the service initialization logic
-# Note: The modular lifespan handles HTTP client and basic resources
-# Service-specific initialization (RAGFlow, IntentService) is done separately
-@app.on_event("startup")
-@entry_trace("service-init")
-async def initialize_services():
-    """Initialize service-specific components (RAGFlow, IntentService).
-
-    This runs after the modular lifespan startup and handles service-specific
-    initialization that requires the application's business logic.
-    """
-    global ragflow_client, intent_service
-
-    marker("服务初始化开始", {"version": "1.0.0"})
-
-    try:
-        # Initialize RAGFlow client
-        ragflow_client = RagflowClient(settings.ragflow, settings.intent)
-
-        # Test RAGFlow connection
-        connection_ok = ragflow_client.test_connection()
-        marker("RAGFlow连接测试", {"success": connection_ok})
-        if not connection_ok:
-            marker("RAGFlow连接测试失败", {"mode": "降级运行"}, level="WARNING")
-
-        # Initialize intent service
-        intent_service = IntentService(ragflow_client)
-        app.state.ragflow_client = ragflow_client
-        app.state.intent_service = intent_service
-        marker("意图识别服务初始化完成", {})
-
-        marker(
-            "服务初始化成功",
-            {"host": settings.server.host, "port": settings.server.port},
-        )
-
-    except Exception as exc:
-        marker("服务初始化失败", {"error": str(exc)}, level="ERROR")
-        raise
 
 
 @app.on_event("shutdown")
