@@ -13,9 +13,13 @@ services:
   # rag_stream 服务
   # ============================================================
   rag_stream:
+    image: ${RAG_STREAM_IMAGE:-daishan/rag_stream:local}
     build:
       context: ../..              # Project root for workspace dependencies
       dockerfile: src/rag_stream/Dockerfile
+      target: runtime
+      args:
+        APP_ENV: ${APP_ENV:-development}
     
     container_name: rag_stream
     
@@ -23,7 +27,8 @@ services:
       - "11028:11028"
     
     env_file:
-      - ../../.env                # Load environment variables from project root
+      - path: ../../.env          # Load environment variables from project root when present
+        required: false
     
     environment:
       - LOG_CONSOLE_OUTPUT=true   # Enable stdout logging in container
@@ -76,7 +81,8 @@ services:
       - "11029:11029"
     
     env_file:
-      - ../../.env                # Load environment variables from project root
+      - path: ../../.env          # Load environment variables from project root when present
+        required: false
     
     environment:
       - RAG_STREAM_BASE_URL=http://rag_stream:11028  # 服务间通信使用容器名

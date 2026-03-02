@@ -14,7 +14,10 @@ FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS builder
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     UV_COMPILE_BYTECODE=1 \
-    UV_LINK_MODE=copy
+    UV_LINK_MODE=copy \
+    UV_SYSTEM_PYTHON=1
+
+ARG APP_ENV=production
 
 WORKDIR /app
 
@@ -31,25 +34,27 @@ COPY src/rag_stream/src src/rag_stream/src
 COPY src/rag_stream/static src/rag_stream/static
 COPY src/rag_stream/README.md src/rag_stream/
 
-# Create virtual environment and install packages
-# First install path dependencies as editable packages
-RUN cd /app/src/DaiShanSQL && pip install -e . && \
-    cd /app/src/dify_sdk && pip install -e . && \
-    cd /app/src/ragflow_sdk && pip install -e . && \
-    cd /app/src/log-manager && pip install -e .
+# Install path dependencies as editable packages with uv for deterministic builds
+RUN cd /app/src/DaiShanSQL && uv pip install --system -e . && \
+    cd /app/src/dify_sdk && uv pip install --system -e . && \
+    cd /app/src/ragflow_sdk && uv pip install --system -e . && \
+    cd /app/src/log-manager && uv pip install --system -e .
 
 # Install rag_stream package
-RUN cd /app/src/rag_stream && pip install -e .
+RUN cd /app/src/rag_stream && uv pip install --system -e .
 
 # ------------------------------------------------------------
 # Stage 2: Runtime - Minimal production image
 # ------------------------------------------------------------
 FROM python:3.12-slim-bookworm AS runtime
 
+ARG APP_ENV=production
+
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PYTHONFAULTHANDLER=1
+    PYTHONFAULTHANDLER=1 \
+    APP_ENV=${APP_ENV}
 
 WORKDIR /app
 
