@@ -1,1 +1,0 @@
-../../company/staff/employees/architect-师爷.md
