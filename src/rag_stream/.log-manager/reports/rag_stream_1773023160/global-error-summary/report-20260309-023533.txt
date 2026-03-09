@@ -1,0 +1,11 @@
+log-manager 全局错误汇总
+会话ID: rag_stream_1773023160
+快照时间: 2026-03-09 10:35:33
+
+【错误聚合】
+1. HTTPException@create_rag_session 次数=1
+2. HTTPException@get_or_create_session 次数=1
+3. HTTPException@chat_with_category 次数=1
+
+【进程内存概览】
+PID 1224284: 当前RSS=110124KB 峰值RSS=110124KB 窗口变化=+28792KB

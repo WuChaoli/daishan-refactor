@@ -1,0 +1,90 @@
+metadata:
+  session_id: rag_stream_1772774108
+  entry_id: entry_c8e0ee5b
+  snapshot_time: '2026-03-06 15:19:48'
+  event_count: 79
+  mode: lite
+error_summary: []
+call_chain:
+- trace_id: tr_b8f5ffc8
+  roots:
+  - function_name: handle_chat_general
+    duration_ms: 19244.513
+    exception: null
+    children:
+    - function_name: replace_economic_zone
+      duration_ms: 294.562
+      exception: null
+    - function_name: RagflowClient.query_single_database
+      duration_ms: 1140.805
+      exception: null
+    - function_name: RagflowClient.query_single_database
+      duration_ms: 1337.855
+      exception: null
+    - function_name: RagflowClient.query_single_database
+      duration_ms: 1714.207
+      exception: null
+    - function_name: _extract_primary_question
+      duration_ms: 2.868
+      exception: null
+      children:
+      - function_name: _extract_question_from_qa_text
+        duration_ms: 1.153
+        exception: null
+    - function_name: _find_type2_mapping_by_question
+      duration_ms: 3.223
+      exception: null
+      children:
+      - function_name: _find_mapping_prompt_by_question
+        duration_ms: 1.839
+        exception: null
+        children:
+        - function_name: _load_prompt_mapping
+          duration_ms: 0.374
+          exception: null
+    - function_name: _extract_questions_for_sql
+      duration_ms: 17.7
+      exception: null
+      children:
+      - function_name: _extract_question_from_qa_text
+        duration_ms: 0.968
+        exception: null
+      - function_name: _extract_question_from_qa_text
+        duration_ms: 0.872
+        exception: null
+      - function_name: _extract_question_from_qa_text
+        duration_ms: 0.554
+        exception: null
+      - function_name: _extract_question_from_qa_text
+        duration_ms: 0.817
+        exception: null
+      - function_name: _extract_question_from_qa_text
+        duration_ms: 1.066
+        exception: null
+      - function_name: _extract_question_from_qa_text
+        duration_ms: 1.153
+        exception: null
+      - function_name: _extract_question_from_qa_text
+        duration_ms: 1.158
+        exception: null
+      - function_name: _extract_question_from_qa_text
+        duration_ms: 0.676
+        exception: null
+      - function_name: _extract_question_from_qa_text
+        duration_ms: 0.768
+        exception: null
+      - function_name: _extract_question_from_qa_text
+        duration_ms: 0.765
+        exception: null
+error_path: null
+chain_memory_top:
+- function_name: handle_chat_general
+  mem_delta_rss_kb: 512
+- function_name: replace_economic_zone
+  mem_delta_rss_kb: 0
+- function_name: RagflowClient.query_single_database
+  mem_delta_rss_kb: 0
+- function_name: RagflowClient.query_single_database
+  mem_delta_rss_kb: 0
+- function_name: RagflowClient.query_single_database
+  mem_delta_rss_kb: 0

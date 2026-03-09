@@ -1,0 +1,45 @@
+metadata:
+  session_id: rag_stream_1773023776
+  entry_id: entry_5e8dd497
+  snapshot_time: '2026-03-09 10:52:17'
+  event_count: 25
+  mode: lite
+error_summary: []
+call_chain:
+- trace_id: tr_76eed367
+  roots:
+  - function_name: chat_with_category
+    duration_ms: 524.104
+    exception: null
+    children:
+    - function_name: get_or_create_session
+      duration_ms: 522.543
+      exception: null
+      children:
+      - function_name: SessionManager.cleanup_all_expired_sessions
+        duration_ms: 0.63
+        exception: null
+      - function_name: SessionManager.get_user_session
+        duration_ms: 0.222
+        exception: null
+      - function_name: create_rag_session
+        duration_ms: 519.551
+        exception: null
+      - function_name: SessionManager.create_session
+        duration_ms: 0.41
+        exception: null
+    - function_name: stream_chat_response
+      duration_ms: 0.143
+      exception: null
+error_path: null
+chain_memory_top:
+- function_name: create_rag_session
+  mem_delta_rss_kb: 128
+- function_name: get_or_create_session
+  mem_delta_rss_kb: 128
+- function_name: chat_with_category
+  mem_delta_rss_kb: 128
+- function_name: SessionManager.cleanup_all_expired_sessions
+  mem_delta_rss_kb: 0
+- function_name: SessionManager.get_user_session
+  mem_delta_rss_kb: 0

@@ -99,28 +99,28 @@ def test_process_query_should_prioritize_instruction_tables_when_reaching_priori
     assert result["similarity"] == 0.71
 
 
-def test_process_query_should_fallback_to_global_max_when_priority_tables_below_threshold():
+def test_process_query_should_fallback_to_db_question_table_instead_of_global_max():
     client = MockRagflowClient(
         {
             "岱山-指令集": [
                 MockRetrievalResult(
                     database="岱山-指令集",
                     question="Question: Q1\tAnswer: A1",
-                    total_similarity=0.69,
+                    total_similarity=0.59,
                 )
             ],
             "岱山-数据库问题": [
                 MockRetrievalResult(
                     database="岱山-数据库问题",
                     question="Question: Q2\tAnswer: A2",
-                    total_similarity=0.82,
+                    total_similarity=0.40,
                 )
             ],
             "岱山-指令集-固定问题": [
                 MockRetrievalResult(
                     database="岱山-指令集-固定问题",
                     question="Question: Q3\tAnswer: A3",
-                    total_similarity=0.66,
+                    total_similarity=0.58,
                 )
             ],
         }
@@ -131,4 +131,70 @@ def test_process_query_should_fallback_to_global_max_when_priority_tables_below_
 
     assert result["type"] == 2
     assert result["database"] == "岱山-数据库问题"
-    assert result["similarity"] == 0.82
+    assert result["similarity"] == 0.40
+
+
+def test_process_query_should_return_default_type_when_db_question_table_is_empty():
+    client = MockRagflowClient(
+        {
+            "岱山-指令集": [
+                MockRetrievalResult(
+                    database="岱山-指令集",
+                    question="Question: Q1\tAnswer: A1",
+                    total_similarity=0.59,
+                )
+            ],
+            "岱山-数据库问题": [],
+            "岱山-指令集-固定问题": [
+                MockRetrievalResult(
+                    database="岱山-指令集-固定问题",
+                    question="Question: Q3\tAnswer: A3",
+                    total_similarity=0.58,
+                )
+            ],
+        }
+    )
+    service = IntentService(ragflow_client=client)
+
+    result = asyncio.run(service.process_query("测试数据库问题表为空", "user-001"))
+
+    assert result["type"] == 2
+    assert result["database"] == ""
+    assert result["similarity"] == 0.0
+    assert result["question"] == ""
+    assert result["results"] == []
+
+
+def test_process_query_should_use_db_question_table_even_with_low_similarity():
+    client = MockRagflowClient(
+        {
+            "岱山-指令集": [
+                MockRetrievalResult(
+                    database="岱山-指令集",
+                    question="Question: Q1\tAnswer: A1",
+                    total_similarity=0.59,
+                )
+            ],
+            "岱山-数据库问题": [
+                MockRetrievalResult(
+                    database="岱山-数据库问题",
+                    question="Question: Q2\tAnswer: A2",
+                    total_similarity=0.05,
+                )
+            ],
+            "岱山-指令集-固定问题": [
+                MockRetrievalResult(
+                    database="岱山-指令集-固定问题",
+                    question="Question: Q3\tAnswer: A3",
+                    total_similarity=0.58,
+                )
+            ],
+        }
+    )
+    service = IntentService(ragflow_client=client)
+
+    result = asyncio.run(service.process_query("测试低分数据库问题回退", "user-001"))
+
+    assert result["type"] == 2
+    assert result["database"] == "岱山-数据库问题"
+    assert result["similarity"] == 0.05

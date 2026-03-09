@@ -1,0 +1,9 @@
+# Paths are relative to repository root.
+# Keep only deployable content in this list.
+src
+pyproject.toml
+uv.lock
+README.md
+scripts/build_release_bundle.sh
+scripts/install_and_start_release.sh
+scripts/release_bundle_manifest.txt

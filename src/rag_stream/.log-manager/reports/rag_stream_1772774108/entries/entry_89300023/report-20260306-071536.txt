@@ -1,0 +1,33 @@
+metadata:
+  session_id: rag_stream_1772774108
+  entry_id: entry_89300023
+  snapshot_time: '2026-03-06 15:15:36'
+  event_count: 24
+  mode: lite
+error_summary: []
+call_chain:
+- trace_id: tr_8ea8185b
+  roots:
+  - function_name: handle_guess_questions
+    duration_ms: 2073.43
+    exception: null
+    children:
+    - function_name: RagflowClient.query_single_database
+      duration_ms: 948.022
+      exception: null
+    - function_name: RagflowClient.query_single_database
+      duration_ms: 1030.953
+      exception: null
+    - function_name: RagflowClient.query_single_database
+      duration_ms: 529.771
+      exception: null
+error_path: null
+chain_memory_top:
+- function_name: handle_guess_questions
+  mem_delta_rss_kb: 9344
+- function_name: RagflowClient.query_single_database
+  mem_delta_rss_kb: 8832
+- function_name: RagflowClient.query_single_database
+  mem_delta_rss_kb: 8704
+- function_name: RagflowClient.query_single_database
+  mem_delta_rss_kb: 7680

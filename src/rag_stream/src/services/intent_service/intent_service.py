@@ -15,12 +15,19 @@ from rag_stream.services.intent_service.base_intent_service import (
 )
 
 
+class _DefaultIntentCandidate:
+    """Sentinel candidate used to force fallback to default intent type."""
+
+    database = ""
+    question = ""
+    total_similarity = 0.0
+
+
 class IntentService(BaseIntentService):
     """意图识别服务"""
 
     def __init__(self, ragflow_client):
         super().__init__(ragflow_client=ragflow_client)
-        self._use_daishan_priority = False
         self._intent_classifier: Optional[Any] = None
 
         # 初始化分类器（如果启用）
@@ -49,10 +56,12 @@ class IntentService(BaseIntentService):
         岱山优先级判断逻辑：
         1) 优先判断【岱山-指令集】和【岱山-指令集-固定问题】中的最高相似度结果
         2) 若该结果 >= priority_similarity_threshold，则直接返回
-        3) 否则在所有返回结果中取全局最高相似度结果
+        3) 否则仅在【岱山-数据库问题】中取最高相似度结果（不过 similarity_threshold）
+        4) 若【岱山-数据库问题】无结果，则返回默认类型哨兵结果
         """
         instruction_table = "岱山-指令集"
         fixed_instruction_table = "岱山-指令集-固定问题"
+        db_question_table = "岱山-数据库问题"
         priority_threshold = float(recognizer_settings.priority_similarity_threshold)
 
         marker(
@@ -60,6 +69,7 @@ class IntentService(BaseIntentService):
             {
                 "priority_threshold": priority_threshold,
                 "tables": [instruction_table, fixed_instruction_table],
+                "fallback_table": db_question_table,
             },
         )
 
@@ -99,42 +109,34 @@ class IntentService(BaseIntentService):
             if best_priority_similarity >= priority_threshold:
                 return best_priority
 
-        # 第三步：全局筛选最高相似度
-        all_results = []
-        for table_items in table_results.values():
-            all_results.extend(table_items)
-
-        if all_results:
-            global_best = max(all_results, key=BaseIntentService._safe_similarity)
-            global_best_similarity = BaseIntentService._safe_similarity(global_best)
-            global_best_table = getattr(global_best, "database", "未知")
-
+        # 第三步：仅在【岱山-数据库问题】中筛选最高相似度（不过 similarity_threshold）
+        db_question_results = table_results.get(db_question_table, [])
+        if db_question_results:
+            best_db_question = max(
+                db_question_results, key=BaseIntentService._safe_similarity
+            )
+            best_db_similarity = BaseIntentService._safe_similarity(best_db_question)
             marker(
-                "全局最高相似度",
+                "数据库问题表最高相似度",
                 {
-                    "similarity": global_best_similarity,
-                    "database": global_best_table,
-                    "question_preview": getattr(global_best, "question", "")[:50],
+                    "table": db_question_table,
+                    "similarity": best_db_similarity,
+                    "question_preview": getattr(best_db_question, "question", "")[:50],
                 },
             )
-            return global_best
+            return best_db_question
 
-        marker("所有知识库均无检索结果", {}, level="WARNING")
-        return None
-
-    @staticmethod
-    def _should_use_daishan_priority(recognizer_settings) -> bool:
-        """仅在存在岱山指令双表映射时启用优先级规则"""
-        mapping_keys = set(recognizer_settings.database_mapping.keys())
-        return {"岱山-指令集", "岱山-指令集-固定问题"}.issubset(mapping_keys)
+        marker(
+            "数据库问题表无结果，回默认类型",
+            {"table": db_question_table},
+            level="WARNING",
+        )
+        return _DefaultIntentCandidate()
 
     def _load_process_settings(
         self, text_input: Optional[str] = None
     ) -> IntentRecognizerSettings:
         recognizer_settings = self._load_intent_recognizer_settings()
-        self._use_daishan_priority = self._should_use_daishan_priority(
-            recognizer_settings
-        )
 
         # 分类驱动检索（Phase 6）
         if text_input and self._intent_classifier:
@@ -198,9 +200,7 @@ class IntentService(BaseIntentService):
         )
 
     def _get_process_judge_function(self):
-        if self._use_daishan_priority:
-            return self._judge_daishan_intent_priority
-        return None
+        return self._judge_daishan_intent_priority
 
     async def _post_process_result(self, intent_result: IntentResult) -> dict:
         """使用基类默认实现，已包含 question 和 answer 字段"""

@@ -1,0 +1,17 @@
+metadata:
+  session_id: rag_stream_1772782719
+  entry_id: entry_24da085e
+  snapshot_time: '2026-03-06 16:19:15'
+  event_count: 4
+  mode: lite
+error_summary: []
+call_chain:
+- trace_id: tr_3fb8e69a
+  roots:
+  - function_name: chat_general
+    duration_ms: 100723.306
+    exception: null
+error_path: null
+chain_memory_top:
+- function_name: chat_general
+  mem_delta_rss_kb: 25612
