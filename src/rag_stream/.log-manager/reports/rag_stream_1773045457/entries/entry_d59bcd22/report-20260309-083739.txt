@@ -1,0 +1,49 @@
+metadata:
+  session_id: rag_stream_1773045457
+  entry_id: entry_d59bcd22
+  snapshot_time: '2026-03-09 16:37:38'
+  event_count: 16
+  mode: lite
+error_summary: []
+call_chain:
+- trace_id: tr_a8cca5df
+  roots:
+  - function_name: handle_chat_general
+    duration_ms: 4.223
+    exception: null
+    children:
+    - function_name: _build_query_variants
+      duration_ms: 0.599
+      exception: null
+      children:
+      - function_name: replace_daishan_zone_alias
+        duration_ms: 0.117
+        exception: null
+    - function_name: query_fixed_question_candidates
+      duration_ms: 1.294
+      exception: null
+      children:
+      - function_name: normalize_fixed_question_candidates
+        duration_ms: 0.473
+        exception: null
+    - function_name: select_top_candidates
+      duration_ms: 0.133
+      exception: null
+    - function_name: _pick_fixed_question_candidate
+      duration_ms: 0.096
+      exception: null
+    - function_name: _route_low_confidence_to_general
+      duration_ms: 0.146
+      exception: null
+error_path: null
+chain_memory_top:
+- function_name: normalize_fixed_question_candidates
+  mem_delta_rss_kb: 128
+- function_name: query_fixed_question_candidates
+  mem_delta_rss_kb: 128
+- function_name: handle_chat_general
+  mem_delta_rss_kb: 128
+- function_name: replace_daishan_zone_alias
+  mem_delta_rss_kb: 0
+- function_name: _build_query_variants
+  mem_delta_rss_kb: 0

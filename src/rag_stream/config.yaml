@@ -12,6 +12,13 @@ ragflow:
   base_url: "http://172.16.11.60:8081/api/v1"
   timeout: 30
   max_retries: 3
+  retry_delay: 1.0
+  retry_backoff_factor: 2.0
+  retry_max_delay: 30.0
+  list_datasets_page_size: 100
+  list_datasets_timeout: 10
+  query_timeout: 60
+  retrieval_top_k: 100
   vector_similarity_weight: 0.7
 
   # Chat IDs
@@ -48,6 +55,10 @@ intent:
   # 可选覆盖项：不设置则继承 ragflow.vector_similarity_weight
   # vector_similarity_weight: 0.7
   default_type: 0
+  fixed_question_similarity_threshold: 0.6
+  fixed_question_direct_threshold: 0.7
+  fixed_question_top_k: 5
+  fixed_question_table_name: "岱山-指令集-固定问题"
 
 # ============================================================
 # 服务器配置

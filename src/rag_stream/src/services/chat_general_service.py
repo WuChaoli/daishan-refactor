@@ -7,9 +7,17 @@ from pathlib import Path
 from typing import Any, Awaitable, Callable
 
 from rag_stream.config.settings import settings
+from rag_stream.services.fixed_question_flow_service import (
+    query_fixed_question_candidates,
+    replace_daishan_zone_alias,
+    select_top_candidates,
+)
 from rag_stream.utils.log_manager_import import entry_trace, marker, trace
 from rag_stream.utils.daishan_sql_logging import format_daishan_log_text
-from rag_stream.utils.query_chat import rewrite_query
+from rag_stream.utils.query_chat import (
+    rerank_fixed_question_candidates,
+    rewrite_query,
+)
 
 try:
     from DaiShanSQL.DaiShanSQL.api_server import Server
@@ -26,6 +34,7 @@ _TYPE3_PROMPT_MAPPING_PATH = (
     _PROMPT_MAPPING_DATA_DIR / "fixed_question_prompt_mapping.json"
 )
 _prompt_mapping_cache: dict[str, dict[str, dict[str, Any]]] = {}
+LOW_CONFIDENCE_REPLY = "对不起，该问题超出系统回答范围，请重新提问"
 
 
 def _get_server() -> Server:
@@ -85,6 +94,137 @@ async def replace_economic_zone(query: str) -> str:
 
     marker("query_normalized", {"normalized": rewritten_text != query})
     return rewritten_text
+
+
+@trace
+async def _build_query_variants(query: str) -> tuple[str, str]:
+    if not isinstance(query, str):
+        return query, query
+
+    q2 = replace_daishan_zone_alias(query)
+    q1 = await replace_economic_zone(q2)
+    return q1, q2
+
+
+def _build_chat_request_with_question(request: ChatRequest, question: str) -> ChatRequest:
+    return ChatRequest(
+        question=question,
+        session_id=request.session_id,
+        user_id=request.user_id,
+        stream=request.stream,
+    )
+
+
+@trace
+def _pick_candidate_by_question(
+    candidates: list[dict[str, Any]],
+    selected_question: str,
+) -> dict[str, Any]:
+    normalized_selected = str(selected_question or "").strip()
+    if not normalized_selected:
+        return candidates[0]
+
+    for item in candidates:
+        if str(item.get("question", "")).strip() == normalized_selected:
+            return item
+
+    return candidates[0]
+
+
+@trace
+async def _pick_fixed_question_candidate(
+    original_question: str,
+    candidates: list[dict[str, Any]],
+) -> dict[str, Any] | None:
+    if not candidates:
+        return None
+
+    similarity_threshold = float(settings.intent.fixed_question_similarity_threshold)
+    direct_threshold = float(settings.intent.fixed_question_direct_threshold)
+
+    best_candidate = candidates[0]
+    best_similarity = float(best_candidate.get("similarity", 0.0))
+
+    if best_similarity >= direct_threshold:
+        marker(
+            "fixed_question_direct_hit",
+            {"best_similarity": best_similarity, "candidate_count": len(candidates)},
+        )
+        return best_candidate
+
+    if best_similarity > similarity_threshold and len(candidates) == 1:
+        marker(
+            "fixed_question_single_candidate_direct_hit",
+            {"best_similarity": best_similarity},
+        )
+        return best_candidate
+
+    if similarity_threshold <= best_similarity < direct_threshold and len(candidates) > 1:
+        selected_question = await rerank_fixed_question_candidates(
+            original_question,
+            [str(item.get("question", "") or "") for item in candidates],
+            settings.query_chat,
+        )
+        marker(
+            "fixed_question_rerank_done",
+            {"matched": bool(selected_question), "candidate_count": len(candidates)},
+        )
+        return _pick_candidate_by_question(candidates, selected_question)
+
+    return None
+
+
+@trace
+async def _route_low_confidence_to_general(
+    request: ChatRequest,
+    chat_with_category: Callable[[str, ChatRequest], Awaitable[Any]],
+):
+    low_confidence_request = _build_chat_request_with_question(request, LOW_CONFIDENCE_REPLY)
+    return await chat_with_category("通用", low_confidence_request)
+
+
+@trace
+async def _route_selected_fixed_question(
+    request: ChatRequest,
+    q2: str,
+    selected_question: str,
+    chat_with_category: Callable[[str, ChatRequest], Awaitable[Any]],
+):
+    mapped_prompt = _find_type3_prompt_by_question(selected_question)
+    if not mapped_prompt:
+        marker(
+            "fixed_question_prompt_unavailable",
+            {"question_len": len(selected_question)},
+            level="WARNING",
+        )
+        return await chat_with_category("通用", request)
+
+    try:
+        marker(
+            "DaiShanSQL入参",
+            {
+                "入参": format_daishan_log_text(
+                    {"query_q2": q2, "fixed_question": selected_question}
+                )
+            },
+        )
+        sql_result = await asyncio.to_thread(
+            _get_server().judgeQuery,
+            q2,
+            selected_question,
+        )
+        marker("DaiShanSQL出参", {"出参": format_daishan_log_text(sql_result)})
+    except Exception as error:
+        marker(
+            "DaiShanSQL出参",
+            {"出参": format_daishan_log_text(f"ERROR: {error}")},
+            level="ERROR",
+        )
+        return await chat_with_category("通用", request)
+
+    merged_question = f"{mapped_prompt}\n\n{str(sql_result)}\n\n{request.question}"
+    updated_request = _build_chat_request_with_question(request, merged_question)
+    return await chat_with_category("通用", updated_request)
 
 
 @trace
@@ -490,53 +630,36 @@ async def handle_chat_general(
     intent_service,
     chat_with_category: Callable[[str, ChatRequest], Awaitable[Any]],
 ):
-    """通用问答业务逻辑（从路由层下沉）"""
+    """General chat flow based on fixed-question single-table matching."""
 
     user_id = request.user_id or "anonymous"
-    original_question = request.question
-
-    if isinstance(request.question, str):
-        request.question = await replace_economic_zone(request.question)
+    q1, q2 = await _build_query_variants(request.question)
 
     try:
-        result_dict = await intent_service.process_query(request.question, user_id)
-    finally:
-        request.question = original_question
+        all_candidates = await query_fixed_question_candidates(
+            intent_service=intent_service,
+            query=q1,
+            user_id=user_id,
+        )
+        top_candidates = select_top_candidates(
+            candidates=all_candidates,
+            min_similarity=float(settings.intent.fixed_question_similarity_threshold),
+            top_k=int(settings.intent.fixed_question_top_k),
+        )
 
-    result_type = result_dict.get("type")
-    has_error = bool(result_dict.get("data", {}).get("error"))
+        selected_candidate = await _pick_fixed_question_candidate(
+            original_question=request.question,
+            candidates=top_candidates,
+        )
+        if selected_candidate is None:
+            return await _route_low_confidence_to_general(request, chat_with_category)
 
-    try:
-        if has_error:
-            _skip_intent_error_result(result_dict)
-            return await chat_with_category("通用", request)
-        elif result_type == 1:
-            routed_result = await _post_process_and_route_type1(
-                request=request,
-                result_dict=result_dict,
-                chat_with_category=chat_with_category,
-            )
-            if routed_result is not None:
-                return routed_result
-            return await chat_with_category("通用", request)
-        elif result_type == 3:
-            routed_result = await _post_process_and_route_type3(
-                request=request,
-                result_dict=result_dict,
-                chat_with_category=chat_with_category,
-            )
-            if routed_result is not None:
-                return routed_result
-            return await chat_with_category("通用", request)
-        else:
-            routed_result = await _post_process_and_route_type2(
-                request=request,
-                result_dict=result_dict,
-                chat_with_category=chat_with_category,
-            )
-            if routed_result is not None:
-                return routed_result
-            return await chat_with_category("通用", request)
+        return await _route_selected_fixed_question(
+            request=request,
+            q2=q2,
+            selected_question=str(selected_candidate.get("question", "") or ""),
+            chat_with_category=chat_with_category,
+        )
     except ImportError as error:
         try:
             _log_fallback_error_and_reraise(error)

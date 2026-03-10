@@ -25,7 +25,8 @@ async def create_rag_session(
 ) -> str:
     """在RAG服务中创建会话"""
     marker("创建RAG会话开始", {"chat_id": chat_id, "session_name": session_name, "has_user_id": bool(user_id)})
-    async with aiohttp.ClientSession() as session:
+    timeout = aiohttp.ClientTimeout(total=float(settings.ragflow.timeout))
+    async with aiohttp.ClientSession(timeout=timeout) as session:
         url = f"{settings.ragflow.base_url}/chats/{chat_id}/sessions"
         headers = {
             "Content-Type": "application/json",
@@ -99,7 +100,8 @@ async def stream_chat_response(
     first_output_sent = False
     end_sent = False
     try:
-        async with aiohttp.ClientSession() as session:
+        timeout = aiohttp.ClientTimeout(total=float(settings.ragflow.timeout))
+        async with aiohttp.ClientSession(timeout=timeout) as session:
             async with session.post(url, headers=headers, json=data) as response:
                 if response.status != 200:
                     error_text = await response.text()

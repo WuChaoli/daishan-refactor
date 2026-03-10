@@ -73,6 +73,13 @@ class RAGFlowConfig(BaseConfig):
     base_url: str = Field(default="", description="RAGFlow API Base URL")
     timeout: int = Field(default=30, description="HTTP 请求超时时间(秒)")
     max_retries: int = Field(default=3, description="网络错误最大重试次数")
+    retry_delay: float = Field(default=1.0, description="重试间隔基数(秒)，使用指数退避")
+    retry_backoff_factor: float = Field(default=2.0, description="退避因子")
+    retry_max_delay: float = Field(default=30.0, description="最大重试间隔(秒)")
+    list_datasets_page_size: int = Field(default=100, description="获取数据集列表的 page_size")
+    list_datasets_timeout: int = Field(default=10, description="获取数据集列表的超时(秒)")
+    query_timeout: int = Field(default=60, description="检索查询超时时间(秒)")
+    retrieval_top_k: int = Field(default=100, description="检索时的 top_k，减少以提升速度")
     vector_similarity_weight: float = Field(
         default=0.3, description="向量相似度权重（基础配置）"
     )
@@ -102,6 +109,41 @@ class RAGFlowConfig(BaseConfig):
     def validate_max_retries(cls, v: int) -> int:
         if v < 0:
             raise ValueError(f"max_retries 不能为负数，当前值: {v}")
+        return v
+
+    @field_validator("retry_delay", "retry_backoff_factor", "retry_max_delay")
+    @classmethod
+    def validate_positive_float(cls, v: float) -> float:
+        if v <= 0:
+            raise ValueError(f"该值必须大于 0，当前值: {v}")
+        return v
+
+    @field_validator("list_datasets_page_size")
+    @classmethod
+    def validate_list_datasets_page_size(cls, v: int) -> int:
+        if v <= 0:
+            raise ValueError(f"list_datasets_page_size 必须大于 0，当前值: {v}")
+        return v
+
+    @field_validator("list_datasets_timeout")
+    @classmethod
+    def validate_list_datasets_timeout(cls, v: int) -> int:
+        if v <= 0:
+            raise ValueError(f"list_datasets_timeout 必须大于 0，当前值: {v}")
+        return v
+
+    @field_validator("query_timeout")
+    @classmethod
+    def validate_query_timeout(cls, v: int) -> int:
+        if v <= 0:
+            raise ValueError(f"query_timeout 必须大于 0，当前值: {v}")
+        return v
+
+    @field_validator("retrieval_top_k")
+    @classmethod
+    def validate_retrieval_top_k(cls, v: int) -> int:
+        if v <= 0:
+            raise ValueError(f"retrieval_top_k 必须大于 0，当前值: {v}")
         return v
 
     @field_validator("vector_similarity_weight")
@@ -177,6 +219,18 @@ class IntentConfig(BaseConfig):
         default=None, description="向量相似度权重（可选，未设置则继承 ragflow）"
     )
     default_type: int = Field(default=0, description="默认意图类型")
+    fixed_question_similarity_threshold: float = Field(
+        default=0.6, description="固定问题最小相似度阈值"
+    )
+    fixed_question_direct_threshold: float = Field(
+        default=0.7, description="固定问题直接命中阈值"
+    )
+    fixed_question_top_k: int = Field(
+        default=5, description="固定问题候选最大数量"
+    )
+    fixed_question_table_name: str = Field(
+        default="岱山-指令集-固定问题", description="固定问题知识库名称"
+    )
 
     @field_validator("similarity_threshold")
     @classmethod
@@ -185,12 +239,37 @@ class IntentConfig(BaseConfig):
             raise ValueError(f"similarity_threshold 必须在 0-1 之间，当前值: {v}")
         return v
 
+    @field_validator(
+        "fixed_question_similarity_threshold",
+        "fixed_question_direct_threshold",
+    )
+    @classmethod
+    def validate_fixed_question_threshold(cls, v: float) -> float:
+        if not 0 <= v <= 1:
+            raise ValueError(f"fixed question threshold 必须在 0-1 之间，当前值: {v}")
+        return v
+
     @field_validator("top_k_per_database")
     @classmethod
     def validate_top_k(cls, v: int) -> int:
         if v <= 0:
             raise ValueError(f"top_k_per_database 必须大于 0，当前值: {v}")
         return v
+
+    @field_validator("fixed_question_top_k")
+    @classmethod
+    def validate_fixed_question_top_k(cls, v: int) -> int:
+        if v <= 0:
+            raise ValueError(f"fixed_question_top_k 必须大于 0，当前值: {v}")
+        return v
+
+    @field_validator("fixed_question_table_name")
+    @classmethod
+    def validate_fixed_question_table_name(cls, v: str) -> str:
+        text = str(v or "").strip()
+        if not text:
+            raise ValueError("fixed_question_table_name 不能为空")
+        return text
 
     @field_validator("vector_similarity_weight")
     @classmethod
@@ -560,10 +639,30 @@ class Settings(BaseModel):
             "RAGFLOW_BASE_URL": ("ragflow", "base_url"),
             "RAGFLOW_TIMEOUT": ("ragflow", "timeout"),
             "RAGFLOW_MAX_RETRIES": ("ragflow", "max_retries"),
+            "RAGFLOW_RETRY_DELAY": ("ragflow", "retry_delay"),
+            "RAGFLOW_RETRY_BACKOFF_FACTOR": ("ragflow", "retry_backoff_factor"),
+            "RAGFLOW_RETRY_MAX_DELAY": ("ragflow", "retry_max_delay"),
+            "RAGFLOW_LIST_DATASETS_PAGE_SIZE": ("ragflow", "list_datasets_page_size"),
+            "RAGFLOW_LIST_DATASETS_TIMEOUT": ("ragflow", "list_datasets_timeout"),
+            "RAGFLOW_QUERY_TIMEOUT": ("ragflow", "query_timeout"),
+            "RAGFLOW_RETRIEVAL_TOP_K": ("ragflow", "retrieval_top_k"),
             # 意图配置
             "INTENT_SIMILARITY_THRESHOLD": ("intent", "similarity_threshold"),
             "INTENT_TOP_K_PER_DATABASE": ("intent", "top_k_per_database"),
             "INTENT_DEFAULT_TYPE": ("intent", "default_type"),
+            "INTENT_FIXED_QUESTION_SIMILARITY_THRESHOLD": (
+                "intent",
+                "fixed_question_similarity_threshold",
+            ),
+            "INTENT_FIXED_QUESTION_DIRECT_THRESHOLD": (
+                "intent",
+                "fixed_question_direct_threshold",
+            ),
+            "INTENT_FIXED_QUESTION_TOP_K": ("intent", "fixed_question_top_k"),
+            "INTENT_FIXED_QUESTION_TABLE_NAME": (
+                "intent",
+                "fixed_question_table_name",
+            ),
             # 服务器配置
             "SERVER_HOST": ("server", "host"),
             "SERVER_PORT": ("server", "port"),

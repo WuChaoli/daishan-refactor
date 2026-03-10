@@ -1,0 +1,76 @@
+metadata:
+  session_id: rag_stream_1773049367
+  entry_id: entry_6d150dea
+  snapshot_time: '2026-03-09 17:45:53'
+  event_count: 29
+  mode: lite
+error_summary:
+- type: HTTPException
+  function_name: _route_low_confidence_to_general
+  message: ''
+- type: HTTPException
+  function_name: handle_chat_general
+  message: ''
+call_chain:
+- trace_id: tr_e8ad1fa0
+  roots:
+  - function_name: handle_chat_general
+    duration_ms: 17524.967
+    exception:
+      type: HTTPException
+      message: ''
+    children:
+    - function_name: _build_query_variants
+      duration_ms: 0.878
+      exception: null
+      children:
+      - function_name: replace_daishan_zone_alias
+        duration_ms: 0.124
+        exception: null
+      - function_name: replace_economic_zone
+        duration_ms: 0.241
+        exception: null
+    - function_name: query_fixed_question_candidates
+      duration_ms: 62.92
+      exception: null
+      children:
+      - function_name: IntentService.query_fixed_question_candidates
+        duration_ms: 62.077
+        exception: null
+        children:
+        - function_name: RagflowClient.query_single_database
+          duration_ms: 0.44
+          exception: null
+      - function_name: normalize_fixed_question_candidates
+        duration_ms: 0.169
+        exception: null
+    - function_name: select_top_candidates
+      duration_ms: 0.14
+      exception: null
+    - function_name: _pick_fixed_question_candidate
+      duration_ms: 0.147
+      exception: null
+    - function_name: _route_low_confidence_to_general
+      duration_ms: 8477.262
+      exception:
+        type: HTTPException
+        message: ''
+error_path:
+  trace_id: tr_e8ad1fa0
+  functions:
+  - handle_chat_general
+  exception:
+    type: HTTPException
+    message: ''
+  latest_marker: fixed_question_candidates_ready
+chain_memory_top:
+- function_name: handle_chat_general
+  mem_delta_rss_kb: 2048
+- function_name: IntentService.query_fixed_question_candidates
+  mem_delta_rss_kb: 1280
+- function_name: query_fixed_question_candidates
+  mem_delta_rss_kb: 1280
+- function_name: _route_low_confidence_to_general
+  mem_delta_rss_kb: 640
+- function_name: replace_daishan_zone_alias
+  mem_delta_rss_kb: 0

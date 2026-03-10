@@ -6,8 +6,9 @@ startup initialization and graceful shutdown for the rag_stream service.
 
 import logging
 import time
+import asyncio
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
+from typing import Any, AsyncGenerator
 
 from fastapi import FastAPI
 
@@ -23,6 +24,30 @@ from .startup import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+class DegradedIntentService:
+    """Fallback intent service used when RAGFlow client initialization fails."""
+
+    def __init__(self, reason: str = ""):
+        self.reason = str(reason or "")
+
+    async def query_fixed_question_candidates(
+        self,
+        text_input: str,
+        top_k: int | None = None,
+        table_name: str | None = None,
+    ) -> list[dict[str, Any]]:
+        _ = (text_input, top_k, table_name)
+        return []
+
+    async def process_query(self, text_input: str, user_id: str) -> dict:
+        _ = (text_input, user_id)
+        return {
+            "type": settings.intent.default_type,
+            "data": {"error": f"intent service degraded: {self.reason}"},
+            "results": [],
+        }
 
 
 @asynccontextmanager
@@ -96,19 +121,35 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
             ragflow_client = RagflowClient(settings.ragflow, settings.intent)
             app.state.ragflow_client = ragflow_client
 
-            connection_ok = ragflow_client.test_connection()
+            connection_ok = False
+            try:
+                connection_ok = await asyncio.wait_for(
+                    asyncio.to_thread(ragflow_client.test_connection),
+                    timeout=8.0,
+                )
+            except asyncio.TimeoutError:
+                logger.warning(
+                    "[LIFECYCLE] RAGFlow connection test timeout, continuing in degraded mode"
+                )
+            except Exception as exc:
+                logger.warning(
+                    f"[LIFECYCLE] RAGFlow connection test failed: {exc}, continuing in degraded mode"
+                )
+
+            ragflow_client.set_service_available(connection_ok)
             if connection_ok:
                 logger.info("[LIFECYCLE] RAGFlow client initialized")
             else:
-                logger.warning(
-                    "[LIFECYCLE] RAGFlow connection test failed, continuing in degraded mode"
-                )
+                logger.warning("[LIFECYCLE] RAGFlow unavailable, intent service running in degraded mode")
 
             app.state.intent_service = IntentService(ragflow_client)
             logger.info("[LIFECYCLE] Intent service initialized")
-        except Exception:
-            logger.exception("[LIFECYCLE] Business service initialization failed")
-            raise
+        except Exception as exc:
+            logger.exception(
+                "[LIFECYCLE] Business service initialization failed, enabling degraded intent mode"
+            )
+            app.state.ragflow_client = None
+            app.state.intent_service = DegradedIntentService(reason=str(exc))
 
         # Calculate startup duration
         startup_duration = time.time() - start_time

@@ -1,0 +1,29 @@
+metadata:
+  session_id: rag_stream_1773049367
+  entry_id: entry_c605c6f6
+  snapshot_time: '2026-03-09 17:45:53'
+  event_count: 4
+  mode: lite
+error_summary:
+- type: HTTPException
+  function_name: chat_general
+  message: ''
+call_chain:
+- trace_id: tr_4ffce56b
+  roots:
+  - function_name: chat_general
+    duration_ms: 17541.271
+    exception:
+      type: HTTPException
+      message: ''
+error_path:
+  trace_id: tr_4ffce56b
+  functions:
+  - chat_general
+  exception:
+    type: HTTPException
+    message: ''
+  latest_marker: 通用问答路由开始
+chain_memory_top:
+- function_name: chat_general
+  mem_delta_rss_kb: 2048

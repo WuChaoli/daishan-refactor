@@ -1,4 +1,4 @@
-"""Query 聊天工具：用于 query 预处理（企业名称清理）。"""
+"""Query chat utilities for query rewriting and candidate reranking."""
 
 from __future__ import annotations
 
@@ -163,6 +163,76 @@ class QueryChat:
         marker("query_chat.success", {"output_len": len(rewritten)})
         return rewritten
 
+    @staticmethod
+    def _resolve_candidate_from_response(response_text: str, candidates: list[str]) -> str:
+        text = str(response_text or "").strip()
+        if not text:
+            return ""
+
+        for candidate in candidates:
+            if text == candidate:
+                return candidate
+
+        if text.isdigit():
+            index = int(text) - 1
+            if 0 <= index < len(candidates):
+                return candidates[index]
+
+        for candidate in candidates:
+            if candidate in text:
+                return candidate
+
+        return ""
+
+    def rerank_fixed_question_candidates(self, query: str, candidates: list[str]) -> str:
+        normalized_query = str(query or "").strip()
+        normalized_candidates = [str(item or "").strip() for item in candidates if str(item or "").strip()]
+        if not normalized_query or not normalized_candidates:
+            return ""
+
+        candidate_lines = "\n".join(
+            f"{index + 1}. {candidate}"
+            for index, candidate in enumerate(normalized_candidates)
+        )
+        marker(
+            "query_chat.rerank_attempt",
+            {"query_len": len(normalized_query), "candidates": len(normalized_candidates)},
+        )
+        try:
+            client = self._get_client()
+            response = client.chat.completions.create(
+                model=self._config.model,
+                temperature=self._config.temperature,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": (
+                            "你是候选问题匹配器。"
+                            "请从候选问题中选择与用户问题最匹配的一条。"
+                            "只返回候选原文或候选编号，不要输出解释。"
+                        ),
+                    },
+                    {
+                        "role": "user",
+                        "content": (
+                            f"用户问题：{normalized_query}\n"
+                            f"候选问题：\n{candidate_lines}"
+                        ),
+                    },
+                ],
+            )
+            response_text = self._extract_text_content(response).strip()
+        except Exception as error:
+            marker("query_chat.rerank_failed", {"error": str(error)}, level="ERROR")
+            raise
+
+        selected = self._resolve_candidate_from_response(
+            response_text=response_text,
+            candidates=normalized_candidates,
+        )
+        marker("query_chat.rerank_success", {"matched": bool(selected)})
+        return selected
+
 
 _query_chat_instance: Optional[QueryChat] = None
 
@@ -211,3 +281,25 @@ async def rewrite_query(query: str, config: QueryChatConfig) -> str:
 
 def rewrite_query_remove_company(query: str) -> str:
     return get_query_chat().rewrite_query_remove_company(query)
+
+
+async def rerank_fixed_question_candidates(
+    query: str,
+    candidates: list[str],
+    config: QueryChatConfig,
+) -> str:
+    """Asynchronously rerank candidate fixed questions with a small chat model."""
+    if not isinstance(query, str) or not query.strip():
+        return ""
+    if not isinstance(candidates, list) or not candidates:
+        return ""
+
+    try:
+        chat = QueryChat(config)
+        return await asyncio.to_thread(
+            chat.rerank_fixed_question_candidates,
+            query.strip(),
+            candidates,
+        )
+    except Exception:
+        return ""

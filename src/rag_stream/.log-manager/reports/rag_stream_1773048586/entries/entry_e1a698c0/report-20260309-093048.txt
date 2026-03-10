@@ -1,0 +1,28 @@
+metadata:
+  session_id: rag_stream_1773048586
+  entry_id: entry_e1a698c0
+  snapshot_time: '2026-03-09 17:30:48'
+  event_count: 8
+  mode: lite
+error_summary: []
+call_chain:
+- trace_id: tr_6ed099c7
+  roots:
+  - function_name: handle_chat_general
+    duration_ms: null
+    exception: null
+    children:
+    - function_name: _build_query_variants
+      duration_ms: null
+      exception: null
+      children:
+      - function_name: replace_daishan_zone_alias
+        duration_ms: 0.108
+        exception: null
+      - function_name: replace_economic_zone
+        duration_ms: null
+        exception: null
+error_path: null
+chain_memory_top:
+- function_name: replace_daishan_zone_alias
+  mem_delta_rss_kb: 0

@@ -1,0 +1,27 @@
+metadata:
+  session_id: rag_stream_1773049593
+  entry_id: entry_f33752da
+  snapshot_time: '2026-03-09 17:52:09'
+  event_count: 3
+  mode: lite
+error_summary:
+- type: HTTPException
+  function_name: chat_general
+  message: ''
+call_chain:
+- trace_id: tr_f5df6202
+  roots:
+  - function_name: chat_general
+    duration_ms: null
+    exception:
+      type: HTTPException
+      message: ''
+error_path:
+  trace_id: tr_f5df6202
+  functions:
+  - chat_general
+  exception:
+    type: HTTPException
+    message: ''
+  latest_marker: 通用问答路由开始
+chain_memory_top: []

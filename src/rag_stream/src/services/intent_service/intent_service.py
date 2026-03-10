@@ -50,6 +50,54 @@ class IntentService(BaseIntentService):
     async def process_query(self, text_input: str, user_id: str) -> dict:
         return await super().process_query(text_input, user_id)
 
+    @trace
+    async def query_fixed_question_candidates(
+        self,
+        text_input: str,
+        top_k: int | None = None,
+        table_name: str | None = None,
+    ) -> List[Dict[str, Any]]:
+        effective_top_k = int(top_k or settings.intent.fixed_question_top_k)
+        fixed_table_name = str(
+            table_name or settings.intent.fixed_question_table_name
+        ).strip()
+        if not fixed_table_name:
+            return []
+
+        recognizer_settings = self._load_process_settings(text_input)
+        mapped_type = recognizer_settings.database_mapping.get(fixed_table_name, 3)
+        scoped_mapping = {fixed_table_name: mapped_type}
+        scoped_settings = dataclasses.replace(
+            recognizer_settings,
+            database_mapping=scoped_mapping,
+            top_k=max(effective_top_k, 1),
+        )
+
+        table_results = await self._query_process_table_results(text_input, scoped_settings)
+        fixed_results = table_results.get(fixed_table_name, [])
+        fixed_results.sort(key=BaseIntentService._safe_similarity, reverse=True)
+        top_results = fixed_results[: max(effective_top_k, 1)]
+
+        normalized_results: List[Dict[str, Any]] = []
+        for item in top_results:
+            normalized_results.append(
+                {
+                    "question": str(getattr(item, "question", "") or ""),
+                    "similarity": float(BaseIntentService._safe_similarity(item)),
+                }
+            )
+
+        marker(
+            "fixed_question_candidates_ready",
+            {
+                "table_name": fixed_table_name,
+                "query_len": len(str(text_input or "")),
+                "candidate_count": len(normalized_results),
+                "top_k": max(effective_top_k, 1),
+            },
+        )
+        return normalized_results
+
     @staticmethod
     def _judge_daishan_intent_priority(table_results, recognizer_settings):
         """

@@ -52,7 +52,7 @@ class RAGFlowClient:
         api_url: str,
         api_key: str,
         *,
-        timeout: int = 30,
+        timeout: int = 60,
         max_retries: int = 3,
         verify_ssl: bool = True,
     ):

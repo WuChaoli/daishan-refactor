@@ -1,0 +1,72 @@
+metadata:
+  session_id: rag_stream_1773106972
+  entry_id: entry_2274ec37
+  snapshot_time: '2026-03-10 09:44:34'
+  event_count: 30
+  mode: lite
+error_summary:
+- type: HTTPException
+  function_name: _route_low_confidence_to_general
+  message: ''
+call_chain:
+- trace_id: tr_0d255223
+  roots:
+  - function_name: handle_chat_general
+    duration_ms: null
+    exception: null
+    children:
+    - function_name: _build_query_variants
+      duration_ms: 622.565
+      exception: null
+      children:
+      - function_name: replace_daishan_zone_alias
+        duration_ms: 0.103
+        exception: null
+      - function_name: replace_economic_zone
+        duration_ms: 621.785
+        exception: null
+    - function_name: query_fixed_question_candidates
+      duration_ms: 3.003
+      exception: null
+      children:
+      - function_name: IntentService.query_fixed_question_candidates
+        duration_ms: 2.081
+        exception: null
+        children:
+        - function_name: RagflowClient.query_single_database
+          duration_ms: 0.602
+          exception: null
+      - function_name: normalize_fixed_question_candidates
+        duration_ms: 0.223
+        exception: null
+    - function_name: select_top_candidates
+      duration_ms: 0.171
+      exception: null
+    - function_name: _pick_fixed_question_candidate
+      duration_ms: 0.138
+      exception: null
+    - function_name: _route_low_confidence_to_general
+      duration_ms: null
+      exception:
+        type: HTTPException
+        message: ''
+error_path:
+  trace_id: tr_0d255223
+  functions:
+  - handle_chat_general
+  - _route_low_confidence_to_general
+  exception:
+    type: HTTPException
+    message: ''
+  latest_marker: fixed_question_candidates_ready
+chain_memory_top:
+- function_name: replace_economic_zone
+  mem_delta_rss_kb: 10880
+- function_name: _build_query_variants
+  mem_delta_rss_kb: 10880
+- function_name: replace_daishan_zone_alias
+  mem_delta_rss_kb: 0
+- function_name: RagflowClient.query_single_database
+  mem_delta_rss_kb: 0
+- function_name: IntentService.query_fixed_question_candidates
+  mem_delta_rss_kb: 0

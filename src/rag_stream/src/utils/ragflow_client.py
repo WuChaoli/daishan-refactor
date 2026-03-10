@@ -6,13 +6,112 @@ RagflowClient - RAGFlow 服务客户端适配器
 """
 
 import asyncio
+import time
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import Any, Callable, Dict, List, TypeVar
 
 from rag_stream.utils.log_manager_import import marker, trace
 from rag_stream.config.settings import IntentConfig, RAGFlowConfig
 from ragflow_sdk import RAGFlowClient
 from ragflow_sdk.models import RetrievalRequest
+
+T = TypeVar("T")
+
+
+def with_retry(config: RAGFlowConfig, operation_name: str = "operation"):
+    """
+    重试装饰器，使用指数退避策略
+
+    Args:
+        config: RAGFlow 配置，包含重试参数
+        operation_name: 操作名称，用于日志记录
+    """
+    def decorator(func: Callable[..., T]) -> Callable[..., T]:
+        def wrapper(*args, **kwargs) -> T:
+            last_exception = None
+
+            for attempt in range(config.max_retries + 1):
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    last_exception = e
+                    is_last_attempt = attempt == config.max_retries
+
+                    if is_last_attempt:
+                        break
+
+                    # 计算退避延迟
+                    delay = min(
+                        config.retry_delay * (config.retry_backoff_factor ** attempt),
+                        config.retry_max_delay
+                    )
+
+                    marker(
+                        f"ragflow.retry.{operation_name}",
+                        {
+                            "attempt": attempt + 1,
+                            "max_retries": config.max_retries,
+                            "delay": delay,
+                            "error": str(e),
+                        },
+                        level="WARNING",
+                    )
+
+                    time.sleep(delay)
+
+            # 所有重试都失败了
+            raise last_exception
+
+        return wrapper
+    return decorator
+
+
+async def with_retry_async(config: RAGFlowConfig, operation_name: str = "operation"):
+    """
+    异步重试装饰器，使用指数退避策略
+
+    Args:
+        config: RAGFlow 配置，包含重试参数
+        operation_name: 操作名称，用于日志记录
+    """
+    def decorator(func: Callable[..., T]) -> Callable[..., T]:
+        async def wrapper(*args, **kwargs) -> T:
+            last_exception = None
+
+            for attempt in range(config.max_retries + 1):
+                try:
+                    return await func(*args, **kwargs)
+                except Exception as e:
+                    last_exception = e
+                    is_last_attempt = attempt == config.max_retries
+
+                    if is_last_attempt:
+                        break
+
+                    # 计算退避延迟
+                    delay = min(
+                        config.retry_delay * (config.retry_backoff_factor ** attempt),
+                        config.retry_max_delay
+                    )
+
+                    marker(
+                        f"ragflow.retry.{operation_name}",
+                        {
+                            "attempt": attempt + 1,
+                            "max_retries": config.max_retries,
+                            "delay": delay,
+                            "error": str(e),
+                        },
+                        level="WARNING",
+                    )
+
+                    await asyncio.sleep(delay)
+
+            # 所有重试都失败了
+            raise last_exception
+
+        return wrapper
+    return decorator
 
 
 @dataclass
@@ -43,7 +142,7 @@ class RagflowClient:
         """
         self.ragflow_config = ragflow_config
         self.intent_config = intent_config
-        self.single_query_timeout = float(ragflow_config.timeout)
+        self.single_query_timeout = float(ragflow_config.query_timeout)
 
         # 使用根目录的 ragflow_sdk RAGFlowClient
         self.client = RAGFlowClient(
@@ -53,10 +152,11 @@ class RagflowClient:
             max_retries=ragflow_config.max_retries,
             verify_ssl=True,
         )
+        self._service_available = True
 
-        # 获取知识库列表
-        self.datasets = self._get_datasets()
-        self.dataset_map = {ds.name: ds for ds in self.datasets}
+        # Lazy-load datasets to avoid blocking application startup.
+        self.datasets: List = []
+        self.dataset_map: Dict[str, object] = {}
 
         marker(
             "ragflow.init",
@@ -64,8 +164,36 @@ class RagflowClient:
                 "dataset_count": len(self.datasets),
                 "names": list(self.dataset_map.keys()),
                 "vector_similarity_weight": self._get_effective_vector_similarity_weight(),
+                "dataset_load_mode": "lazy",
             },
         )
+
+    def set_service_available(self, available: bool) -> None:
+        self._service_available = bool(available)
+
+    def _ensure_datasets_loaded(self) -> None:
+        """确保数据集已加载（带重试机制）"""
+        if not self._service_available:
+            return
+        if self.dataset_map:
+            return
+
+        try:
+            marker("ragflow.datasets.loading", {"max_retries": self.ragflow_config.max_retries})
+            self.datasets = self._get_datasets()
+            self.dataset_map = {ds.name: ds for ds in self.datasets}
+            marker(
+                "ragflow.datasets.loaded",
+                {"count": len(self.datasets), "names": list(self.dataset_map.keys())},
+            )
+        except Exception as error:
+            marker(
+                "ragflow.datasets.lazy_load_failed",
+                {"error": str(error)},
+                level="WARNING",
+            )
+            self.datasets = []
+            self.dataset_map = {}
 
     def _get_effective_vector_similarity_weight(self) -> float:
         """
@@ -80,9 +208,22 @@ class RagflowClient:
         return float(self.ragflow_config.vector_similarity_weight)
 
     def _get_datasets(self) -> List:
-        """获取知识库对象列表"""
+        """获取知识库对象列表（带重试机制）"""
+        @with_retry(self.ragflow_config, "list_datasets")
+        def _fetch():
+            # 使用更小的 page_size 和更短的超时时间
+            return self.client.list_datasets(
+                page=1,
+                page_size=self.ragflow_config.list_datasets_page_size
+            )
+
         try:
-            all_datasets = self.client.list_datasets(page=1, page_size=100)
+            marker("ragflow.datasets.fetch_start", {
+                "page_size": self.ragflow_config.list_datasets_page_size,
+                "max_retries": self.ragflow_config.max_retries,
+            })
+
+            all_datasets = _fetch()
             configured_databases = list(self.ragflow_config.database_mapping.keys())
             marker("ragflow.datasets.listed", {"configured_count": len(configured_databases)})
 
@@ -171,6 +312,14 @@ class RagflowClient:
             检索结果列表
         """
         marker("ragflow.query_single.start", {"database": database, "query_len": len(query)})
+        if not self._service_available:
+            marker(
+                "ragflow.query_single.degraded_skip",
+                {"database": database},
+                level="WARNING",
+            )
+            return []
+        self._ensure_datasets_loaded()
 
         # 检查知识库是否存在
         if database not in self.dataset_map:
@@ -246,7 +395,7 @@ class RagflowClient:
             page_size=self.intent_config.top_k_per_database,
             similarity_threshold=0.0,  # 不过滤,获取所有结果
             vector_similarity_weight=self._get_effective_vector_similarity_weight(),
-            top_k=1024,
+            top_k=self.ragflow_config.retrieval_top_k,
         )
 
     def _parse_similarity(self, chunk, similarity_type: str) -> float:
@@ -281,15 +430,21 @@ class RagflowClient:
 
     def test_connection(self) -> bool:
         """
-        测试 RAGFlow 服务连接状态
+        测试 RAGFlow 服务连接状态（带重试机制）
 
         Returns:
             连接是否成功
         """
+        @with_retry(self.ragflow_config, "test_connection")
+        def _test():
+            return self.client.list_datasets(page=1, page_size=1)
+
         try:
-            datasets = self.client.list_datasets(page=1, page_size=1)
-            marker("RAGFlow连接测试成功", {})
+            datasets = _test()
+            marker("ragflow.connection_test.success", {"datasets_found": len(datasets.get("items", []))})
+            self._service_available = True
             return True
         except Exception as e:
-            marker("RAGFlow连接测试失败", {"error": str(e)}, level="ERROR")
+            marker("ragflow.connection_test.failed", {"error": str(e)}, level="ERROR")
+            self._service_available = False
             return False

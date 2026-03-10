@@ -1,0 +1,87 @@
+metadata:
+  session_id: rag_stream_1773048586
+  entry_id: entry_e1a698c0
+  snapshot_time: '2026-03-09 17:31:50'
+  event_count: 52
+  mode: lite
+error_summary: []
+call_chain:
+- trace_id: tr_6ed099c7
+  roots:
+  - function_name: handle_chat_general
+    duration_ms: null
+    exception: null
+    children:
+    - function_name: _build_query_variants
+      duration_ms: 64883.179
+      exception: null
+      children:
+      - function_name: replace_daishan_zone_alias
+        duration_ms: 0.108
+        exception: null
+      - function_name: replace_economic_zone
+        duration_ms: 64881.694
+        exception: null
+    - function_name: query_fixed_question_candidates
+      duration_ms: 9468.096
+      exception: null
+      children:
+      - function_name: IntentService.query_fixed_question_candidates
+        duration_ms: 9465.073
+        exception: null
+        children:
+        - function_name: RagflowClient.query_single_database
+          duration_ms: 9462.865
+          exception: null
+      - function_name: normalize_fixed_question_candidates
+        duration_ms: 1.534
+        exception: null
+        children:
+        - function_name: extract_question_from_qa_text
+          duration_ms: 0.129
+          exception: null
+        - function_name: extract_question_from_qa_text
+          duration_ms: 0.096
+          exception: null
+        - function_name: extract_question_from_qa_text
+          duration_ms: 0.089
+          exception: null
+        - function_name: extract_question_from_qa_text
+          duration_ms: 0.095
+          exception: null
+        - function_name: extract_question_from_qa_text
+          duration_ms: 0.113
+          exception: null
+    - function_name: select_top_candidates
+      duration_ms: 0.1
+      exception: null
+    - function_name: _pick_fixed_question_candidate
+      duration_ms: 0.255
+      exception: null
+    - function_name: _route_selected_fixed_question
+      duration_ms: null
+      exception: null
+      children:
+      - function_name: _find_type3_prompt_by_question
+        duration_ms: 5.415
+        exception: null
+        children:
+        - function_name: _find_mapping_prompt_by_question
+          duration_ms: 4.677
+          exception: null
+          children:
+          - function_name: _load_prompt_mapping
+            duration_ms: 3.039
+            exception: null
+error_path: null
+chain_memory_top:
+- function_name: replace_economic_zone
+  mem_delta_rss_kb: 8448
+- function_name: _build_query_variants
+  mem_delta_rss_kb: 8448
+- function_name: _load_prompt_mapping
+  mem_delta_rss_kb: 128
+- function_name: _find_mapping_prompt_by_question
+  mem_delta_rss_kb: 128
+- function_name: _find_type3_prompt_by_question
+  mem_delta_rss_kb: 128

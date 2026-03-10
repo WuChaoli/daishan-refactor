@@ -21,7 +21,6 @@ EXCLUDE_PATTERNS=(
   "logs/"
   "tmp*/"
   ".DS_Store"
-  ".env"
 )
 
 log() {

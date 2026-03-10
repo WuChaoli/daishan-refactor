@@ -1,0 +1,61 @@
+metadata:
+  session_id: rag_stream_1773049026
+  entry_id: entry_30e44dfa
+  snapshot_time: '2026-03-09 17:37:43'
+  event_count: 19
+  mode: lite
+error_summary:
+- type: HTTPException
+  function_name: create_rag_session
+  message: ''
+- type: HTTPException
+  function_name: get_or_create_session
+  message: ''
+- type: HTTPException
+  function_name: chat_with_category
+  message: ''
+call_chain:
+- trace_id: tr_392442e2
+  roots:
+  - function_name: chat_with_category
+    duration_ms: 9000.833
+    exception:
+      type: HTTPException
+      message: ''
+    children:
+    - function_name: get_or_create_session
+      duration_ms: 8984.083
+      exception:
+        type: HTTPException
+        message: ''
+      children:
+      - function_name: SessionManager.cleanup_all_expired_sessions
+        duration_ms: 0.467
+        exception: null
+      - function_name: SessionManager.get_user_session
+        duration_ms: 0.309
+        exception: null
+      - function_name: create_rag_session
+        duration_ms: 8969.801
+        exception:
+          type: HTTPException
+          message: ''
+error_path:
+  trace_id: tr_392442e2
+  functions:
+  - chat_with_category
+  exception:
+    type: HTTPException
+    message: ''
+  latest_marker: 创建RAG会话失败
+chain_memory_top:
+- function_name: SessionManager.cleanup_all_expired_sessions
+  mem_delta_rss_kb: 0
+- function_name: SessionManager.get_user_session
+  mem_delta_rss_kb: 0
+- function_name: create_rag_session
+  mem_delta_rss_kb: 0
+- function_name: get_or_create_session
+  mem_delta_rss_kb: 0
+- function_name: chat_with_category
+  mem_delta_rss_kb: 0

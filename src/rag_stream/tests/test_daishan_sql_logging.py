@@ -174,7 +174,7 @@ def test_type1_prompt_mapping_load_and_lookup_markers():
     assert "type1.prompt_mapping_lookup" in names
 
 
-async def _run_type2_mapping_fallback_marker():
+async def _run_fixed_question_prompt_fallback_marker():
     request = chat_general_service.ChatRequest(
         question="查询重点监管危化品",
         user_id="user-001",
@@ -182,15 +182,14 @@ async def _run_type2_mapping_fallback_marker():
     )
 
     intent_service = AsyncMock()
-    intent_service.process_query.return_value = {
-        "type": 2,
-        "results": [
+    intent_service.query_fixed_question_candidates = AsyncMock(
+        return_value=[
             {
                 "question": "Question: 园区有哪些重点监管危化品\tAnswer: v_ai_ipark_enterprise_key_chemicals",
                 "similarity": 0.77,
             }
-        ],
-    }
+        ]
+    )
     chat_with_category = AsyncMock(return_value={"ok": True})
 
     with (
@@ -201,7 +200,7 @@ async def _run_type2_mapping_fallback_marker():
         ),
         patch.object(
             chat_general_service,
-            "_find_type2_mapping_by_question",
+            "_find_type3_prompt_by_question",
             return_value="",
         ),
         patch.object(chat_general_service, "marker") as mock_marker,
@@ -213,8 +212,8 @@ async def _run_type2_mapping_fallback_marker():
         )
 
     names = [call.args[0] for call in mock_marker.call_args_list if call.args]
-    assert "type2.prompt_unavailable_fallback_general" in names
+    assert "fixed_question_prompt_unavailable" in names
 
 
-def test_type2_prompt_mapping_fallback_marker():
-    asyncio.run(_run_type2_mapping_fallback_marker())
+def test_fixed_question_prompt_mapping_fallback_marker():
+    asyncio.run(_run_fixed_question_prompt_fallback_marker())

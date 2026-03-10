@@ -39,7 +39,7 @@ class HTTPClient:
         base_url: str,
         *,
         api_key: Optional[str] = None,
-        timeout: int = 30,
+        timeout: int = 60,
         max_retries: int = 3,
         retry_backoff_factor: float = 0.5,
         default_headers: Optional[Dict[str, str]] = None,
