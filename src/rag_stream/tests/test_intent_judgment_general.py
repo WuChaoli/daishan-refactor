@@ -86,7 +86,7 @@ def test_daishan_priority_should_prioritize_instruction_table_when_over_threshol
         database_mapping={
             "岱山-指令集": 1,
             "岱山-数据库问题": 2,
-            "岱山-指令集-固定问题": 3,
+            "岱山-指令集-固定问题-0311": 3,
         },
         similarity_threshold=0.5,
         top_k=5,
@@ -100,7 +100,7 @@ def test_daishan_priority_should_prioritize_instruction_table_when_over_threshol
         "岱山-数据库问题": [
             MockRetrievalResult(database="岱山-数据库问题", question="D1", total_similarity=0.95)
         ],
-        "岱山-指令集-固定问题": [],
+        "岱山-指令集-固定问题-0311": [],
     }
 
     result = IntentService._judge_daishan_intent_priority(table_results, recognizer_settings)
@@ -114,7 +114,7 @@ def test_daishan_priority_should_fallback_to_db_question_table_when_priority_not
         database_mapping={
             "岱山-指令集": 1,
             "岱山-数据库问题": 2,
-            "岱山-指令集-固定问题": 3,
+            "岱山-指令集-固定问题-0311": 3,
         },
         similarity_threshold=0.7,
         top_k=5,
@@ -128,9 +128,9 @@ def test_daishan_priority_should_fallback_to_db_question_table_when_priority_not
         "岱山-数据库问题": [
             MockRetrievalResult(database="岱山-数据库问题", question="D1", total_similarity=0.55)
         ],
-        "岱山-指令集-固定问题": [
+        "岱山-指令集-固定问题-0311": [
             MockRetrievalResult(
-                database="岱山-指令集-固定问题", question="F1", total_similarity=0.58
+                database="岱山-指令集-固定问题-0311", question="F1", total_similarity=0.58
             )
         ],
     }
@@ -139,3 +139,35 @@ def test_daishan_priority_should_fallback_to_db_question_table_when_priority_not
 
     assert result.database == "岱山-数据库问题"
     assert result.total_similarity == 0.55
+
+
+def test_daishan_priority_should_support_0311_fixed_question_table_name():
+    recognizer_settings = IntentRecognizerSettings(
+        database_mapping={
+            "岱山-指令集": 1,
+            "岱山-数据库问题": 2,
+            "岱山-指令集-固定问题-0311": 3,
+        },
+        similarity_threshold=0.5,
+        top_k=5,
+        default_type=2,
+        priority_similarity_threshold=0.6,
+    )
+    table_results = {
+        "岱山-指令集": [
+            MockRetrievalResult(database="岱山-指令集", question="I1", total_similarity=0.58)
+        ],
+        "岱山-数据库问题": [
+            MockRetrievalResult(database="岱山-数据库问题", question="D1", total_similarity=0.55)
+        ],
+        "岱山-指令集-固定问题-0311": [
+            MockRetrievalResult(
+                database="岱山-指令集-固定问题-0311", question="F1", total_similarity=0.88
+            )
+        ],
+    }
+
+    result = IntentService._judge_daishan_intent_priority(table_results, recognizer_settings)
+
+    assert result.database == "岱山-指令集-固定问题-0311"
+    assert result.total_similarity == 0.88

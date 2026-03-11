@@ -38,10 +38,10 @@ def normalize_fixed_question_candidates(raw_candidates: Iterable[Any]) -> list[d
 
     for item in raw_candidates or []:
         if isinstance(item, dict):
-            raw_question = str(item.get("question", "") or "").strip()
+            raw_question = _clean_fixed_question_text(item.get("question", ""))
             similarity_value = item.get("similarity", 0.0)
         else:
-            raw_question = str(getattr(item, "question", "") or "").strip()
+            raw_question = _clean_fixed_question_text(getattr(item, "question", ""))
             similarity_value = getattr(item, "similarity", 0.0)
 
         if not raw_question:

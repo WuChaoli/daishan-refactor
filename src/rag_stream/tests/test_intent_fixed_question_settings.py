@@ -5,6 +5,12 @@ from pathlib import Path
 from rag_stream.config.settings import Settings
 
 
+def test_intent_fixed_question_settings_should_default_to_0311_table_name():
+    settings = Settings()
+
+    assert settings.intent.fixed_question_table_name == "岱山-指令集-固定问题-0311"
+
+
 def test_intent_fixed_question_settings_should_load_from_yaml(tmp_path: Path):
     yaml_path = tmp_path / "config.yaml"
     yaml_path.write_text(

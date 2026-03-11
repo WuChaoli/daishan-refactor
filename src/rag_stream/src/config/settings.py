@@ -229,7 +229,7 @@ class IntentConfig(BaseConfig):
         default=5, description="固定问题候选最大数量"
     )
     fixed_question_table_name: str = Field(
-        default="岱山-指令集-固定问题", description="固定问题知识库名称"
+        default="岱山-指令集-固定问题-0311", description="固定问题知识库名称"
     )
 
     @field_validator("similarity_threshold")

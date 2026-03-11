@@ -99,16 +99,30 @@ class IntentService(BaseIntentService):
         return normalized_results
 
     @staticmethod
+    def _resolve_daishan_fixed_instruction_table(recognizer_settings) -> str:
+        configured_table_name = str(settings.intent.fixed_question_table_name or "").strip()
+        if configured_table_name and configured_table_name in recognizer_settings.database_mapping:
+            return configured_table_name
+
+        for table_name, mapped_type in recognizer_settings.database_mapping.items():
+            if mapped_type == 3:
+                return table_name
+
+        return configured_table_name
+
+    @staticmethod
     def _judge_daishan_intent_priority(table_results, recognizer_settings):
         """
         岱山优先级判断逻辑：
-        1) 优先判断【岱山-指令集】和【岱山-指令集-固定问题】中的最高相似度结果
+        1) 优先判断【岱山-指令集】和【固定问题知识库】中的最高相似度结果
         2) 若该结果 >= priority_similarity_threshold，则直接返回
         3) 否则仅在【岱山-数据库问题】中取最高相似度结果（不过 similarity_threshold）
         4) 若【岱山-数据库问题】无结果，则返回默认类型哨兵结果
         """
         instruction_table = "岱山-指令集"
-        fixed_instruction_table = "岱山-指令集-固定问题"
+        fixed_instruction_table = IntentService._resolve_daishan_fixed_instruction_table(
+            recognizer_settings
+        )
         db_question_table = "岱山-数据库问题"
         priority_threshold = float(recognizer_settings.priority_similarity_threshold)
 

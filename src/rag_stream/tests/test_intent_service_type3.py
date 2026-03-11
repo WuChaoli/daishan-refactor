@@ -37,9 +37,9 @@ def test_process_query_should_return_type3_when_fixed_question_table_is_top():
                     total_similarity=0.72,
                 )
             ],
-            "岱山-指令集-固定问题": [
+            "岱山-指令集-固定问题-0311": [
                 MockRetrievalResult(
-                    database="岱山-指令集-固定问题",
+                    database="岱山-指令集-固定问题-0311",
                     question="Question: 东区的安全负责人是谁？\tAnswer: 园区安全负责人是谁",
                     total_similarity=0.95,
                 )
@@ -51,7 +51,7 @@ def test_process_query_should_return_type3_when_fixed_question_table_is_top():
     result = asyncio.run(service.process_query("查询东区安全负责人", "user-001"))
 
     assert result["type"] == 3
-    assert result["database"] == "岱山-指令集-固定问题"
+    assert result["database"] == "岱山-指令集-固定问题-0311"
     assert result["answer"] == "园区安全负责人是谁"
 
 
@@ -62,7 +62,7 @@ def test_post_process_result_should_return_empty_answer_when_no_answer_segment()
         query="测试问题",
         results=[QueryResult(question="纯文本问题", similarity=0.9)],
         similarity=0.9,
-        database="岱山-指令集-固定问题",
+        database="岱山-指令集-固定问题-0311",
     )
 
     result = asyncio.run(service._post_process_result(intent_result))
@@ -87,7 +87,7 @@ def test_process_query_should_prioritize_instruction_tables_when_reaching_priori
                     total_similarity=0.95,
                 )
             ],
-            "岱山-指令集-固定问题": [],
+            "岱山-指令集-固定问题-0311": [],
         }
     )
     service = IntentService(ragflow_client=client)
@@ -116,9 +116,9 @@ def test_process_query_should_fallback_to_db_question_table_instead_of_global_ma
                     total_similarity=0.40,
                 )
             ],
-            "岱山-指令集-固定问题": [
+            "岱山-指令集-固定问题-0311": [
                 MockRetrievalResult(
-                    database="岱山-指令集-固定问题",
+                    database="岱山-指令集-固定问题-0311",
                     question="Question: Q3\tAnswer: A3",
                     total_similarity=0.58,
                 )
@@ -145,9 +145,9 @@ def test_process_query_should_return_default_type_when_db_question_table_is_empt
                 )
             ],
             "岱山-数据库问题": [],
-            "岱山-指令集-固定问题": [
+            "岱山-指令集-固定问题-0311": [
                 MockRetrievalResult(
-                    database="岱山-指令集-固定问题",
+                    database="岱山-指令集-固定问题-0311",
                     question="Question: Q3\tAnswer: A3",
                     total_similarity=0.58,
                 )
@@ -182,9 +182,9 @@ def test_process_query_should_use_db_question_table_even_with_low_similarity():
                     total_similarity=0.05,
                 )
             ],
-            "岱山-指令集-固定问题": [
+            "岱山-指令集-固定问题-0311": [
                 MockRetrievalResult(
-                    database="岱山-指令集-固定问题",
+                    database="岱山-指令集-固定问题-0311",
                     question="Question: Q3\tAnswer: A3",
                     total_similarity=0.58,
                 )

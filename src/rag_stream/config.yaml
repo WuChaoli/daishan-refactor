@@ -44,7 +44,7 @@ ragflow:
   database_mapping:
     岱山-指令集: 1
     岱山-数据库问题: 2
-    岱山-指令集-固定问题: 3
+    岱山-指令集-固定问题-0311: 3
 
 # ============================================================
 # 意图判断参数（业务配置）
@@ -58,7 +58,7 @@ intent:
   fixed_question_similarity_threshold: 0.6
   fixed_question_direct_threshold: 0.7
   fixed_question_top_k: 5
-  fixed_question_table_name: "岱山-指令集-固定问题"
+  fixed_question_table_name: "岱山-指令集-固定问题-0311"
 
 # ============================================================
 # 服务器配置
