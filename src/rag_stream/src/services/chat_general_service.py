@@ -137,6 +137,15 @@ async def _pick_fixed_question_candidate(
     candidates: list[dict[str, Any]],
 ) -> dict[str, Any] | None:
     if not candidates:
+        marker(
+            "fixed_question_decision",
+            _build_fixed_question_decision_log(
+                candidates=candidates,
+                decision="fallback",
+                reason="no_candidates",
+            ),
+            level="WARNING",
+        )
         return None
 
     similarity_threshold = float(settings.intent.fixed_question_similarity_threshold)
@@ -150,12 +159,28 @@ async def _pick_fixed_question_candidate(
             "fixed_question_direct_hit",
             {"best_similarity": best_similarity, "candidate_count": len(candidates)},
         )
+        marker(
+            "fixed_question_decision",
+            _build_fixed_question_decision_log(
+                candidates=candidates,
+                decision="direct_hit",
+                selected_question=str(best_candidate.get("question", "") or ""),
+            ),
+        )
         return best_candidate
 
     if best_similarity > similarity_threshold and len(candidates) == 1:
         marker(
             "fixed_question_single_candidate_direct_hit",
             {"best_similarity": best_similarity},
+        )
+        marker(
+            "fixed_question_decision",
+            _build_fixed_question_decision_log(
+                candidates=candidates,
+                decision="single_candidate_direct_hit",
+                selected_question=str(best_candidate.get("question", "") or ""),
+            ),
         )
         return best_candidate
 
@@ -169,9 +194,67 @@ async def _pick_fixed_question_candidate(
             "fixed_question_rerank_done",
             {"matched": bool(selected_question), "candidate_count": len(candidates)},
         )
-        return _pick_candidate_by_question(candidates, selected_question)
+        selected_candidate = _pick_candidate_by_question(candidates, selected_question)
+        marker(
+            "fixed_question_decision",
+            _build_fixed_question_decision_log(
+                candidates=candidates,
+                decision="rerank_select" if selected_question else "rerank_fallback_first",
+                selected_question=str(selected_candidate.get("question", "") or ""),
+                rerank_selected_question=selected_question,
+            ),
+        )
+        return selected_candidate
 
+    fallback_reason = "single_candidate_at_similarity_threshold"
+    if best_similarity < similarity_threshold:
+        fallback_reason = "below_similarity_threshold"
+    elif len(candidates) > 1:
+        fallback_reason = "no_fixed_question_selected"
+
+    marker(
+        "fixed_question_decision",
+        _build_fixed_question_decision_log(
+            candidates=candidates,
+            decision="fallback",
+            reason=fallback_reason,
+        ),
+        level="WARNING",
+    )
     return None
+
+
+@trace
+def _build_fixed_question_fallback_log(
+    all_candidates: list[dict[str, Any]],
+    top_candidates: list[dict[str, Any]],
+) -> dict[str, Any]:
+    similarity_threshold = float(settings.intent.fixed_question_similarity_threshold)
+    direct_threshold = float(settings.intent.fixed_question_direct_threshold)
+    best_similarity = 0.0
+    if all_candidates:
+        best_similarity = float(all_candidates[0].get("similarity", 0.0))
+
+    if not all_candidates:
+        reason = "no_candidates"
+    elif not top_candidates:
+        reason = "below_similarity_threshold"
+    elif len(top_candidates) == 1 and best_similarity == similarity_threshold:
+        reason = "single_candidate_at_similarity_threshold"
+    else:
+        reason = "no_fixed_question_selected"
+
+    return {
+        "reason": reason,
+        "best_similarity": best_similarity,
+        "raw_candidate_count": len(all_candidates),
+        "top_candidate_count": len(top_candidates),
+        "similarity_threshold": similarity_threshold,
+        "direct_threshold": direct_threshold,
+        "top_questions": [
+            str(item.get("question", "") or "") for item in top_candidates[:3]
+        ],
+    }
 
 
 @trace
@@ -646,12 +729,30 @@ async def handle_chat_general(
             min_similarity=float(settings.intent.fixed_question_similarity_threshold),
             top_k=int(settings.intent.fixed_question_top_k),
         )
+        marker(
+            "fixed_question_ragflow_result",
+            _build_fixed_question_ragflow_result_log(
+                original_question=request.question,
+                rewritten_question=q1,
+                alias_replaced_question=q2,
+                all_candidates=all_candidates,
+                top_candidates=top_candidates,
+            ),
+        )
 
         selected_candidate = await _pick_fixed_question_candidate(
             original_question=request.question,
             candidates=top_candidates,
         )
         if selected_candidate is None:
+            marker(
+                "fixed_question_route_fallback",
+                _build_fixed_question_fallback_log(
+                    all_candidates=all_candidates,
+                    top_candidates=top_candidates,
+                ),
+                level="WARNING",
+            )
             return await _route_low_confidence_to_general(request, chat_with_category)
 
         return await _route_selected_fixed_question(
