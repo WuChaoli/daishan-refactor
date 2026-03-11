@@ -12,6 +12,12 @@ logger = logging.getLogger(__name__)
 
 
 class MySQLManager:
+    @staticmethod
+    def _print_full_sql(sql: str) -> None:
+        if not isinstance(sql, str):
+            return
+        print(f"[DaiShanSQL FULL SQL] {sql}", flush=True)
+
     def __init__(self, config_file: str = ".env"):
         """
         初始化MySQL数据库管理器，从.env文件读取配置
@@ -40,6 +46,8 @@ class MySQLManager:
         return result
 
     def request_api_sql(self, sql):
+        self._print_full_sql(sql)
+
         if not self.api_url_ds:
             message = "SQL_DataBase is not configured"
             logger.error(message)

@@ -9,8 +9,8 @@ import copy
 import re
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
+import re
 import calendar
-
 
 def read_jsonl_file(file_path: str):
     data_list = []
@@ -184,6 +184,7 @@ class SQLPlus():
                 clean_content = json_match.group(0)
             else:
                 clean_content = content
+            # print(clean_content)
             json_obj = json.loads(clean_content)
             return json_obj
 
@@ -207,6 +208,7 @@ class SQLPlus():
                 else:
                     formatted_sql = item
                 content = self.sqlmanager.request_api_sql(formatted_sql)
+                print("sql:",formatted_sql)
                 if content:
                     results.append(content['data'])
                 else:
@@ -222,12 +224,17 @@ class SQLPlus():
         '''
         处理因为相似度太高导致的错误匹配
         '''    
-        stop_keywords = ["详细信息"]
+        params = {}
+        stop_keywords = ["信息"]
+        qualifications = ["安全生产知识和管理考核能力合格证书", "安全生产知识和管理能力考核合格证书", "安全生产知识和管理能力考核合格证", "安全生产知识和管理能力考核证书", "安全生产知识和管理能力", "化工自动化控制仪表作业", "快开门式压力容器操作", "锅炉压力管道管理", "厂内机动车辆作业", "注册安全工程师证书", "注册安全工程师证", "安全管理人员证书", "主要负责人证书", "特种设备操作证", "高压电工作业", "低压电工作业", "特种设备安全管理", "注册安全工程师", "工业锅炉司炉", "G1工业锅炉司炉", "聚合工艺作业", "加氢工艺作业", "氧化工艺作业", "高级工程师", "N1叉车司机", "电工作业", "气瓶充装", "锅炉水处理", "工程师", "安全管理", "电工", "工程"]
         for keyword in stop_keywords:
             if keyword in query:
-                return copy.deepcopy(next(data for data in self.table_plus if data['question'] == "某企业的详细信息"))
+                for qualification in qualifications:
+                    if qualification in query:
+                        params['qualification_type'] = qualification
+                        return params,copy.deepcopy(next(data for data in self.table_plus if data['question'] == "某许可证详细信息"))
 
-        return copy.deepcopy(next(data for data in self.table_plus if data['question'] == returnQuestion))
+        return params,copy.deepcopy(next(data for data in self.table_plus if data['question'] == returnQuestion))
   
     def judgeQuery(self,query,returnQuestion):
         '''
@@ -236,7 +243,9 @@ class SQLPlus():
         :param returnQuestion: 匹配到的最相似问题
         ''' 
         # 获取表的信息
-        table_data = self.getTableData(query,returnQuestion)
+        params,table_data = self.getTableData(query,returnQuestion)
+        print(returnQuestion)
+        print(table_data)
 
         # 定义字段映射配置：key是extractItem中的标识，value是处理规则
         # 格式：(prompt方法名, 结果键名, params键名, 格式化函数)
@@ -246,8 +255,10 @@ class SQLPlus():
             "NeedMonth": ("extractTime", "month", "month_value", lambda x: f"{x:02d}"),
             "NeedCompany": ("extractCompany", "company", "company_name", lambda x: x),
             "NeedWeek": ("extractWeek", "week", "week_value", lambda x: x),
+            "NeedPersonName": ("extractPersonName", "person", "person_name", lambda x: x),
+            "NeedRiskLevel": ("extractRiskLevel", "riskLevel", "riskLevel_value", lambda x: x),
+            # "NeedQualification": ("extractQualification", "qualification", "qualification_type", lambda x: x) NeedQualification在getTableData时特殊处理
         }
-        params = {}
         extract_items = table_data.get("extractItem", [])
         # 遍历配置，统一处理所有字段
         for item_key, (prompt_method, res_key, param_key, formatter) in field_configs.items():
