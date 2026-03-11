@@ -6,8 +6,18 @@ from rag_stream.config.settings import settings
 from rag_stream.utils.log_manager_import import marker, trace
 
 
-DAISHAN_ZONE_ALIAS = "岱山经开区"
+DAISHAN_ZONE_ALIASES = (
+    "岱山经开区",
+    "岱山经济开发区",
+    "岱山化工园区",
+)
 PARK_ALIAS = "园区"
+
+
+@trace
+def _clean_fixed_question_text(question_text: str) -> str:
+    text = str(question_text or "")
+    return text.replace("\r", "\n").strip()
 
 
 @trace
@@ -16,7 +26,10 @@ def replace_daishan_zone_alias(query: str) -> str:
         return query
     if not query:
         return query
-    return query.replace(DAISHAN_ZONE_ALIAS, PARK_ALIAS)
+    rewritten = query
+    for alias in DAISHAN_ZONE_ALIASES:
+        rewritten = rewritten.replace(alias, PARK_ALIAS)
+    return rewritten
 
 
 @trace

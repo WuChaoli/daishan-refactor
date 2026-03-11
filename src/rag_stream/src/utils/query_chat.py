@@ -3,12 +3,70 @@
 from __future__ import annotations
 
 import asyncio
+import re
+from functools import lru_cache
+from pathlib import Path
 from typing import Any, Optional
 
 from openai import OpenAI
 
 from rag_stream.config.settings import QueryChatConfig, settings
 from rag_stream.utils.log_manager_import import marker
+
+_ALLOWED_PLACEHOLDER_TOKENS = {"某公司", "某人", "某证书"}
+def _build_sql_plus_candidate_paths() -> tuple[Path, ...]:
+    current_root = Path(__file__).resolve().parents[4]
+    candidates = [
+        current_root / "src" / "DaiShanSQL" / "DaiShanSQL" / "SQL" / "sql_Plus.py"
+    ]
+
+    if ".worktrees" in current_root.parts:
+        worktrees_index = current_root.parts.index(".worktrees")
+        main_root = Path(*current_root.parts[:worktrees_index])
+        candidates.append(
+            main_root / "src" / "DaiShanSQL" / "DaiShanSQL" / "SQL" / "sql_Plus.py"
+        )
+
+    unique_candidates: list[Path] = []
+    for candidate in candidates:
+        if candidate not in unique_candidates:
+            unique_candidates.append(candidate)
+    return tuple(unique_candidates)
+
+
+@lru_cache(maxsize=1)
+def _load_qualification_terms() -> tuple[str, ...]:
+    candidate_paths = _build_sql_plus_candidate_paths()
+
+    for candidate_path in candidate_paths:
+        try:
+            source_text = candidate_path.read_text(encoding="utf-8")
+        except Exception:
+            continue
+
+        match = re.search(r"qualifications\s*=\s*(\[[\s\S]*?\])", source_text)
+        if not match:
+            continue
+
+        try:
+            value = eval(match.group(1), {"__builtins__": {}}, {})
+        except Exception as error:
+            marker(
+                "query_chat.qualification_terms_parse_failed",
+                {"error": str(error), "path": str(candidate_path)},
+                level="WARNING",
+            )
+            return ()
+
+        if isinstance(value, list):
+            return tuple(str(item).strip() for item in value if str(item).strip())
+
+    marker(
+        "query_chat.qualification_terms_missing",
+        {"paths": [str(path) for path in candidate_paths]},
+        level="WARNING",
+    )
+    return ()
 
 
 class QueryChat:
@@ -81,33 +139,57 @@ class QueryChat:
         return str(content or "")
 
     @staticmethod
-    def _validate_content(text: str, original: str) -> tuple[bool, str]:
-        """验证 AI 返回的内容是否有效。
+    def _find_unsupported_placeholder_tokens(text: str) -> list[str]:
+        sanitized = str(text or "")
+        for token in _ALLOWED_PLACEHOLDER_TOKENS:
+            sanitized = sanitized.replace(token, "")
+        return ["某*"] if "某" in sanitized else []
 
-        Returns:
-            (is_valid, reason) 元组
-        """
+    @classmethod
+    def _validate_content(cls, text: str, original: str) -> tuple[bool, str]:
+        """验证 AI 返回的内容是否有效。"""
         if not text:
             return False, "empty"
 
-        # 检测 JSON 格式（AI 错误返回）
-        if text.strip().startswith(("{", "[")):
+        stripped_text = text.strip()
+        if stripped_text.startswith(("{", "[")):
             return False, "json"
 
-        # 检测指令性文字（AI 在解释而非改写）
-        instruction_keywords = ["请", "应该", "建议", "需要", "可以"]
-        if any(kw in text for kw in instruction_keywords):
-            # 但排除原句本身就包含这些词的情况
-            if not any(kw in original for kw in instruction_keywords):
+        if "\n" in stripped_text or "\r" in stripped_text:
+            return False, "multiline"
+
+        instruction_keywords = ["请", "应该", "建议", "需要", "可以", "替换后", "说明"]
+        if any(keyword in stripped_text for keyword in instruction_keywords):
+            if not any(keyword in original for keyword in instruction_keywords):
                 return False, "instruction"
 
-        # 检测多行文本（可能包含解释）
-        if "\n" in text and len(text.split("\n")) > 2:
-            return False, "multiline"
+        unsupported_tokens = cls._find_unsupported_placeholder_tokens(stripped_text)
+        if unsupported_tokens:
+            return False, "unsupported_placeholder"
 
         return True, ""
 
-    def rewrite_query_remove_company(self, query: str) -> str:
+    @staticmethod
+    def _normalize_model_output(text: str) -> str:
+        return str(text or "").replace("\r", "").strip()
+
+    def _build_placeholder_rewrite_prompt(self) -> str:
+        qualification_terms = _load_qualification_terms()
+        qualification_text = "、".join(qualification_terms)
+        return (
+            "你是中文问句占位改写助手。"
+            "请在保持原句语义、顺序和语气不变的前提下，只做定向占位替换。"
+            "替换规则："
+            "1. 园区相关名称统一替换为‘园区’；"
+            "2. 公司名称统一替换为‘某公司’；"
+            "3. 人名统一替换为‘某人’；"
+            "4. 证书、资质、许可证名称若命中给定词表则统一替换为‘某证书’。"
+            "允许保留已有的‘园区/某公司/某人/某证书’，不要编号，不要扩写，不要解释，不要删除非目标信息。"
+            "只返回改写后的单句文本。"
+            f"证书词表：{qualification_text}"
+        )
+
+    def rewrite_query_with_placeholders(self, query: str) -> str:
         if not isinstance(query, str):
             marker(
                 "query_chat.invalid_input",
@@ -121,7 +203,7 @@ class QueryChat:
             marker("query_chat.empty_query", {}, level="WARNING")
             return query
 
-        marker("query_chat.attempt", {"query_len": len(source_query)})
+        marker("query_chat.request_start", {"query_len": len(source_query)})
         try:
             client = self._get_client()
             response = client.chat.completions.create(
@@ -130,38 +212,37 @@ class QueryChat:
                 messages=[
                     {
                         "role": "system",
-                        "content": (
-                            "你是中文问句清洗助手。"
-                            "只做一件事：删除用户句子中的企业名称和园区/开发区名称。"
-                            "需要删除的内容包括：企业名称（如XX公司、XX集团）、园区名称（如岱山经开区、经开区、岱山经济开发区、岱山开发区等）。"
-                            "除上述名称外，保留原句其余内容和语义，不要扩写，不要解释。"
-                            "只返回清洗后的单句文本。"
-                        ),
+                        "content": self._build_placeholder_rewrite_prompt(),
                     },
                     {"role": "user", "content": source_query},
                 ],
             )
-            rewritten = self._extract_text_content(response).strip()
+            rewritten = self._normalize_model_output(self._extract_text_content(response))
         except Exception as error:
-            marker("query_chat.api_error", {"error": str(error)}, level="ERROR")
+            marker("query_chat.request_failed", {"error": str(error)}, level="ERROR")
             raise
 
         if not rewritten:
             marker("query_chat.empty_response", {}, level="WARNING")
             return query
 
-        # 内容验证
-        is_valid, reason = self._validate_content(rewritten, query)
+        is_valid, reason = self._validate_content(rewritten, source_query)
         if not is_valid:
             marker(
                 "query_chat.content_invalid",
                 {"reason": reason, "response_preview": rewritten[:100]},
                 level="WARNING",
             )
-            return query  # 回退原句
+            return query
 
-        marker("query_chat.success", {"output_len": len(rewritten)})
+        marker(
+            "query_chat.request_complete",
+            {"output_len": len(rewritten), "normalized": rewritten != source_query},
+        )
         return rewritten
+
+    def rewrite_query_remove_company(self, query: str) -> str:
+        return self.rewrite_query_with_placeholders(query)
 
     @staticmethod
     def _resolve_candidate_from_response(response_text: str, candidates: list[str]) -> str:
@@ -186,7 +267,9 @@ class QueryChat:
 
     def rerank_fixed_question_candidates(self, query: str, candidates: list[str]) -> str:
         normalized_query = str(query or "").strip()
-        normalized_candidates = [str(item or "").strip() for item in candidates if str(item or "").strip()]
+        normalized_candidates = [
+            str(item or "").strip() for item in candidates if str(item or "").strip()
+        ]
         if not normalized_query or not normalized_candidates:
             return ""
 
@@ -245,16 +328,7 @@ def get_query_chat() -> QueryChat:
 
 
 async def rewrite_query(query: str, config: QueryChatConfig) -> str:
-    """异步改写 query，删除企业名称。
-
-    Args:
-        query: 原始查询字符串
-        config: QueryChat 配置对象
-
-    Returns:
-        改写后的字符串，失败时返回原 query
-    """
-    # 输入验证
+    """异步改写 query，输出占位后的 q1。"""
     if not isinstance(query, str):
         marker(
             "rewrite_query.invalid_input",
@@ -267,15 +341,13 @@ async def rewrite_query(query: str, config: QueryChatConfig) -> str:
     if not source_query:
         return query
 
-    # 使用 asyncio.to_thread 包装同步调用
     try:
         chat = QueryChat(config)
         result = await asyncio.to_thread(
-            chat.rewrite_query_remove_company, source_query
+            chat.rewrite_query_with_placeholders, source_query
         )
         return result
     except Exception:
-        # 任何异常都返回原 query（降级）
         return query
 
 

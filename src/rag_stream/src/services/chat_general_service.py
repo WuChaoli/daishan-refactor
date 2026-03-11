@@ -56,10 +56,10 @@ def _log_fallback_error_and_reraise(error: Exception) -> None:
 @trace
 async def replace_economic_zone(query: str) -> str:
     """
-    使用 AI 对 query 进行企业名称清理。
+    使用 AI 对 q2 生成占位化后的 q1。
 
-    始终调用模型进行问题删除，不再依赖关键词触发。
-    失败时返回原 query，不再执行正则替换。
+    始终调用模型进行占位替换，不再依赖关键词触发。
+    失败时返回原 query。
     """
     if not isinstance(query, str) or not query:
         marker(
@@ -113,6 +113,72 @@ def _build_chat_request_with_question(request: ChatRequest, question: str) -> Ch
         user_id=request.user_id,
         stream=request.stream,
     )
+
+
+@trace
+def _build_fixed_question_candidate_log_items(
+    candidates: list[dict[str, Any]],
+    limit: int = 5,
+) -> list[dict[str, Any]]:
+    log_items: list[dict[str, Any]] = []
+    for index, item in enumerate(candidates[: max(int(limit), 0)], start=1):
+        log_items.append(
+            {
+                "rank": index,
+                "question": str(item.get("question", "") or ""),
+                "raw_question": str(item.get("raw_question", "") or ""),
+                "similarity": float(item.get("similarity", 0.0)),
+            }
+        )
+    return log_items
+
+
+@trace
+def _build_fixed_question_ragflow_result_log(
+    original_question: str,
+    rewritten_question: str,
+    alias_replaced_question: str,
+    all_candidates: list[dict[str, Any]],
+    top_candidates: list[dict[str, Any]],
+) -> dict[str, Any]:
+    similarity_threshold = float(settings.intent.fixed_question_similarity_threshold)
+    direct_threshold = float(settings.intent.fixed_question_direct_threshold)
+    return {
+        "query_original": str(original_question or ""),
+        "query_rewritten": str(rewritten_question or ""),
+        "query_alias_replaced": str(alias_replaced_question or ""),
+        "similarity_threshold": similarity_threshold,
+        "direct_threshold": direct_threshold,
+        "ragflow_candidate_count": len(all_candidates),
+        "selected_pool_count": len(top_candidates),
+        "ragflow_candidates": _build_fixed_question_candidate_log_items(all_candidates),
+        "selected_pool": _build_fixed_question_candidate_log_items(top_candidates),
+    }
+
+
+@trace
+def _build_fixed_question_decision_log(
+    candidates: list[dict[str, Any]],
+    decision: str,
+    selected_question: str = "",
+    rerank_selected_question: str = "",
+    reason: str = "",
+) -> dict[str, Any]:
+    similarity_threshold = float(settings.intent.fixed_question_similarity_threshold)
+    direct_threshold = float(settings.intent.fixed_question_direct_threshold)
+    best_candidate = candidates[0] if candidates else {}
+    return {
+        "decision": decision,
+        "reason": reason,
+        "selected_question": str(selected_question or ""),
+        "rerank_selected_question": str(rerank_selected_question or ""),
+        "candidate_count": len(candidates),
+        "best_question": str(best_candidate.get("question", "") or ""),
+        "best_similarity": float(best_candidate.get("similarity", 0.0)) if best_candidate else 0.0,
+        "similarity_threshold": similarity_threshold,
+        "direct_threshold": direct_threshold,
+        "candidates": _build_fixed_question_candidate_log_items(candidates),
+    }
 
 
 @trace

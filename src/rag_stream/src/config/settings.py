@@ -428,10 +428,10 @@ class QueryChatConfig(BaseConfig):
     """
     Query Chat 配置
 
-    用于 query 预处理（企业名称清理）的聊天模型配置
+    用于 q1 占位改写的聊天模型配置
     """
 
-    enabled: bool = Field(default=True, description="是否启用 query 清理功能")
+    enabled: bool = Field(default=True, description="是否启用 q1 占位改写功能")
     api_key: str = Field(default="", description="聊天服务 API Key")
     base_url: str = Field(default="", description="聊天服务 Base URL")
     model: str = Field(default="", description="聊天模型名称")
@@ -741,7 +741,7 @@ class Settings(BaseModel):
 
         if missing:
             logger.warning(
-                "QUERY_CHAT 配置不完整（缺少: %s），query 清理功能将降级运行",
+                "QUERY_CHAT 配置不完整（缺少: %s），q1 占位改写功能将降级运行",
                 ", ".join(missing),
             )
 
