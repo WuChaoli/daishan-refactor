@@ -1,0 +1,9 @@
+question_source_path: scripts/岱山-指令集-固定问题 -测试问题0311.xlsx
+base_url: http://127.0.0.1:11028
+log_source_path: /path/to/rag_stream.log
+host: 127.0.0.1
+port: 8000
+user_id_prefix: fixed_question_export
+startup_timeout: 60
+request_timeout: 180
+question_limit:
