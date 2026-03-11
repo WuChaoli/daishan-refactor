@@ -75,9 +75,10 @@ async def _run_post_process_type2_success():
             )
 
     assert result["type"] == 2
-    names = [call.args[0] for call in mock_marker.call_args_list]
-    assert "DaiShanSQL入参" in names
-    assert "DaiShanSQL出参" in names
+    matched_calls = [call for call in mock_marker.call_args_list if call.args and call.args[0] == "chat_general.daishansql"]
+    assert matched_calls
+    assert matched_calls[-1].args[1]["called"] is True
+    assert matched_calls[-1].args[1]["method"] == "get_sql_result"
 
 
 def test_post_process_type2_should_log_input_output():
@@ -98,11 +99,9 @@ async def _run_post_process_type2_error():
             else:
                 raise AssertionError("expected RuntimeError")
 
-    has_error_marker = any(
-        call.args and call.args[0] == "DaiShanSQL出参" and call.kwargs.get("level") == "ERROR"
-        for call in mock_marker.call_args_list
-    )
-    assert has_error_marker
+    matched_calls = [call for call in mock_marker.call_args_list if call.args and call.args[0] == "chat_general.daishansql"]
+    assert matched_calls
+    assert matched_calls[-1].kwargs.get("level") == "ERROR"
 
 
 def test_post_process_type2_should_log_error_and_reraise():
@@ -155,7 +154,7 @@ def test_query_table_structure_should_log_input_output():
     assert "DaiShanSQL出参" in names
 
 
-def test_type1_prompt_mapping_load_and_lookup_markers():
+def test_type1_prompt_mapping_lookup_should_not_emit_extra_markers():
     with patch.object(chat_general_service, "marker") as mock_marker:
         with patch.object(
             chat_general_service,
@@ -167,11 +166,10 @@ def test_type1_prompt_mapping_load_and_lookup_markers():
             / "type1_question_mapping.json",
         ):
             chat_general_service._clear_prompt_mapping_cache()
-            _ = chat_general_service._find_type1_mapping_by_question("I 企业的情况介绍一下")
+            prompt_text = chat_general_service._find_type1_mapping_by_question("I 企业的情况介绍一下")
 
-    names = [call.args[0] for call in mock_marker.call_args_list if call.args]
-    assert "type1.prompt_mapping_loaded" in names
-    assert "type1.prompt_mapping_lookup" in names
+    assert prompt_text
+    assert mock_marker.call_count == 0
 
 
 async def _run_fixed_question_prompt_fallback_marker():
@@ -211,8 +209,10 @@ async def _run_fixed_question_prompt_fallback_marker():
             chat_with_category=chat_with_category,
         )
 
-    names = [call.args[0] for call in mock_marker.call_args_list if call.args]
-    assert "fixed_question_prompt_unavailable" in names
+    matched_calls = [call for call in mock_marker.call_args_list if call.args and call.args[0] == "chat_general.daishansql"]
+    assert matched_calls
+    assert matched_calls[-1].args[1]["called"] is False
+    assert matched_calls[-1].args[1]["reason"] == "prompt_unavailable"
 
 
 def test_fixed_question_prompt_mapping_fallback_marker():
@@ -251,18 +251,17 @@ async def _run_fixed_question_fallback_reason_marker_at_threshold():
             chat_with_category=chat_with_category,
         )
 
-    matched_calls = [
+    decision_calls = [
         call
         for call in mock_marker.call_args_list
-        if call.args and call.args[0] == "fixed_question_route_fallback"
+        if call.args and call.args[0] == "chat_general.intent_decision"
     ]
-    assert matched_calls
+    assert decision_calls
 
-    fallback_data = matched_calls[-1].args[1]
+    fallback_data = decision_calls[-1].args[1]
+    assert fallback_data["decision"] == "fallback"
     assert fallback_data["reason"] == "single_candidate_at_similarity_threshold"
     assert fallback_data["best_similarity"] == 0.6
-    assert fallback_data["raw_candidate_count"] == 1
-    assert fallback_data["top_candidate_count"] == 1
 
 
 def test_fixed_question_fallback_reason_marker_at_threshold():
@@ -320,27 +319,28 @@ async def _run_fixed_question_ragflow_and_decision_logging():
     matched_ragflow_calls = [
         call
         for call in mock_marker.call_args_list
-        if call.args and call.args[0] == "fixed_question_ragflow_result"
+        if call.args and call.args[0] == "chat_general.ragflow_result"
     ]
     assert matched_ragflow_calls
     ragflow_payload = matched_ragflow_calls[-1].args[1]
     assert ragflow_payload["query_original"] == "介绍一下岱山经开区情况"
-    assert ragflow_payload["query_rewritten"] == "介绍一下园区情况"
-    assert ragflow_payload["similarity_threshold"] == 0.6
-    assert ragflow_payload["direct_threshold"] == 0.7
-    assert ragflow_payload["ragflow_candidates"][0]["question"] == "园区地址在哪"
-    assert ragflow_payload["ragflow_candidates"][0]["similarity"] == 0.7
+    assert ragflow_payload["query_q1"] == "介绍一下园区情况"
+    assert ragflow_payload["query_q2"] == "介绍一下园区情况"
+    assert ragflow_payload["candidate_count"] == 2
+    assert ragflow_payload["top_candidates"][0]["question"] == "园区地址在哪"
+    assert ragflow_payload["top_candidates"][0]["similarity"] == 0.7
 
     matched_decision_calls = [
         call
         for call in mock_marker.call_args_list
-        if call.args and call.args[0] == "fixed_question_decision"
+        if call.args and call.args[0] == "chat_general.intent_decision"
     ]
     assert matched_decision_calls
     decision_payload = matched_decision_calls[-1].args[1]
     assert decision_payload["decision"] == "direct_hit"
     assert decision_payload["selected_question"] == "园区地址在哪"
     assert decision_payload["best_similarity"] == 0.7
+    assert decision_payload["direct_threshold"] == 0.7
 
 
 def test_fixed_question_should_log_ragflow_result_and_decision_process():

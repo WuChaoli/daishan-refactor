@@ -166,6 +166,21 @@ class SQLPlus():
             base_url=os.getenv("Qwen2.5_7B_base_url"),
             api_key=os.getenv("Qwen2.5_7B_api_key"),
         )
+        self._last_execution_log = []
+
+    def _record_execution(self, sql_text, result=None, error=""):
+        self._last_execution_log.append(
+            {
+                "sql_text": str(sql_text or ""),
+                "result": result,
+                "error": str(error or ""),
+            }
+        )
+
+    def consume_last_execution_log(self):
+        logs = list(self._last_execution_log)
+        self._last_execution_log = []
+        return logs
     
     def extractItem(self, prompt):
         '''
@@ -210,8 +225,10 @@ class SQLPlus():
                 content = self.sqlmanager.request_api_sql(formatted_sql)
                 print("sql:",formatted_sql)
                 if content:
+                    self._record_execution(formatted_sql, content.get('data'))
                     results.append(content['data'])
                 else:
+                    self._record_execution(formatted_sql, ["数据库查询失败"])
                     results.append(["数据库查询失败"])
             except KeyError as e:
                 # 捕获format_map时参数缺失的错误

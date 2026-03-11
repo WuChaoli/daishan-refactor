@@ -7,7 +7,7 @@ from typing import Any, Dict, List
 
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
-from rag_stream.utils.log_manager_import import entry_trace, marker
+from rag_stream.utils.log_manager_import import marker
 
 from rag_stream.config.settings import settings
 from rag_stream.models.schemas import (
@@ -95,35 +95,29 @@ async def health_ready(request: Request) -> Dict[str, Any]:
     return response
 
 
-@router.post("/api/chat/{category}", response_model=ChatResponse)
-@entry_trace("chat-category")
-async def chat_with_category(
+async def _build_category_stream_response(
     category: str,
     request: ChatRequest,
+    emit_chat_general_stream_log: bool = False,
 ):
-    """通用聊天接口，根据类别选择对应的chat_id"""
     user_id = request.user_id or None
-    marker(
-        "分类聊天请求",
-        {
-            "category": category,
-            "has_user_id": bool(user_id),
-            "question_len": len(request.question),
-        },
-    )
     if category not in settings.ragflow.chat_ids:
-        marker("分类聊天请求拒绝", {"unsupported_category": category}, level="WARNING")
         raise HTTPException(status_code=400, detail=f"不支持的类别: {category}")
 
     chat_id = settings.ragflow.chat_ids[category]
-    marker("chat_id获取", {"chat_id": chat_id})
-
     session_id = await get_or_create_session(chat_id, category, user_id)
-    marker(
-        "会话就绪", {"category": category, "chat_id": chat_id, "session_id": session_id}
-    )
-
-    marker("分类聊天流式响应启动", {"category": category, "session_id": session_id})
+    if emit_chat_general_stream_log:
+        if session_id in session_manager.sessions:
+            session_manager.sessions[session_id]["emit_chat_general_stream_log"] = True
+        marker(
+            "chat_general.stream",
+            {
+                "phase": "start",
+                "category": category,
+                "chat_id": chat_id,
+                "session_id": session_id,
+            },
+        )
 
     return StreamingResponse(
         stream_chat_response(chat_id, request.question, session_id, user_id),
@@ -135,6 +129,15 @@ async def chat_with_category(
             "Access-Control-Allow-Headers": "*",
         },
     )
+
+
+@router.post("/api/chat/{category}", response_model=ChatResponse)
+async def chat_with_category(
+    category: str,
+    request: ChatRequest,
+):
+    """通用聊天接口，根据类别选择对应的chat_id"""
+    return await _build_category_stream_response(category, request)
 
 
 async def chat_with_dify(request: ChatRequest):
@@ -220,28 +223,37 @@ async def dict_to_stream_generator(result_dict: dict):
 
 
 @router.post("/api/general", response_model=ChatResponse)
-@entry_trace("chat-general")
 async def chat_general(request: ChatRequest, http_request: Request):
     """
     通用问答接口 - 使用意图识别路由
     """
     intent_service = getattr(http_request.app.state, "intent_service", None)
     if intent_service is None:
-        marker("通用问答路由失败", {"reason": "intent_service未初始化"}, level="ERROR")
         raise HTTPException(status_code=500, detail="intent_service 未初始化")
 
     marker(
-        "通用问答路由开始",
-        {"question_len": len(request.question), "has_user_id": bool(request.user_id)},
+        "chat_general.enter",
+        {
+            "interface": "/api/general",
+            "question": request.question,
+            "has_user_id": bool(request.user_id),
+            "has_session_id": bool(request.session_id),
+            "stream": bool(request.stream),
+        },
     )
 
-    response = await handle_chat_general(
+    async def _chat_with_general_stream(category: str, routed_request: ChatRequest):
+        return await _build_category_stream_response(
+            category=category,
+            request=routed_request,
+            emit_chat_general_stream_log=True,
+        )
+
+    return await handle_chat_general(
         request=request,
         intent_service=intent_service,
-        chat_with_category=chat_with_category,
+        chat_with_category=_chat_with_general_stream,
     )
-    marker("通用问答路由完成", {})
-    return response
 
 
 @router.post("/api/warn", response_model=ChatResponse)

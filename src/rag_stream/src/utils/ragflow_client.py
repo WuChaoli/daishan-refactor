@@ -18,6 +18,21 @@ from ragflow_sdk.models import RetrievalRequest
 T = TypeVar("T")
 
 
+def _build_result_summary_item(result: Any) -> dict[str, Any]:
+    question = str(getattr(result, "question", "") or "").strip()
+    return {
+        "question": question,
+        "similarity": float(getattr(result, "total_similarity", 0.0) or 0.0),
+    }
+
+
+def _build_result_summary_list(results: list[Any], limit: int = 3) -> list[dict[str, Any]]:
+    summary_items: list[dict[str, Any]] = []
+    for item in results[: max(int(limit), 0)]:
+        summary_items.append(_build_result_summary_item(item))
+    return summary_items
+
+
 def with_retry(config: RAGFlowConfig, operation_name: str = "operation"):
     """
     重试装饰器，使用指数退避策略
@@ -249,7 +264,6 @@ class RagflowClient:
             marker("ragflow.datasets.error", {"error": str(e)}, level="ERROR")
             raise
 
-    @trace
     async def query_all_databases(self, query: str) -> List[RetrievalResult]:
         """
         查询所有知识库并返回合并后的结果
@@ -260,9 +274,8 @@ class RagflowClient:
         Returns:
             按相似度降序排序的检索结果列表
         """
-        marker("ragflow.query_all.start", {"query_preview": query[:50], "query_len": len(query)})
+        marker("ragflow.query_all.start", {"query_len": len(query)})
         database_count = len(self.ragflow_config.database_mapping.keys())
-        marker("ragflow.query_all.parallel_start", {"database_count": database_count, "query_len": len(query)})
 
         # 并发查询所有知识库
         tasks = [
@@ -283,7 +296,16 @@ class RagflowClient:
             if isinstance(result, list):
                 all_results.extend(result)
 
-        marker("ragflow.query_all.complete", {"result_count": len(all_results), "exception_count": exception_count})
+        marker(
+            "ragflow.query_all.complete",
+            {
+                "query_len": len(query),
+                "database_count": database_count,
+                "result_count": len(all_results),
+                "exception_count": exception_count,
+                "top_results": _build_result_summary_list(all_results),
+            },
+        )
 
         # 按相似度降序排序
         all_results.sort(key=lambda x: x.total_similarity, reverse=True)
@@ -297,7 +319,6 @@ class RagflowClient:
         return all_results, instruct_results
         # return all_results
 
-    @trace
     async def query_single_database(
         self, query: str, database: str
     ) -> List[RetrievalResult]:
@@ -335,19 +356,32 @@ class RagflowClient:
                 timeout=self.single_query_timeout,
             )
 
-            marker("单库查询完成", {"database": database, "result_count": len(results)})
+            marker(
+                "ragflow.query_single.complete",
+                {
+                    "database": database,
+                    "query_len": len(query),
+                    "chunk_count": len(results),
+                    "top_question": str(results[0].question or "") if results else "",
+                    "top_similarity": float(results[0].total_similarity) if results else 0.0,
+                },
+            )
             return results
 
         except asyncio.TimeoutError:
             marker(
-                "单库查询超时",
-                {"database": database, "timeout": self.single_query_timeout},
+                "ragflow.query_single.timeout",
+                {"database": database, "query_len": len(query), "timeout": self.single_query_timeout},
                 level="WARNING",
             )
             return []
 
         except Exception as e:
-            marker("单库查询失败", {"database": database, "error": str(e)}, level="ERROR")
+            marker(
+                "ragflow.query_single.failed",
+                {"database": database, "query_len": len(query), "error": str(e)},
+                level="ERROR",
+            )
             return []
 
     async def _query_with_sdk(self, query: str, dataset) -> List[RetrievalResult]:
@@ -370,7 +404,6 @@ class RagflowClient:
             None, lambda: self.client.retrieve(retrieval)
         )
         chunk_count = len(chunks) if chunks else 0
-        marker("SDK检索返回", {"database": dataset.name, "chunk_count": chunk_count})
 
         results = []
         if chunks:
@@ -384,6 +417,16 @@ class RagflowClient:
                 )
                 results.append(result)
 
+        marker(
+            "ragflow.query_sdk.complete",
+            {
+                "database": dataset.name,
+                "query_len": len(query),
+                "chunk_count": chunk_count,
+                "top_question": str(results[0].question or "") if results else "",
+                "top_similarity": float(results[0].total_similarity) if results else 0.0,
+            },
+        )
         return results
 
     def _build_retrieval_request(self, query: str, dataset_id: str) -> RetrievalRequest:

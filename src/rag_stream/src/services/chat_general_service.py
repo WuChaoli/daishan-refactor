@@ -12,8 +12,7 @@ from rag_stream.services.fixed_question_flow_service import (
     replace_daishan_zone_alias,
     select_top_candidates,
 )
-from rag_stream.utils.log_manager_import import entry_trace, marker, trace
-from rag_stream.utils.daishan_sql_logging import format_daishan_log_text
+from rag_stream.utils.log_manager_import import marker
 from rag_stream.utils.query_chat import (
     rerank_fixed_question_candidates,
     rewrite_query,
@@ -37,6 +36,118 @@ _prompt_mapping_cache: dict[str, dict[str, dict[str, Any]]] = {}
 LOW_CONFIDENCE_REPLY = "对不起，该问题超出系统回答范围，请重新提问"
 
 
+def _build_ragflow_result_log(
+    original_question: str,
+    q1: str,
+    q2: str,
+    all_candidates: list[dict[str, Any]],
+) -> dict[str, Any]:
+    top_candidates: list[dict[str, Any]] = []
+    for item in all_candidates[:3]:
+        top_candidates.append(
+            {
+                "question": str(item.get("question", "") or ""),
+                "similarity": float(item.get("similarity", 0.0) or 0.0),
+            }
+        )
+    return {
+        "query_original": str(original_question or ""),
+        "query_q1": str(q1 or ""),
+        "query_q2": str(q2 or ""),
+        "table_name": str(settings.intent.fixed_question_table_name),
+        "candidate_count": len(all_candidates),
+        "top_candidates": top_candidates,
+    }
+
+
+def _build_intent_decision_log(
+    candidates: list[dict[str, Any]],
+    decision: str,
+    selected_question: str = "",
+    selected_similarity: float = 0.0,
+    reason: str = "",
+) -> dict[str, Any]:
+    best_candidate = candidates[0] if candidates else {}
+    return {
+        "decision": decision,
+        "reason": reason,
+        "selected_question": str(selected_question or ""),
+        "selected_similarity": float(selected_similarity or 0.0),
+        "best_question": str(best_candidate.get("question", "") or ""),
+        "best_similarity": float(best_candidate.get("similarity", 0.0)) if best_candidate else 0.0,
+        "similarity_threshold": float(settings.intent.fixed_question_similarity_threshold),
+        "direct_threshold": float(settings.intent.fixed_question_direct_threshold),
+    }
+
+
+def _log_daishansql_call(
+    called: bool,
+    method: str = "",
+    request_payload: Any = None,
+    sql_text: Any = "",
+    result: Any = None,
+    reason: str = "",
+    sql_source: str = "unavailable",
+    error: str = "",
+    level: str = "INFO",
+) -> None:
+    marker(
+        "chat_general.daishansql",
+        {
+            "called": called,
+            "method": method,
+            "request": request_payload,
+            "sql_source": sql_source,
+            "sql_text": sql_text,
+            "result": result,
+            "reason": reason,
+            "error": error,
+        },
+        level=level,
+    )
+
+
+def _extract_sql_texts_from_agent_result(sql_result: Any) -> list[str]:
+    sql_texts: list[str] = []
+    if not isinstance(sql_result, list):
+        return sql_texts
+    for item in sql_result:
+        if not isinstance(item, dict):
+            continue
+        sql_value = item.get("sql语句", "")
+        if isinstance(sql_value, set):
+            sql_texts.extend(str(part) for part in sql_value if str(part).strip())
+            continue
+        if isinstance(sql_value, (list, tuple)):
+            sql_texts.extend(str(part) for part in sql_value if str(part).strip())
+            continue
+        if str(sql_value).strip():
+            sql_texts.append(str(sql_value).strip())
+    return sql_texts
+
+
+def _consume_execution_logs(executor: Any) -> list[dict[str, Any]]:
+    consume = getattr(executor, "consume_last_execution_log", None)
+    if not callable(consume):
+        return []
+    try:
+        logs = consume()
+    except Exception:
+        return []
+    return logs if isinstance(logs, list) else []
+
+
+def _extract_sql_texts_from_execution_logs(logs: list[dict[str, Any]]) -> list[str]:
+    sql_texts: list[str] = []
+    for item in logs:
+        if not isinstance(item, dict):
+            continue
+        sql_text = str(item.get("sql_text", "") or "").strip()
+        if sql_text:
+            sql_texts.append(sql_text)
+    return sql_texts
+
+
 def _get_server() -> Server:
     global _server
     if _server is None:
@@ -53,7 +164,6 @@ def _log_fallback_error_and_reraise(error: Exception) -> None:
     raise error
 
 
-@trace
 async def replace_economic_zone(query: str) -> str:
     """
     使用 AI 对 q2 生成占位化后的 q1。
@@ -62,41 +172,29 @@ async def replace_economic_zone(query: str) -> str:
     失败时返回原 query。
     """
     if not isinstance(query, str) or not query:
-        marker(
-            "query_normalized_skip_invalid",
-            {"input_type": type(query).__name__ if query is not None else "None"},
-            level="WARNING",
-        )
         return query
 
     if not settings.query_chat.enabled:
-        marker("query_normalized_disabled", {"query_len": len(query)})
         return query
 
     if (
         not (settings.query_chat.api_key or "").strip()
         or not (settings.query_chat.base_url or "").strip()
     ):
-        marker("query_normalized_misconfigured", {"query_len": len(query)})
         return query
 
-    marker("query_normalized_start", {"query_len": len(query)})
     try:
         rewritten = await rewrite_query(query, settings.query_chat)
-    except Exception as error:
-        marker("query_normalized_failed", {"error": str(error)}, level="WARNING")
+    except Exception:
         return query
 
     rewritten_text = str(rewritten).strip() if rewritten is not None else ""
     if not rewritten_text:
-        marker("query_normalized_empty", {}, level="WARNING")
         return query
 
-    marker("query_normalized", {"normalized": rewritten_text != query})
     return rewritten_text
 
 
-@trace
 async def _build_query_variants(query: str) -> tuple[str, str]:
     if not isinstance(query, str):
         return query, query
@@ -115,7 +213,6 @@ def _build_chat_request_with_question(request: ChatRequest, question: str) -> Ch
     )
 
 
-@trace
 def _build_fixed_question_candidate_log_items(
     candidates: list[dict[str, Any]],
     limit: int = 5,
@@ -133,7 +230,6 @@ def _build_fixed_question_candidate_log_items(
     return log_items
 
 
-@trace
 def _build_fixed_question_ragflow_result_log(
     original_question: str,
     rewritten_question: str,
@@ -156,7 +252,6 @@ def _build_fixed_question_ragflow_result_log(
     }
 
 
-@trace
 def _build_fixed_question_decision_log(
     candidates: list[dict[str, Any]],
     decision: str,
@@ -181,7 +276,6 @@ def _build_fixed_question_decision_log(
     }
 
 
-@trace
 def _pick_candidate_by_question(
     candidates: list[dict[str, Any]],
     selected_question: str,
@@ -197,80 +291,54 @@ def _pick_candidate_by_question(
     return candidates[0]
 
 
-@trace
 async def _pick_fixed_question_candidate(
     original_question: str,
     candidates: list[dict[str, Any]],
-) -> dict[str, Any] | None:
+) -> tuple[dict[str, Any] | None, dict[str, Any]]:
     if not candidates:
-        marker(
-            "fixed_question_decision",
-            _build_fixed_question_decision_log(
-                candidates=candidates,
-                decision="fallback",
-                reason="no_candidates",
-            ),
-            level="WARNING",
+        return None, _build_intent_decision_log(
+            candidates=candidates,
+            decision="fallback",
+            reason="no_candidates",
         )
-        return None
 
     similarity_threshold = float(settings.intent.fixed_question_similarity_threshold)
     direct_threshold = float(settings.intent.fixed_question_direct_threshold)
 
     best_candidate = candidates[0]
     best_similarity = float(best_candidate.get("similarity", 0.0))
+    selected_question = str(best_candidate.get("question", "") or "")
 
     if best_similarity >= direct_threshold:
-        marker(
-            "fixed_question_direct_hit",
-            {"best_similarity": best_similarity, "candidate_count": len(candidates)},
+        return best_candidate, _build_intent_decision_log(
+            candidates=candidates,
+            decision="direct_hit",
+            selected_question=selected_question,
+            selected_similarity=best_similarity,
         )
-        marker(
-            "fixed_question_decision",
-            _build_fixed_question_decision_log(
-                candidates=candidates,
-                decision="direct_hit",
-                selected_question=str(best_candidate.get("question", "") or ""),
-            ),
-        )
-        return best_candidate
 
     if best_similarity > similarity_threshold and len(candidates) == 1:
-        marker(
-            "fixed_question_single_candidate_direct_hit",
-            {"best_similarity": best_similarity},
+        return best_candidate, _build_intent_decision_log(
+            candidates=candidates,
+            decision="single_candidate_direct_hit",
+            selected_question=selected_question,
+            selected_similarity=best_similarity,
         )
-        marker(
-            "fixed_question_decision",
-            _build_fixed_question_decision_log(
-                candidates=candidates,
-                decision="single_candidate_direct_hit",
-                selected_question=str(best_candidate.get("question", "") or ""),
-            ),
-        )
-        return best_candidate
 
     if similarity_threshold <= best_similarity < direct_threshold and len(candidates) > 1:
-        selected_question = await rerank_fixed_question_candidates(
+        rerank_question = await rerank_fixed_question_candidates(
             original_question,
             [str(item.get("question", "") or "") for item in candidates],
             settings.query_chat,
         )
-        marker(
-            "fixed_question_rerank_done",
-            {"matched": bool(selected_question), "candidate_count": len(candidates)},
+        selected_candidate = _pick_candidate_by_question(candidates, rerank_question)
+        return selected_candidate, _build_intent_decision_log(
+            candidates=candidates,
+            decision="rerank_select" if rerank_question else "rerank_fallback_first",
+            selected_question=str(selected_candidate.get("question", "") or ""),
+            selected_similarity=float(selected_candidate.get("similarity", 0.0) or 0.0),
+            reason=str(rerank_question or ""),
         )
-        selected_candidate = _pick_candidate_by_question(candidates, selected_question)
-        marker(
-            "fixed_question_decision",
-            _build_fixed_question_decision_log(
-                candidates=candidates,
-                decision="rerank_select" if selected_question else "rerank_fallback_first",
-                selected_question=str(selected_candidate.get("question", "") or ""),
-                rerank_selected_question=selected_question,
-            ),
-        )
-        return selected_candidate
 
     fallback_reason = "single_candidate_at_similarity_threshold"
     if best_similarity < similarity_threshold:
@@ -278,19 +346,13 @@ async def _pick_fixed_question_candidate(
     elif len(candidates) > 1:
         fallback_reason = "no_fixed_question_selected"
 
-    marker(
-        "fixed_question_decision",
-        _build_fixed_question_decision_log(
-            candidates=candidates,
-            decision="fallback",
-            reason=fallback_reason,
-        ),
-        level="WARNING",
+    return None, _build_intent_decision_log(
+        candidates=candidates,
+        decision="fallback",
+        reason=fallback_reason,
     )
-    return None
 
 
-@trace
 def _build_fixed_question_fallback_log(
     all_candidates: list[dict[str, Any]],
     top_candidates: list[dict[str, Any]],
@@ -323,7 +385,6 @@ def _build_fixed_question_fallback_log(
     }
 
 
-@trace
 async def _route_low_confidence_to_general(
     request: ChatRequest,
     chat_with_category: Callable[[str, ChatRequest], Awaitable[Any]],
@@ -332,7 +393,6 @@ async def _route_low_confidence_to_general(
     return await chat_with_category("通用", low_confidence_request)
 
 
-@trace
 async def _route_selected_fixed_question(
     request: ChatRequest,
     q2: str,
@@ -341,32 +401,40 @@ async def _route_selected_fixed_question(
 ):
     mapped_prompt = _find_type3_prompt_by_question(selected_question)
     if not mapped_prompt:
-        marker(
-            "fixed_question_prompt_unavailable",
-            {"question_len": len(selected_question)},
-            level="WARNING",
+        _log_daishansql_call(
+            called=False,
+            method="judgeQuery",
+            request_payload={"query_q2": q2, "fixed_question": selected_question},
+            reason="prompt_unavailable",
         )
         return await chat_with_category("通用", request)
 
+    server = _get_server()
+    _consume_execution_logs(getattr(server, "sqlPlus", None))
     try:
-        marker(
-            "DaiShanSQL入参",
-            {
-                "入参": format_daishan_log_text(
-                    {"query_q2": q2, "fixed_question": selected_question}
-                )
-            },
-        )
         sql_result = await asyncio.to_thread(
-            _get_server().judgeQuery,
+            server.judgeQuery,
             q2,
             selected_question,
         )
-        marker("DaiShanSQL出参", {"出参": format_daishan_log_text(sql_result)})
+        execution_logs = _consume_execution_logs(getattr(server, "sqlPlus", None))
+        _log_daishansql_call(
+            called=True,
+            method="judgeQuery",
+            request_payload={"query_q2": q2, "fixed_question": selected_question},
+            sql_text=_extract_sql_texts_from_execution_logs(execution_logs),
+            result=sql_result,
+            sql_source="runtime",
+        )
     except Exception as error:
-        marker(
-            "DaiShanSQL出参",
-            {"出参": format_daishan_log_text(f"ERROR: {error}")},
+        _log_daishansql_call(
+            called=True,
+            method="judgeQuery",
+            request_payload={"query_q2": q2, "fixed_question": selected_question},
+            sql_text="",
+            result=None,
+            sql_source="runtime",
+            error=str(error),
             level="ERROR",
         )
         return await chat_with_category("通用", request)
@@ -376,12 +444,7 @@ async def _route_selected_fixed_question(
     return await chat_with_category("通用", updated_request)
 
 
-@trace
 def _extract_questions_for_sql(text_input: str, result_items: list[dict]) -> list[str]:
-    marker(
-        "extract_questions.start",
-        {"text_len": len(text_input or ""), "candidates": len(result_items or [])},
-    )
     questions: list[str] = []
     for item in result_items:
         question_text = str(item.get("question", "") or "")
@@ -396,14 +459,11 @@ def _extract_questions_for_sql(text_input: str, result_items: list[dict]) -> lis
 
     if not questions:
         questions = [text_input]
-        marker("extract_questions.fallback_to_input")
 
     return questions
 
 
-@trace
 def _extract_question_from_qa_text(question_text: str) -> str:
-    marker("extract_question_from_qa.start", {"text_len": len(question_text or "")})
     if not isinstance(question_text, str):
         return ""
 
@@ -416,7 +476,6 @@ def _extract_question_from_qa_text(question_text: str) -> str:
     return ""
 
 
-@trace
 def _extract_primary_question(result_items: list[dict]) -> str:
     if not result_items:
         return ""
@@ -439,7 +498,6 @@ def _build_mapping_entry(raw_value: Any) -> dict[str, Any]:
     return {"prompt": str(raw_value or "").strip(), "meta": {}}
 
 
-@trace
 def _load_prompt_mapping(mapping_type: str, mapping_path: Path) -> dict[str, dict[str, Any]]:
     cached_mapping = _prompt_mapping_cache.get(mapping_type)
     if cached_mapping is not None:
@@ -462,32 +520,14 @@ def _load_prompt_mapping(mapping_type: str, mapping_path: Path) -> dict[str, dic
             normalized_mapping[normalized_key] = entry
 
         _prompt_mapping_cache[mapping_type] = normalized_mapping
-        marker(
-            f"{mapping_type}.prompt_mapping_loaded",
-            {
-                "entries": len(normalized_mapping),
-                "file": mapping_path.name,
-            },
-        )
     except FileNotFoundError:
-        marker(
-            f"{mapping_type}.prompt_mapping_missing",
-            {"file": str(mapping_path)},
-            level="WARNING",
-        )
         _prompt_mapping_cache[mapping_type] = {}
-    except Exception as error:
-        marker(
-            f"{mapping_type}.prompt_mapping_load_failed",
-            {"error": str(error), "file": mapping_path.name},
-            level="WARNING",
-        )
+    except Exception:
         _prompt_mapping_cache[mapping_type] = {}
 
     return _prompt_mapping_cache[mapping_type]
 
 
-@trace
 def _find_mapping_prompt_by_question(
     mapping_type: str,
     mapping_path: Path,
@@ -501,10 +541,6 @@ def _find_mapping_prompt_by_question(
         )
         prompt_text = str(matched_prompt.get("prompt", "") or "").strip()
 
-    marker(
-        f"{mapping_type}.prompt_mapping_lookup",
-        {"matched": bool(prompt_text), "question_len": len(normalized_question)},
-    )
     return prompt_text
 
 
@@ -512,7 +548,6 @@ def _clear_prompt_mapping_cache() -> None:
     _prompt_mapping_cache.clear()
 
 
-@trace
 def _find_type1_mapping_by_question(question: str) -> str:
     return _find_mapping_prompt_by_question(
         mapping_type="type1",
@@ -521,7 +556,6 @@ def _find_type1_mapping_by_question(question: str) -> str:
     )
 
 
-@trace
 def _find_type2_mapping_by_question(question: str) -> str:
     return _find_mapping_prompt_by_question(
         mapping_type="type2",
@@ -530,7 +564,6 @@ def _find_type2_mapping_by_question(question: str) -> str:
     )
 
 
-@trace
 def _find_type3_prompt_by_question(question: str) -> str:
     return _find_mapping_prompt_by_question(
         mapping_type="type3",
@@ -539,55 +572,72 @@ def _find_type3_prompt_by_question(question: str) -> str:
     )
 
 
-@trace
 async def _post_process_type1(result_dict: dict) -> dict:
     result_items = result_dict.get("results", [])
     first_question = result_items[0].get("question", "") if result_items else ""
     kb_match = re.search(r"\[knowledgebase:(\w+)\]", first_question)
 
     if not kb_match:
+        _log_daishansql_call(called=False, reason="kb_not_found")
         return {"type": 1, "data": {"kb_name": "园区知识库", "sql_result": "1"}}
 
     kb_name = kb_match.group(1)
 
     result = ""
     if kb_name == "园区知识库":
+        _log_daishansql_call(called=False, reason="park_kb_shortcut")
         result = "1"
     elif kb_name == "企业知识库":
-        marker(
-            "DaiShanSQL入参",
-            {"入参": format_daishan_log_text("sql_ChemicalCompanyInfo()")},
-        )
+        server = _get_server()
+        _consume_execution_logs(getattr(server, "sqlFixed", None))
         try:
-            result = _get_server().sqlFixed.sql_ChemicalCompanyInfo()
-            marker("DaiShanSQL出参", {"出参": format_daishan_log_text(result)})
+            result = server.sqlFixed.sql_ChemicalCompanyInfo()
+            execution_logs = _consume_execution_logs(getattr(server, "sqlFixed", None))
+            _log_daishansql_call(
+                called=True,
+                method="sql_ChemicalCompanyInfo",
+                sql_text=_extract_sql_texts_from_execution_logs(execution_logs),
+                result=result,
+                sql_source="runtime",
+            )
         except Exception as error:
-            marker(
-                "DaiShanSQL出参",
-                {"出参": format_daishan_log_text(f"ERROR: {error}")},
+            _log_daishansql_call(
+                called=True,
+                method="sql_ChemicalCompanyInfo",
+                sql_text="",
+                result=None,
+                sql_source="runtime",
+                error=str(error),
                 level="ERROR",
             )
             raise
     elif kb_name == "安全信息知识库":
-        marker(
-            "DaiShanSQL入参",
-            {"入参": format_daishan_log_text("sql_SecuritySituation()")},
-        )
+        server = _get_server()
+        _consume_execution_logs(getattr(server, "sqlFixed", None))
         try:
-            result = _get_server().sqlFixed.sql_SecuritySituation()
-            marker("DaiShanSQL出参", {"出参": format_daishan_log_text(result)})
+            result = server.sqlFixed.sql_SecuritySituation()
+            execution_logs = _consume_execution_logs(getattr(server, "sqlFixed", None))
+            _log_daishansql_call(
+                called=True,
+                method="sql_SecuritySituation",
+                sql_text=_extract_sql_texts_from_execution_logs(execution_logs),
+                result=result,
+                sql_source="runtime",
+            )
         except Exception as error:
-            marker(
-                "DaiShanSQL出参",
-                {"出参": format_daishan_log_text(f"ERROR: {error}")},
+            _log_daishansql_call(
+                called=True,
+                method="sql_SecuritySituation",
+                sql_text="",
+                result=None,
+                sql_source="runtime",
+                error=str(error),
                 level="ERROR",
             )
             raise
+    else:
+        _log_daishansql_call(called=False, reason=f"unsupported_kb:{kb_name}")
 
-    marker(
-        "type1.sql_result_ready",
-        {"kb_name": kb_name, "result_len": len(str(result or ""))},
-    )
     return {"type": 1, "data": {"kb_name": kb_name, "sql_result": str(result)}}
 
 
@@ -628,11 +678,7 @@ async def _post_process_and_route_type1(
     primary_question = _extract_primary_question(result_dict.get("results", []))
     mapped_prompt = _find_type1_mapping_by_question(primary_question)
     if not mapped_prompt:
-        marker(
-            "type1.prompt_unavailable_fallback_general",
-            {"question_len": len(primary_question)},
-            level="WARNING",
-        )
+        _log_daishansql_call(called=False, reason="type1_prompt_unavailable")
         return await chat_with_category("通用", request)
 
     mapped_request = ChatRequest(
@@ -655,18 +701,6 @@ async def _post_process_and_route_type1(
 async def _post_process_type2(text_input: str, result_dict: dict) -> dict:
     questions = _extract_questions_for_sql(text_input, result_dict.get("results", []))
 
-    marker(
-        "DaiShanSQL入参",
-        {
-            "入参": format_daishan_log_text(
-                {
-                    "query": text_input,
-                    "history": [],
-                    "questions": questions,
-                }
-            )
-        },
-    )
     try:
         sql_result = await asyncio.to_thread(
             _get_server().get_sql_result,
@@ -674,11 +708,23 @@ async def _post_process_type2(text_input: str, result_dict: dict) -> dict:
             history=[],
             questions=questions,
         )
-        marker("DaiShanSQL出参", {"出参": format_daishan_log_text(sql_result)})
+        _log_daishansql_call(
+            called=True,
+            method="get_sql_result",
+            request_payload={"query": text_input, "history": [], "questions": questions},
+            sql_text=_extract_sql_texts_from_agent_result(sql_result),
+            result=sql_result,
+            sql_source="response",
+        )
     except Exception as error:
-        marker(
-            "DaiShanSQL出参",
-            {"出参": format_daishan_log_text(f"ERROR: {error}")},
+        _log_daishansql_call(
+            called=True,
+            method="get_sql_result",
+            request_payload={"query": text_input, "history": [], "questions": questions},
+            sql_text="",
+            result=None,
+            sql_source="response",
+            error=str(error),
             level="ERROR",
         )
         raise
@@ -694,11 +740,7 @@ async def _post_process_and_route_type2(
     primary_question = _extract_primary_question(result_dict.get("results", []))
     mapped_prompt = _find_type2_mapping_by_question(primary_question)
     if not mapped_prompt:
-        marker(
-            "type2.prompt_unavailable_fallback_general",
-            {"question_len": len(primary_question)},
-            level="WARNING",
-        )
+        _log_daishansql_call(called=False, reason="type2_prompt_unavailable")
         return await chat_with_category("通用", request)
 
     processed_result = await _post_process_type2(request.question, result_dict)
@@ -727,35 +769,35 @@ async def _post_process_and_route_type3(
     fallback_prompt = str(result_dict.get("answer", "") or "").strip()
     answer_text = mapped_prompt or fallback_prompt
     if not answer_text:
-        marker(
-            "type3.prompt_unavailable",
-            {"question_len": len(return_question)},
-            level="WARNING",
-        )
+        _log_daishansql_call(called=False, method="judgeQuery", reason="type3_prompt_unavailable")
         return None
 
+    server = _get_server()
+    _consume_execution_logs(getattr(server, "sqlPlus", None))
     try:
-        marker(
-            "DaiShanSQL入参",
-            {
-                "入参": format_daishan_log_text(
-                    {
-                        "query": request.question,
-                        "return_question": return_question,
-                    }
-                )
-            },
-        )
         judge_result = await asyncio.to_thread(
-            _get_server().judgeQuery,
+            server.judgeQuery,
             request.question,
             return_question,
         )
-        marker("DaiShanSQL出参", {"出参": format_daishan_log_text(judge_result)})
+        execution_logs = _consume_execution_logs(getattr(server, "sqlPlus", None))
+        _log_daishansql_call(
+            called=True,
+            method="judgeQuery",
+            request_payload={"query": request.question, "return_question": return_question},
+            sql_text=_extract_sql_texts_from_execution_logs(execution_logs),
+            result=judge_result,
+            sql_source="runtime",
+        )
     except Exception as error:
-        marker(
-            "DaiShanSQL出参",
-            {"出参": format_daishan_log_text(f"ERROR: {error}")},
+        _log_daishansql_call(
+            called=True,
+            method="judgeQuery",
+            request_payload={"query": request.question, "return_question": return_question},
+            sql_text="",
+            result=None,
+            sql_source="runtime",
+            error=str(error),
             level="ERROR",
         )
         return None
@@ -773,7 +815,6 @@ async def _post_process_and_route_type3(
     return await chat_with_category("通用", updated_request)
 
 
-@entry_trace("chat-general")
 async def handle_chat_general(
     request: ChatRequest,
     intent_service,
@@ -796,28 +837,29 @@ async def handle_chat_general(
             top_k=int(settings.intent.fixed_question_top_k),
         )
         marker(
-            "fixed_question_ragflow_result",
-            _build_fixed_question_ragflow_result_log(
+            "chat_general.ragflow_result",
+            _build_ragflow_result_log(
                 original_question=request.question,
-                rewritten_question=q1,
-                alias_replaced_question=q2,
+                q1=q1,
+                q2=q2,
                 all_candidates=all_candidates,
-                top_candidates=top_candidates,
             ),
         )
 
-        selected_candidate = await _pick_fixed_question_candidate(
+        selected_candidate, decision_log = await _pick_fixed_question_candidate(
             original_question=request.question,
             candidates=top_candidates,
         )
+        marker(
+            "chat_general.intent_decision",
+            decision_log,
+            level="WARNING" if decision_log.get("decision") == "fallback" else "INFO",
+        )
         if selected_candidate is None:
-            marker(
-                "fixed_question_route_fallback",
-                _build_fixed_question_fallback_log(
-                    all_candidates=all_candidates,
-                    top_candidates=top_candidates,
-                ),
-                level="WARNING",
+            _log_daishansql_call(
+                called=False,
+                reason=str(decision_log.get("reason", "") or "no_fixed_question_selected"),
+                request_payload={"query": request.question, "q1": q1, "q2": q2},
             )
             return await _route_low_confidence_to_general(request, chat_with_category)
 

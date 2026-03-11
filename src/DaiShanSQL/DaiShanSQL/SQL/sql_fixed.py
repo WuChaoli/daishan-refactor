@@ -7,6 +7,21 @@ class SQLFixed:
         current_dir = os.path.dirname(os.path.abspath(__file__))
         Json_path = os.path.join(current_dir,"data/岱山固定查询.jsonl")
         json_data= self.read_jsonl(Json_path)
+        self._last_execution_log = []
+
+    def _record_execution(self, sql_text, result=None, error=""):
+        self._last_execution_log.append(
+            {
+                "sql_text": str(sql_text or ""),
+                "result": result,
+                "error": str(error or ""),
+            }
+        )
+
+    def consume_last_execution_log(self):
+        logs = list(self._last_execution_log)
+        self._last_execution_log = []
+        return logs
     def read_jsonl(self,JsonPath):
         data_list = []
         with open(JsonPath, 'r', encoding='utf-8') as f:
@@ -106,6 +121,7 @@ class SQLFixed:
             # 变量字典
             for key,value in search_dict_sql.items():
                 sql_search=self.sql_manager.request_api_sql(value)
+                self._record_execution(value, sql_search)
                 data={
                     f"{key}":sql_search
                 }
@@ -202,6 +218,7 @@ class SQLFixed:
                     # 变量字典
                     for key, value in sql_dict.items():
                         sql_search = self.sql_manager.request_api_sql(value)["data"]
+                        self._record_execution(value, sql_search)
                         data = {
                             f"{key}": sql_search
                         }
@@ -286,6 +303,7 @@ class SQLFixed:
             # 变量字典
             for key,value in search_dict_sql.items():
                 sql_search=self.sql_manager.request_api_sql(value)
+                self._record_execution(value, sql_search)
                 data={
                     f"{key}":sql_search
                 }
