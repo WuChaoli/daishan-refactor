@@ -1,0 +1,78 @@
+metadata:
+  session_id: rag_stream_1773205684
+  entry_id: entry_e7fd597f
+  snapshot_time: '2026-03-11 13:08:38'
+  event_count: 46
+  mode: lite
+error_summary: []
+call_chain:
+- trace_id: tr_50a2b8a2
+  roots:
+  - function_name: handle_chat_general
+    duration_ms: 818.952
+    exception: null
+    children:
+    - function_name: _build_query_variants
+      duration_ms: 168.08
+      exception: null
+      children:
+      - function_name: replace_daishan_zone_alias
+        duration_ms: 0.128
+        exception: null
+      - function_name: replace_economic_zone
+        duration_ms: 167.434
+        exception: null
+    - function_name: query_fixed_question_candidates
+      duration_ms: 505.193
+      exception: null
+      children:
+      - function_name: IntentService.query_fixed_question_candidates
+        duration_ms: 503.902
+        exception: null
+        children:
+        - function_name: RagflowClient.query_single_database
+          duration_ms: 503.008
+          exception: null
+      - function_name: normalize_fixed_question_candidates
+        duration_ms: 0.749
+        exception: null
+        children:
+        - function_name: extract_question_from_qa_text
+          duration_ms: 0.116
+          exception: null
+        - function_name: extract_question_from_qa_text
+          duration_ms: 0.137
+          exception: null
+    - function_name: select_top_candidates
+      duration_ms: 0.095
+      exception: null
+    - function_name: _pick_fixed_question_candidate
+      duration_ms: 0.234
+      exception: null
+    - function_name: _route_selected_fixed_question
+      duration_ms: 144.44
+      exception: null
+      children:
+      - function_name: _find_type3_prompt_by_question
+        duration_ms: 0.715
+        exception: null
+        children:
+        - function_name: _find_mapping_prompt_by_question
+          duration_ms: 0.433
+          exception: null
+          children:
+          - function_name: _load_prompt_mapping
+            duration_ms: 0.074
+            exception: null
+error_path: null
+chain_memory_top:
+- function_name: handle_chat_general
+  mem_delta_rss_kb: 9216
+- function_name: _route_selected_fixed_question
+  mem_delta_rss_kb: 8448
+- function_name: replace_economic_zone
+  mem_delta_rss_kb: 768
+- function_name: _build_query_variants
+  mem_delta_rss_kb: 768
+- function_name: replace_daishan_zone_alias
+  mem_delta_rss_kb: 0

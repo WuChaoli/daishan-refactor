@@ -1,0 +1,63 @@
+metadata:
+  session_id: rag_stream_1773111042
+  entry_id: entry_7553d494
+  snapshot_time: '2026-03-11 13:16:41'
+  event_count: 34
+  mode: lite
+error_summary: []
+call_chain:
+- trace_id: tr_d70e4079
+  roots:
+  - function_name: handle_chat_general
+    duration_ms: 46895.331
+    exception: null
+    children:
+    - function_name: _build_query_variants
+      duration_ms: 45153.09
+      exception: null
+      children:
+      - function_name: replace_daishan_zone_alias
+        duration_ms: 1.272
+        exception: null
+      - function_name: replace_economic_zone
+        duration_ms: 45148.883
+        exception: null
+    - function_name: query_fixed_question_candidates
+      duration_ms: 634.316
+      exception: null
+      children:
+      - function_name: IntentService.query_fixed_question_candidates
+        duration_ms: 589.184
+        exception: null
+        children:
+        - function_name: RagflowClient.query_single_database
+          duration_ms: 483.839
+          exception: null
+      - function_name: normalize_fixed_question_candidates
+        duration_ms: 2.685
+        exception: null
+        children:
+        - function_name: extract_question_from_qa_text
+          duration_ms: 0.84
+          exception: null
+    - function_name: select_top_candidates
+      duration_ms: 0.581
+      exception: null
+    - function_name: _pick_fixed_question_candidate
+      duration_ms: 1.128
+      exception: null
+    - function_name: _route_low_confidence_to_general
+      duration_ms: 1097.466
+      exception: null
+error_path: null
+chain_memory_top:
+- function_name: IntentService.query_fixed_question_candidates
+  mem_delta_rss_kb: 62208
+- function_name: RagflowClient.query_single_database
+  mem_delta_rss_kb: 50816
+- function_name: query_fixed_question_candidates
+  mem_delta_rss_kb: 12264
+- function_name: handle_chat_general
+  mem_delta_rss_kb: 7284
+- function_name: replace_daishan_zone_alias
+  mem_delta_rss_kb: 0

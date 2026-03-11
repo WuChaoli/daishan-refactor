@@ -1,0 +1,56 @@
+metadata:
+  session_id: sess_20260311_055750_735e33
+  entry_id: entry_2ae6c7e8
+  snapshot_time: '2026-03-11 13:57:51'
+  event_count: 20
+  mode: lite
+error_summary: []
+call_chain:
+- trace_id: tr_6c8cff20
+  roots:
+  - function_name: handle_chat_general
+    duration_ms: 4.486
+    exception: null
+    children:
+    - function_name: _build_query_variants
+      duration_ms: 0.702
+      exception: null
+      children:
+      - function_name: replace_daishan_zone_alias
+        duration_ms: 0.088
+        exception: null
+    - function_name: query_fixed_question_candidates
+      duration_ms: 0.83
+      exception: null
+      children:
+      - function_name: normalize_fixed_question_candidates
+        duration_ms: 0.443
+        exception: null
+        children:
+        - function_name: extract_question_from_qa_text
+          duration_ms: 0.098
+          exception: null
+    - function_name: select_top_candidates
+      duration_ms: 0.074
+      exception: null
+    - function_name: _pick_fixed_question_candidate
+      duration_ms: 0.062
+      exception: null
+    - function_name: _build_fixed_question_fallback_log
+      duration_ms: 0.072
+      exception: null
+    - function_name: _route_low_confidence_to_general
+      duration_ms: 0.327
+      exception: null
+error_path: null
+chain_memory_top:
+- function_name: replace_daishan_zone_alias
+  mem_delta_rss_kb: 0
+- function_name: _build_query_variants
+  mem_delta_rss_kb: 0
+- function_name: extract_question_from_qa_text
+  mem_delta_rss_kb: 0
+- function_name: normalize_fixed_question_candidates
+  mem_delta_rss_kb: 0
+- function_name: query_fixed_question_candidates
+  mem_delta_rss_kb: 0

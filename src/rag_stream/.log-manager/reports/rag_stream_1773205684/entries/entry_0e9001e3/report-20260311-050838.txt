@@ -1,0 +1,84 @@
+metadata:
+  session_id: rag_stream_1773205684
+  entry_id: entry_0e9001e3
+  snapshot_time: '2026-03-11 13:08:38'
+  event_count: 50
+  mode: lite
+error_summary: []
+call_chain:
+- trace_id: tr_ebd88aed
+  roots:
+  - function_name: handle_chat_general
+    duration_ms: 976.499
+    exception: null
+    children:
+    - function_name: _build_query_variants
+      duration_ms: 167.048
+      exception: null
+      children:
+      - function_name: replace_daishan_zone_alias
+        duration_ms: 0.129
+        exception: null
+      - function_name: replace_economic_zone
+        duration_ms: 166.291
+        exception: null
+    - function_name: query_fixed_question_candidates
+      duration_ms: 562.447
+      exception: null
+      children:
+      - function_name: IntentService.query_fixed_question_candidates
+        duration_ms: 560.1
+        exception: null
+        children:
+        - function_name: RagflowClient.query_single_database
+          duration_ms: 558.667
+          exception: null
+      - function_name: normalize_fixed_question_candidates
+        duration_ms: 1.55
+        exception: null
+        children:
+        - function_name: extract_question_from_qa_text
+          duration_ms: 0.144
+          exception: null
+        - function_name: extract_question_from_qa_text
+          duration_ms: 0.121
+          exception: null
+        - function_name: extract_question_from_qa_text
+          duration_ms: 0.107
+          exception: null
+        - function_name: extract_question_from_qa_text
+          duration_ms: 0.132
+          exception: null
+    - function_name: select_top_candidates
+      duration_ms: 0.116
+      exception: null
+    - function_name: _pick_fixed_question_candidate
+      duration_ms: 0.265
+      exception: null
+    - function_name: _route_selected_fixed_question
+      duration_ms: 245.406
+      exception: null
+      children:
+      - function_name: _find_type3_prompt_by_question
+        duration_ms: 0.803
+        exception: null
+        children:
+        - function_name: _find_mapping_prompt_by_question
+          duration_ms: 0.538
+          exception: null
+          children:
+          - function_name: _load_prompt_mapping
+            duration_ms: 0.104
+            exception: null
+error_path: null
+chain_memory_top:
+- function_name: replace_economic_zone
+  mem_delta_rss_kb: 128
+- function_name: _build_query_variants
+  mem_delta_rss_kb: 128
+- function_name: replace_daishan_zone_alias
+  mem_delta_rss_kb: 0
+- function_name: RagflowClient.query_single_database
+  mem_delta_rss_kb: 0
+- function_name: IntentService.query_fixed_question_candidates
+  mem_delta_rss_kb: 0
