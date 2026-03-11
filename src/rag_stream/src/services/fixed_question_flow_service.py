@@ -52,7 +52,9 @@ def normalize_fixed_question_candidates(raw_candidates: Iterable[Any]) -> list[d
         except (TypeError, ValueError):
             similarity = 0.0
 
-        question = extract_question_from_qa_text(raw_question) or raw_question
+        question = _clean_fixed_question_text(
+            extract_question_from_qa_text(raw_question) or raw_question
+        )
         normalized.append(
             {
                 "question": question.strip(),
